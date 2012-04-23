@@ -156,8 +156,22 @@ namespace DGtal
     {
       return static_cast<double>(aT);
     }
-
-
+    /**
+       @param aT any number.
+       @return 'true' iff the number is even.
+    */
+    static bool even( ParamType aT )
+    {
+      return ( aT & ONE ) == ZERO;
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is odd.
+    */
+    static bool odd( ParamType aT )
+    {
+      return ( aT & ONE ) != ZERO;
+    }
   }; // end of class NumberTraits
 
   
@@ -175,8 +189,8 @@ namespace DGtal
     typedef uint16_t UnsignedVersion;
     typedef uint16_t ReturnType;
     typedef boost::call_traits<uint16_t>::param_type ParamType;
-    static const uint16_t ZERO = 0;
-    static const uint16_t ONE = 1;
+    static const uint16_t ZERO; // = 0;
+    static const uint16_t ONE; // = 1;
     static ReturnType zero()
     {
       return 0;
@@ -217,6 +231,22 @@ namespace DGtal
     {
       return static_cast<double>(aT);
     }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is even.
+    */
+    static bool even( ParamType aT )
+    {
+      return ( aT & 1 ) == 0;
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is odd.
+    */
+    static bool odd( ParamType aT )
+    {
+      return ( aT & 1 ) != 0;
+    }
 
   }; // end of class NumberTraits<uint16_t>.
 
@@ -234,8 +264,8 @@ namespace DGtal
     typedef uint16_t UnsignedVersion;
     typedef int16_t ReturnType;
     typedef boost::call_traits<int16_t>::param_type ParamType;
-    static const int16_t ZERO = 0;
-    static const int16_t ONE = 1;
+    static const int16_t ZERO; // = 0;
+    static const int16_t ONE; // = 1;
     static ReturnType zero()
     {
       return 0;
@@ -276,6 +306,22 @@ namespace DGtal
     {
       return static_cast<double>(aT);
     }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is even.
+    */
+    static bool even( ParamType aT )
+    {
+      return ( aT & 1 ) == 0;
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is odd.
+    */
+    static bool odd( ParamType aT )
+    {
+      return ( aT & 1 ) != 0;
+    }
   }; // end of class NumberTraits<int16_t>.
  
 
@@ -293,8 +339,8 @@ namespace DGtal
     typedef uint8_t UnsignedVersion;
     typedef uint8_t ReturnType;
     typedef boost::call_traits<uint8_t>::param_type ParamType;
-    static const uint8_t ZERO = 0;
-    static const uint8_t ONE = 1;
+    static const uint8_t ZERO; // = 0;
+    static const uint8_t ONE; // = 1;
     static ReturnType zero()
     {
       return 0;
@@ -335,6 +381,22 @@ namespace DGtal
     {
       return static_cast<double>(aT);
     }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is even.
+    */
+    static bool even( ParamType aT )
+    {
+      return ( aT & 1 ) == 0;
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is odd.
+    */
+    static bool odd( ParamType aT )
+    {
+      return ( aT & 1 ) != 0;
+    }
 
   }; // end of class NumberTraits<uint8_t>.
 
@@ -352,8 +414,8 @@ namespace DGtal
     typedef uint8_t UnsignedVersion;
     typedef int8_t ReturnType;
     typedef boost::call_traits<int8_t>::param_type ParamType;
-    static const int8_t ZERO = 0;
-    static const int8_t ONE = 1;
+    static const int8_t ZERO; // = 0;
+    static const int8_t ONE; // = 1;
     static ReturnType zero()
     {
       return 0;
@@ -394,6 +456,22 @@ namespace DGtal
     {
       return static_cast<double>(aT);
     }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is even.
+    */
+    static bool even( ParamType aT )
+    {
+      return ( aT & 1 ) == 0;
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is odd.
+    */
+    static bool odd( ParamType aT )
+    {
+      return ( aT & 1 ) != 0;
+    }
   }; // end of class NumberTraits<int16_t>.
 
   /**
@@ -410,8 +488,8 @@ namespace DGtal
     typedef uint32_t UnsignedVersion;
     typedef uint32_t ReturnType;
     typedef boost::call_traits<uint32_t>::param_type ParamType;
-    static const uint32_t ZERO = 0;
-    static const uint32_t ONE = 1;
+    static const uint32_t ZERO; // = 0;
+    static const uint32_t ONE; // = 1;
     static ReturnType zero()
     {
       return 0;
@@ -448,6 +526,22 @@ namespace DGtal
     {
       return static_cast<double>(aT);
     }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is even.
+    */
+    static bool even( ParamType aT )
+    {
+      return ( aT & 1 ) == 0;
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is odd.
+    */
+    static bool odd( ParamType aT )
+    {
+      return ( aT & 1 ) != 0;
+    }
   }; // end of class NumberTraits<uint32_t>.
 
   /**
@@ -464,8 +558,8 @@ namespace DGtal
     typedef uint32_t UnsignedVersion;
     typedef int32_t ReturnType;
     typedef boost::call_traits<int32_t>::param_type ParamType;
-    static const int32_t ZERO = 0;
-    static const int32_t ONE = 1;
+    static const int32_t ZERO;// = 0;
+    static const int32_t ONE;// = 1;
     static ReturnType zero()
     {
       return 0;
@@ -506,6 +600,22 @@ namespace DGtal
     {
       return static_cast<double>(aT);
     }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is even.
+    */
+    static bool even( ParamType aT )
+    {
+      return ( aT & 1 ) == 0;
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is odd.
+    */
+    static bool odd( ParamType aT )
+    {
+      return ( aT & 1 ) != 0;
+    }
   }; // end of class NumberTraits<int32_t>.
 
   /**
@@ -522,8 +632,8 @@ namespace DGtal
     typedef uint64_t UnsignedVersion;
     typedef uint64_t ReturnType;
     typedef boost::call_traits<uint64_t>::param_type ParamType;
-    static const uint64_t ZERO = 0;
-    static const uint64_t ONE = 1;
+    static const uint64_t ZERO; // = 0;
+    static const uint64_t ONE; // = 1;
     static ReturnType zero()
     {
       return 0;
@@ -564,6 +674,22 @@ namespace DGtal
     {
       return static_cast<double>(aT);
     }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is even.
+    */
+    static bool even( ParamType aT )
+    {
+      return ( aT & 1 ) == 0;
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is odd.
+    */
+    static bool odd( ParamType aT )
+    {
+      return ( aT & 1 ) != 0;
+    }
   }; // end of class NumberTraits<uint64_t>.
 
   /**
@@ -580,8 +706,8 @@ namespace DGtal
     typedef uint64_t UnsignedVersion;
     typedef int64_t ReturnType;
     typedef boost::call_traits<int64_t>::param_type ParamType;
-    static const int64_t ZERO = 0;
-    static const int64_t ONE = 1;
+    static const int64_t ZERO; // = 0;
+    static const int64_t ONE; // = 1;
     static ReturnType zero()
     {
       return 0;
@@ -617,6 +743,22 @@ namespace DGtal
     static double castToDouble(const int64_t & aT)
     {
       return static_cast<double>(aT);
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is even.
+    */
+    static bool even( ParamType aT )
+    {
+      return ( aT & 1 ) == 0;
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is odd.
+    */
+    static bool odd( ParamType aT )
+    {
+      return ( aT & 1 ) != 0;
     }
   }; // end of class NumberTraits<int64_t>.
 
@@ -803,9 +945,9 @@ namespace DGtal
     typedef DGtal::BigInteger SignedVersion;
     typedef DGtal::BigInteger UnsignedVersion;
     typedef DGtal::BigInteger ReturnType;
-    typedef boost::call_traits<int64_t>::param_type ParamType;
-    static DGtal::BigInteger ZERO;
-    static DGtal::BigInteger ONE;
+    typedef DGtal::BigInteger ParamType;
+    static const DGtal::BigInteger ZERO;
+    static const DGtal::BigInteger ONE;
     static ReturnType zero()
     {
       return ZERO;
@@ -845,6 +987,22 @@ namespace DGtal
     static double castToDouble(const DGtal::BigInteger & aT)
     {
       return aT.get_d();
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is even.
+    */
+    static bool even( ParamType aT )
+    {
+      return mpz_even_p( aT.get_mpz_t() );
+    }
+    /**
+       @param aT any number.
+       @return 'true' iff the number is odd.
+    */
+    static bool odd( ParamType aT )
+    {
+      return mpz_odd_p( aT.get_mpz_t() );
     }
   }; // end of class NumberTraits<DGtal::BigInteger>.
 #endif

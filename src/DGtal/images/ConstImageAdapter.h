@@ -42,7 +42,7 @@
 // Inclusions
 #include "DGtal/base/Common.h"
 #include "DGtal/base/BasicFunctors.h"
-#include "DGtal/base/ConstRangeAdapter.h"
+#include "DGtal/base/ConstRangeFromPointAdapter.h"
 #include "DGtal/base/CLabel.h"
 #include "DGtal/base/CUnaryFunctor.h"
 #include "DGtal/kernel/domains/CDomain.h"
@@ -79,6 +79,12 @@ namespace DGtal
    *
    * @snippet images/exampleConstImageAdapter.cpp ConstImageAdapterConstruction 
    *
+   * NB: the underlying image as well as the functor
+   * are stored in the adapter as aliasing pointer
+   * in order to avoid copies.  
+   * The pointed objects must exist and must not be deleted 
+   * during the use of the adapter
+   *
    * @see exampleConstImageAdapter
    */
   template <typename TImage, typename TFunctor, typename TValue>
@@ -107,7 +113,7 @@ namespace DGtal
     // static constants
     static const Dimension dimension = Domain::dimension;
 
-    typedef ConstRangeAdapter<typename Image::ConstRange::ConstIterator, 
+    typedef ConstRangeFromPointAdapter<typename Image::ConstRange, 
 		       TFunctor, TValue> ConstRange; 
 
     // ----------------------- Standard services ------------------------------
@@ -172,10 +178,9 @@ namespace DGtal
      * @return the range that can be used 
      * to iterate over the values of the image.
      */
-    ConstRange range() const
+    ConstRange constRange() const
     {
-      typename Image::ConstRange r = myImg->range(); 
-      return ConstRange(r.begin(), r.end(), *myF);
+      return ConstRange(myImg->constRange(), *myF);
     }
 
     /**

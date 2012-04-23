@@ -49,7 +49,7 @@
 #include <functional>
 #include <cmath>
 
-#include "boost/concept_check.hpp"
+#include "BasicBoolFunctions.h"
 //////////////////////////////////////////////////////////////////////////////
 
 namespace DGtal 
@@ -63,7 +63,7 @@ namespace DGtal
   {
     inline
     T operator() (const T&a, const T&b) const
-    { return std::min(a,b); }
+    { return /*std::*/min(a,b); }
   };
   
   template<typename T>
@@ -71,7 +71,7 @@ namespace DGtal
   {
     inline
     T operator() (const T&a, const T&b) const
-    { return std::max(a,b); }
+    { return /*std::*/max(a,b); }
   };
 
  /**
@@ -154,7 +154,7 @@ namespace DGtal
      */
     template <typename TInput>
     inline
-    Value operator()(const TInput& aInput) const
+    Value operator()(const TInput& /*aInput*/) const
     {
       return myValue;
     }
@@ -226,6 +226,7 @@ namespace DGtal
 	  myF1 = other.myF1; 
 	  myF2 = other.myF2;
 	}
+    return *this;
     }
 
 
@@ -258,8 +259,6 @@ namespace DGtal
      */
     const TFunctor2* myF2;
   };
-
-
 
 /**
  * // template class Thresholder
@@ -379,6 +378,144 @@ struct Thresholder<T,true,true> {
     Input myT;
 };
 
+  /////////////////////////////////////////////////////////////////////////////
+  // template class PredicateCombiner
+  /**
+   * Description of template class 'PredicateCombiner' <p> \brief
+   * Aim: The predicate returns true when the given binary functor
+   * returns true for the two Predicates given at construction.
+   *
+   * @tparam Predicate1 the left predicate type.
+   * @tparam Predicate2 the right predicate type.
+   * @tparam TBinaryFunctor binary functor used for comparison
+   */
+  template <typename TPredicate1, typename TPredicate2, 
+	    typename TBinaryFunctor = BoolFunction2 >
+  struct PredicateCombiner
+  {
+    typedef TPredicate1 Predicate1;
+    typedef TPredicate2 Predicate2;
+
+    /**
+       Constructor from predicates and bool Functor.
+       @param pred1 the left predicate.
+       @param pred2 the right predicate.
+       @param boolFunctor the binary function used to combine pred1
+       and pred2.
+     */
+    PredicateCombiner( const Predicate1 & pred1,
+        const Predicate2 & pred2,
+        const TBinaryFunctor & boolFunctor )
+      : myPred1( &pred1 ), myPred2( &pred2 ), myBoolFunctor( &boolFunctor )
+    {
+    }
+
+    /**
+       Copy constructor.
+       @param other the object to copy
+      */
+    PredicateCombiner(  const PredicateCombiner& other )
+      : myPred1( other.pred1 ), myPred2( other.pred2 ), myBoolFunctor( other.boolFunctor )
+    {
+    }
+
+    /**
+       Assignement
+       @param other the object to copy
+       @return reference to the current object
+     */
+    PredicateCombiner& operator=( const PredicateCombiner& other )
+    {
+      if (this != &other)
+	{
+	  myPred1 = other.myPred1; 
+	  myPred2 = other.myPred2; 
+	  myBoolFunctor = other.myBoolFunctor; 
+	}
+    return *this;
+    }
+
+    /**
+       Destructor
+     */
+    ~PredicateCombiner() {}
+
+    /**
+     * @param t any object of type T.
+     * @tparam T any input type supported 
+     * by the two predicates to combine 
+     * @return the value of the predicate.
+     */
+    template<typename T>
+    bool operator()( const T & t ) const 
+    {
+      return myBoolFunctor->operator()( myPred1->operator()( t ), 
+					myPred2->operator()( t ) );
+    }
+
+    /// aliasing pointer to the left predicate.
+    const Predicate1* myPred1;
+    /// aliasing pointer to the right predicate.
+    const Predicate2* myPred2;
+    /// aliasing pointer to the binary functor.
+    const TBinaryFunctor* myBoolFunctor;
+  };
+
+/**
+ * // template class IntervalThresholder
+ * \brief Aim: A small functor with an operator ()
+ * that compares one value to an interval.
+ *
+ * @tparam T  type for a value that must be equality and less-than comparable
+ */
+template <typename T>
+class IntervalThresholder 
+{
+public:
+  BOOST_CONCEPT_ASSERT(( boost::EqualityComparable<T> ));
+  BOOST_CONCEPT_ASSERT(( boost::LessThanComparable<T> ));
+
+  /// input type
+  typedef T Input; 
+
+  /// predicates type
+  typedef Thresholder<T,false,true> Tlow; 
+  typedef Thresholder<T,true,true> Tup; 
+  typedef PredicateCombiner<Tlow,Tup,AndBoolFct2 > CombinedPredicate; 
+    
+  /** 
+   * Constructor. 
+   * @param low lower threshold.
+   * @param up upper threshold.
+   */
+  IntervalThresholder(const Input& low, const Input& up)
+    : myTlow( low), myTup ( up ), 
+      myPred( myTlow, myTup, AndBoolFct2() ) {};
+
+  /**
+   * Compares  @a aI to @ myT.
+   * @param aI  any input value
+   * @return 'true' or 'false' according to @a myPred
+   */
+  bool operator()(const Input& aI) const 
+  {
+    return myPred(aI); 
+  }
+private:
+  /** 
+   * First thresholder
+   */
+  Tlow myTlow;
+  /** 
+   * Second thresholder
+   */
+  Tup myTup;
+  /** 
+   * Combined predicate
+   */
+  CombinedPredicate myPred;
+};
+
 
   /**
    * Description of template class 'Pair1st' <p>
@@ -465,6 +602,21 @@ struct Thresholder<T,true,true> {
     {
       return aPair.first;
     }
+
+    /** 
+     * Operator
+     *
+     * @tparam TPair model of CPair
+     * @param aPair input pair
+     *
+     * @return constant reference on the first member of @a aPair.
+     */
+    template <typename TPair>
+    inline
+    const ReturnType& operator()(const TPair& aPair) const
+    {
+      return aPair.first;
+    }
     
   };
 
@@ -492,6 +644,21 @@ struct Thresholder<T,true,true> {
     template <typename TPair>
     inline
     ReturnType& operator()(TPair& aPair) const
+    {
+      return aPair.second;
+    }
+
+    /** 
+     * Operator
+     *
+     * @tparam TPair model of CPair
+     * @param aPair input pair
+     *
+     * @return constant reference on the second member of @a aPair.
+     */
+    template <typename TPair>
+    inline
+    const ReturnType& operator()(const TPair& aPair) const
     {
       return aPair.second;
     }
