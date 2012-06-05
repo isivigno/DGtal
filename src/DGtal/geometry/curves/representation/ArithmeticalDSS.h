@@ -54,6 +54,8 @@
 
 #include "DGtal/geometry/curves/representation/SegmentComputerUtils.h"
 
+#include "DGtal/math/arithmetic/SternBrocot.h"
+
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -211,7 +213,20 @@ Steps:
     BOOST_STATIC_ASSERT(( Point::dimension == 2 ));
 
     typedef PointVector<2,double> PointD;  
-
+    
+    typedef SternBrocot<DGtal::int32_t,DGtal::int32_t> SB;
+    typedef SB::Fraction Fraction;
+    typedef vector<vector<Fraction> > DualPolygon; // ideally, we should
+						   // do typedef
+						   // vector<PointVector<2,
+						   // Fraction> >
+						   // DualPolygon
+                                                   //->
+						   // does not work
+						   // because Fraction
+						   // is not a model of
+						   // CEuclideanRing.   
+    
 
     // ----------------------- Standard services ------------------------------
   public:
@@ -451,6 +466,14 @@ Steps:
      * @return iterator pointing to the front of the DSS.
      */
     ConstIterator getFront() const;
+
+    /**
+     * The dual polygon is computed from the DSS parameters and leaning points. 
+     * @return dual polygon (preimage) of the DSS.
+     */
+    DualPolygon getDualPolygon() const;
+    
+
     /**
      *  
      * @return begin iterator of the DSS range.
@@ -649,7 +672,6 @@ Steps:
     * Number of lower patterns ( @a myLf = @a myNbLowPat . ( @a myB , @a myA ) + @a myLl )
     */
     Integer myNbLowPat; 
-
     
     /**
     * Steps of the DSS (eg. right and up in the first octant)

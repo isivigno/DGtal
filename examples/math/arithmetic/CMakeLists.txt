@@ -3,6 +3,7 @@ SET(DGTAL_EXAMPLES_SRC
         convergents
         fraction
         pattern
+	highestFractionInBetween
 )
 
 FOREACH(FILE ${DGTAL_EXAMPLES_SRC})

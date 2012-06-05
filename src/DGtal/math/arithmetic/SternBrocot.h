@@ -490,10 +490,11 @@ namespace DGtal
    * @param object the object of class 'SternBrocot' to write.
    * @return the output stream after the writing.
    */
-  // template <typename TInteger, typename TQuotient>
-  // std::ostream&
-  // operator<< ( std::ostream & out, 
-  //              const typename SternBrocot<TInteger, TQuotient>::Fraction & object );
+  /* template <typename TInteger, typename TQuotient> */
+  /*   std::ostream& */
+  /*   operator<< ( std::ostream & out,  */
+  /* 		 const typename SternBrocot<TInteger, TQuotient>::Fraction & object ); */
+  
 
 } // namespace DGtal
 

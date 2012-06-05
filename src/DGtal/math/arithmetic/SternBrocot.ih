@@ -675,6 +675,9 @@ DGtal::SternBrocot<TInteger, TQuotient>::fraction
 }
 
 
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Implementation of inline functions                                        //
 
