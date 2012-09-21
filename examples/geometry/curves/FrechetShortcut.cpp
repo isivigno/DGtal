@@ -77,27 +77,37 @@ int main( int argc, char** argv )
   
   typedef FrechetShortcut<Curve::PointsRange::ConstIterator,int> Shortcut;
   
-  typedef GreedySegmentation<Shortcut> Segmentation;
-  Segmentation theSegmentation( r.begin(), r.end(), Shortcut(error) );
-  
-  Segmentation::SegmentComputerIterator it = theSegmentation.begin();
-  Segmentation::SegmentComputerIterator itEnd = theSegmentation.end();
 
-  Shortcut s;
+  Shortcut s(error);
   
-  for ( ; it != itEnd; ++it) {
-    s=Shortcut(*it);
-    trace.info() << s << std::endl;
-    board << s; 
-    //   //   for (Iterator i = it->begin(); i != it->end(); ++i)
-  }
+  // simple computation of the first shortcut
   
-  board.saveEPS("FrechetShortcutExample.eps", Board2D::BoundingBox, 5000 ); 
+  s.init( r.begin() );
+  while ( ( s.end() != r.end() )
+	  &&( s.extendForward() ) ) {}
+  
+  std::cerr << Point(*(s.end()));
 
-  //extension
-  //  s.init( r.begin() );
-  //while ( ( s.end() != itEnd )
-  //    &&( s.extendForward() ) ) {}
+  // computation of the greedy segmentation
+
+  // typedef GreedySegmentation<Shortcut> Segmentation;
+  // Segmentation theSegmentation( r.begin(), r.end(), Shortcut(error) );
+  
+  // Segmentation::SegmentComputerIterator it = theSegmentation.begin();
+  // Segmentation::SegmentComputerIterator itEnd = theSegmentation.end();
+
+  // Shortcut s;
+  
+  // for ( ; it != itEnd; ++it) {
+  //   s=Shortcut(*it);
+  //   trace.info() << s << std::endl;
+  //   board << s; 
+  //   //   //   for (Iterator i = it->begin(); i != it->end(); ++i)
+  // }
+  
+  // board.saveEPS("FrechetShortcutExample.eps", Board2D::BoundingBox, 5000 ); 
+
+
   //! [FrechetShortcutUsage]
 
 
