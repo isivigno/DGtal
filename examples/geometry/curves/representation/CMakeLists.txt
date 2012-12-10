@@ -5,7 +5,6 @@ SET(DGTAL_EXAMPLES_SRC
   exampleGridCurve2d
   exampleGeometricalDSS
   exampleGeometricalDCA
-  unionOfDSS
 )
 
 
