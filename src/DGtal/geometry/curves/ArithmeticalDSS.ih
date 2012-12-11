@@ -178,6 +178,23 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::operator!=(
   return (!(*this == other));
 }
 
+template <typename TIterator, typename TInteger, int connectivity>
+inline
+typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::Self
+DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( const ArithmeticalDSS<TIterator,TInteger,connectivity> & other ) const {
+  
+  DualPolygon dualOther, dualSelf, inter;
+  dualOther = other.computeDualPolygon();
+  dualSelf = this.computeDualPolygon();
+  
+  inter = intersectionDualPolygons(dualOther,dualSelf);
+  
+  
+  
+}
+
+
+
 
 template <typename TIterator, typename TInteger, int connectivity>
 inline
@@ -881,79 +898,92 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::getFront() const {
 
 
 
-DGtal::int32_t gcd(DGtal::int32_t x,DGtal::int32_t y)
-{
-  if(y==0) // base case, the programs stops if y reaches 0.
-    return x; //it returns the GCD
-  else
-    return gcd(y,x%y); //if y doesn't reach 0 then recursion continues
-}
-
 template <typename TIterator, typename TInteger, int connectivity>
 inline
 typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
-DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::getDualPolygon() const {
+DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon() const {
   
-  vector<Fraction > vertex(2);  
+  //vector<Fraction > vertex(2);  
+  PointR vertex;
   DualPolygon dual;
   
+  IntegerComputer<Integer> ic;
+
   assert(myB>=myA);
   assert(myB>0);
   assert(myA>=0);
   
       
   // LeftMost vertex of the dual polygon (lower slope)
-  DGtal::int32_t g = gcd(myUl[1]-(myLf[1]+1),myUl[0]-myLf[0]);
+  Integer g = ic.gcd(myUl[1]-(myLf[1]+1),myUl[0]-myLf[0]);
   
-  vertex[0] = Fraction((myUl[1]-(myLf[1]+1))/g,(myUl[0]-myLf[0])/g);
+  //vertex[0] = Fraction((myUl[1]-(myLf[1]+1))/g,(myUl[0]-myLf[0])/g);
+  vertex[0] = (myUl[1]-(myLf[1]+1))/g;
+  vertex[1] = (myUl[0]-myLf[0])/g;
+
+  g = ic.gcd(myUl[1]*vertex[1]-myUl[0]*vertex[0],vertex[1]);
+  //vertex[1] = Fraction((myUl[1]*vertex[0].q()-myUl[0]*vertex[0].p())/g,(vertex[0].q())/g);
+  vertex[2] = (myUl[1]*vertex[1]-myUl[0]*vertex[0])/g;
+  vertex[3] = vertex[1]/g;
   
-  g = gcd(myUl[1]*vertex[0].q()-myUl[0]*vertex[0].p(),vertex[0].q());
-  vertex[1] = Fraction((myUl[1]*vertex[0].q()-myUl[0]*vertex[0].p())/g,(vertex[0].q())/g);
-  
-  trace.info() << vertex[0].p() << "/" << vertex[0].q() << " - ";
-  trace.info() << vertex[1].p() << "/" << vertex[1].q() << std::endl;
+  trace.info() << vertex[0] << "/" << vertex[1] << " - ";
+  trace.info() << vertex[2] << "/" << vertex[3] << std::endl;
   
   dual.push_back(vertex);
   
   if(myUf != myUl)
     {
-      // Upper middle vertex
-      vertex[0] = Fraction(myA,myB); 
-      vertex[1] = Fraction(-myMu,myB);
+      // Lower middle vertex
+      //vertex[0] = Fraction(myA,myB); 
+      //vertex[1] = Fraction(-myMu,myB);
       
-      trace.info() << vertex[0].p() << "/" << vertex[0].q() << " - ";
-      trace.info() << vertex[1].p() << "/" << vertex[1].q() << std::endl;
-      
+      vertex[0] = myA;
+      vertex[1] = myB;
+      vertex[2] = -myMu;
+      vertex[3] = myB;
+
+      trace.info() << vertex[0] << "/" << vertex[1] << " - ";
+      trace.info() << vertex[2] << "/" << vertex[3] << std::endl;
+     
       dual.push_back(vertex);
     }
   
   // RightMost vertex (greater slope)
-  g = gcd(myLl[1]+1-myUf[1],myLl[0]-myUf[0]);
+  g = ic.gcd(myLl[1]+1-myUf[1],myLl[0]-myUf[0]);
   
-  vertex[0] = Fraction((myLl[1]+1-myUf[1])/g,(myLl[0]-myUf[0])/g);
+  //vertex[0] = Fraction((myLl[1]+1-myUf[1])/g,(myLl[0]-myUf[0])/g);
+  vertex[0] = (myLl[1]+1-myUf[1])/g;
+  vertex[1] = (myLl[0]-myUf[0])/g;
+
+  g = ic.gcd(myUf[1]*vertex[1]-myUf[0]*vertex[0],vertex[1]);
+  //vertex[1] = Fraction((myUf[1]*vertex[0].q()-myUf[0]*vertex[0].p())/g,(vertex[0].q())/g);
   
-  g = gcd(myUf[1]*vertex[0].q()-myUf[0]*vertex[0].p(),vertex[0].q());
-  vertex[1] = Fraction((myUf[1]*vertex[0].q()-myUf[0]*vertex[0].p())/g,(vertex[0].q())/g);
-      
-  
-  trace.info() << vertex[0].p() << "/" << vertex[0].q() << " - ";
-  trace.info() << vertex[1].p() << "/" << vertex[1].q() << std::endl;
+  vertex[2] = (myUf[1]*vertex[1]-myUf[0]*vertex[0])/g;
+  vertex[3] = vertex[1]/g;
+    
+  trace.info() << vertex[0] << "/" << vertex[1] << " - ";
+  trace.info() << vertex[2] << "/" << vertex[3] << std::endl;
   
   dual.push_back(vertex);
   
   if(myLl != myLf)
     {
-      // Lower middle vertex
-      vertex[0] = Fraction(myA,myB);
-      vertex[1] = Fraction(-myMu+1,myB);
+      // Upper middle vertex
+      //vertex[0] = Fraction(myA,myB);
+      //vertex[1] = Fraction(-myMu+1,myB);
+
+      vertex[0] = myA;
+      vertex[1] = myB;
+      vertex[2] = -myMu+1;
+      vertex[3] = myB;
       
-      trace.info() << vertex[0].p() << "/" << vertex[0].q() << " - ";
-      trace.info() << vertex[1].p() << "/" << vertex[1].q() << std::endl;
-      
+      trace.info() << vertex[0] << "/" << vertex[1] << " - ";
+      trace.info() << vertex[2] << "/" << vertex[3] << std::endl;
+
       dual.push_back(vertex);
     }
   
-  return dual ;
+  return dual;
 }
 
 

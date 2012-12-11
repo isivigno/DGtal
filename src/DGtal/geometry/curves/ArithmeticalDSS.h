@@ -52,6 +52,7 @@
 #include "DGtal/kernel/CInteger.h"
 #include "DGtal/base/ReverseIterator.h"
 #include "DGtal/io/Color.h"
+#include "DGtal/arithmetic/IntegerComputer.h"
 
 #include "DGtal/geometry/curves/SegmentComputerUtils.h"
 
@@ -215,9 +216,13 @@ Steps:
 
     typedef PointVector<2,double> PointD;  
     
-    typedef SternBrocot<DGtal::int32_t,DGtal::int32_t> SB;
-    typedef SB::Fraction Fraction;
-    typedef vector<vector<Fraction> > DualPolygon; // ideally, we should
+    typedef PointVector<4,Integer> PointR; // stores a rational point P of coordinates (P[0]/P[1],P[2]/P[3])
+    typedef vector<PointR> DualPolygon;
+
+
+    /* typedef SternBrocot<DGtal::int32_t,DGtal::int32_t> SB; */
+    /* typedef SB::Fraction Fraction; */
+    /* typedef vector<vector<Fraction> > DualPolygon; // ideally, we should */
 						   // do typedef
 						   // vector<PointVector<2,
 						   // Fraction> >
@@ -231,8 +236,10 @@ Steps:
 
     // ----------------------- Standard services ------------------------------
   public:
+    
+    DualPolygon translateDualPolygon();
 
-
+    
     /**
      * Default constructor.
      * not valid
@@ -294,6 +301,9 @@ Steps:
      * 'true' otherwise
      */
     bool operator!=( const Self & other ) const;
+
+    
+    Self unionDSS(const Self & other) const;
 
     /**
      * Destructor.
@@ -472,7 +482,7 @@ Steps:
      * The dual polygon is computed from the DSS parameters and leaning points. 
      * @return dual polygon (preimage) of the DSS.
      */
-    DualPolygon getDualPolygon() const;
+    DualPolygon computeDualPolygon() const;
     
 
     /**
@@ -716,6 +726,7 @@ Steps:
     */
     ConstIterator myL;
     
+
     /**
      * Projects the point @a m onto the straight line of slope ( @a myA / @a myB) 
      * and intercept @a myMu + ( @a myOmega - 1 )/2 ).

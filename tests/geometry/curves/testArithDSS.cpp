@@ -155,7 +155,7 @@ bool testDSS8drawing()
 
     trace.info() << theDSS8 << " " << theDSS8.isValid() << std::endl;
 
-    DSS8::DualPolygon dual = theDSS8.getDualPolygon();
+    DSS8::DualPolygon dual = theDSS8.computeDualPolygon();
     
     
 
