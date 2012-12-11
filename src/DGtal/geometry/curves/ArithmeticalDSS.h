@@ -253,6 +253,8 @@ Steps:
      */
     ArithmeticalDSS(const ConstIterator& it);
 
+    
+    
     /**
      * Initialisation.
      * @param it an iterator on 2D points
