@@ -1,0 +1,320 @@
+/**
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ **/
+
+/**
+ * @file FareyFan.ih
+ * @author Isabelle Sivignon (\c isabelle.sivignon@gipsa-lab.grenoble-inp.fr )
+ * gipsa-lab Grenoble Images Parole Signal Automatique (CNRS, UMR 5216), CNRS, France
+ *
+ * @date 2012/12/11
+ *
+ * Implementation of inline methods defined in FareyFan.h
+ *
+ * This file is part of the DGtal library.
+ */
+
+///////////////////////////////////////////////////////////////////////////////
+// IMPLEMENTATION of inline methods.
+///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+#include <cstdlib>
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Implementation of inline methods                                          //
+
+
+
+template <typename TInteger>
+inline
+DGtal::FareyFan<TInteger>::Ray::Ray()
+{}
+
+template <typename TInteger>
+inline
+DGtal::FareyFan<TInteger>::Ray::Ray(const Integer x0, const Integer y0)
+{
+  x = x0;
+  y = y0;
+} 
+
+template <typename TInteger>
+inline
+DGtal::FareyFan<TInteger>::Ray::Ray(const PointR p, const Integer slope)
+{
+  x = slope;
+  y = (p[2]+p[0]*x)/p[1];
+}
+
+
+template <typename TInteger>
+inline
+DGtal::FareyFan<TInteger>::Ray::Ray(const PointR p, const PointR q)
+{
+  
+  // Compute the slope of the line through (p=p[0]/p[1],p[2]/p[1]) and
+  // (q=q[0]/q[1],q[2]/q[1])
+  
+  x = (p[2]*q[1] - q[2]*p[1])/(q[0]*p[1]-q[1]*p[0]);
+  y = (p[2]+p[0]*x)/p[1];
+  
+}
+
+
+template <typename TInteger>
+inline
+DGtal::FareyFan<TInteger>::Ray::~Ray()
+{
+}
+
+
+template <typename TInteger>
+inline
+typename DGtal::FareyFan<TInteger>::Position DGtal::FareyFan<TInteger>::Ray::positionWrtRay(PointR p)
+{
+  Integer v = -p[0]*x + y*p[1] - p[2];
+  
+  if(v == 0)
+    return ONTO;
+  else
+    if(v > 0)
+      return BELOW;
+    else
+      if(v < 0)
+	return ABOVE;
+  
+}
+
+
+template <typename TInteger>
+inline
+typename DGtal::FareyFan<TInteger>::PointR DGtal::FareyFan<TInteger>::Ray::intersect(Ray r)
+{
+  PointR res;
+  DGtal::IntegerComputer<TInteger> ic;
+
+  res[0] = r.y - y;
+  res[1] = r.x - x;
+  
+  if(res[0] < 0 && res[1] <0)
+    {
+      res[0] = -res[0];
+      res[1] = -res[1];
+    }
+  
+  Integer g = ic.gcd(res[0],res[1]);
+  res[0] = res[0]/g;
+  res[1] = res[1]/g;
+
+  res[2] = -res[0]*x + res[1]*y;
+  
+  return res;
+}
+
+template <typename TInteger>
+inline
+DGtal::FareyFan<TInteger>::Polygon::Polygon()
+{}
+
+template <typename TInteger>
+inline
+DGtal::FareyFan<TInteger>::Polygon::Polygon(const PointR a,const PointR b,const PointR c,const PointR d)
+{
+  Points.push_back(a);
+  Points.push_back(b);
+  Points.push_back(c);
+  Points.push_back(d);
+  // Points[1] = b;
+  // Points[2] = c;
+  // Points[3] = c;
+  
+  Rays.push_back(Ray(a,b));
+  Rays.push_back(Ray(b,c));
+  Rays.push_back(Ray(c,d));
+  Rays.push_back(Ray(d,a));
+} 
+
+
+template <typename TInteger>
+inline
+DGtal::FareyFan<TInteger>::Polygon::Polygon(const PointR a,const PointR b,const PointR c,const PointR d, const Ray rab, const Ray rbc, const Ray rcd, const Ray rda)
+{
+  Points.push_back(a);
+  Points.push_back(b);
+  Points.push_back(c);
+  Points.push_back(d);
+  // Points[1] = b;
+  // Points[2] = c;
+  // Points[3] = c;
+  
+  Rays.push_back(rab);
+  Rays.push_back(rbc);
+  Rays.push_back(rcd);
+  Rays.push_back(rda);
+
+
+} 
+
+
+
+// Assumes that xA < xB
+template <typename TInteger>
+inline
+void DGtal::FareyFan<TInteger>::Polygon::intersect(const PointR A, const PointR B, const Ray rab, PointList *res)
+{
+  double m,M;
+  PointList intersectPoints;
+  bool found = false;
+
+  for(int i=0;i<4;i++)
+    {
+      PointR P=Points[i],Q=Points[(i+1)%4];
+      
+      Ray r = Rays[i];
+      
+      if(!((double) A[0]/A[1]>(double) Q[0]/Q[1] || (double) B[0]/B[1]<(double) P[0]/P[1]))
+	{
+	  if(i==0 || i==1) // xP < xQ
+	    {
+	      m = std::max((double) A[0]/(double) A[1],(double) P[0]/(double) P[1]);
+	      M = std::min((double) B[0]/(double) B[1],(double) Q[0]/(double) Q[1]);
+	    }
+	  else // xQ < xP
+	    {
+	      m = std::max((double) A[0]/A[1],(double) Q[0]/Q[1]);
+	      M = std::min((double) B[0]/B[1],(double) P[0]/P[1]);
+	    }
+	  
+	  PointR s = r.intersect(rab);
+	  
+	  trace.info() << s << std::endl;
+	  trace.info() << m << " " << M << std::endl;
+	  
+	  if((double) s[0]/s[1] >= m && (double) s[0]/s[1] <= M)
+	    {
+	      trace.info() << "keep\n";
+	      res->push_back(s);
+	      found =true;
+	    }
+	  else // keep the point in mind
+	    {
+	      intersectPoints.push_back(s);
+	    }
+	}
+      
+    }
+  
+  if(!found) // check if [AB] in included in the polygon   
+    {
+      PointR s1 = intersectPoints[0];
+      PointR s2 = intersectPoints[1];
+      PointR tmp;
+      if((double) s1[0]/s1[1]>(double) s2[0]/s2[1])
+	{
+	  tmp = s2;
+	  s2 = s1;
+	  s1 = tmp;
+	}
+      
+      if((double) A[0]/A[1]<=(double) s2[0]/s2[1] && (double) A[0]/A[1]>(double) s1[0]/s1[1] && (double) B[0]/B[1]<=(double) s2[0]/s2[1] && (double) B[0]/B[1]>(double) s1[0]/s1[1])
+	{
+	  res->push_back(A);
+	  res->push_back(B);
+	}
+      
+    }
+  
+}
+ 
+template <typename TInteger>
+inline
+void DGtal::FareyFan<TInteger>::Polygon::intersect(const Polygon P, PointList *res)
+{
+  PointR A,B;
+  for(int i=0;i<4;i++)
+    {
+      if(i==0 || i==1)
+	{
+	  A = P.Points[i];
+	  B = P.Points[i+1];
+	}
+      else
+	{
+	  A = P.Points[(i+1)%4];
+	  B = P.Points[i];
+	}
+      std::cout << A << " " << B << " " << std::endl;
+      intersect(A,B,P.Rays[i],res);
+      
+    }
+  
+  trace.info() << "end intersect\n";
+  
+
+}  
+
+
+template <typename TInteger>
+inline
+void DGtal::FareyFan<TInteger>::Polygon::transform(const Point P)
+{
+  for(unsigned int i=0;i<4;i++)
+    Points[i][2] += -Points[i][0]*P[0]+Points[i][1]*P[1]; 
+  
+  for(unsigned int i=0;i<4;i++)
+    Rays[i] = Ray(Points[i],Points[(i+1)%4]);
+  
+  
+}
+
+
+
+
+
+
+template <typename TInteger>
+inline
+DGtal::FareyFan<TInteger>::Polygon::~Polygon()
+{
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Implementation of inline functions and external operators                 //
+
+/**
+ * Overloads 'operator<<' for displaying objects of class 'FareyFan'.
+ * @param out the output stream where the object is written.
+ * @param object the object of class 'FareyFan' to write.
+ * @return the output stream after the writing.
+ */
+// inline
+// std::ostream&
+// DGtal::operator<< ( std::ostream & out,
+//                   const FareyFan & object )
+// {
+//   object.selfDisplay ( out );
+//   return out;
+// }
+
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+

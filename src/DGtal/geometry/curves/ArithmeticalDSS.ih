@@ -184,13 +184,52 @@ inline
 typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::Self
 DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( const ArithmeticalDSS<TIterator,TInteger,connectivity> & other ) const {
   
-  DualPolygon dualOther, dualSelf, inter;
+
+  // TODO: Make sure that dualSelf is th left most dual 
+
+  DualPolygon dualOther, dualSelf;
+  
+  // compute the dual polygon of each DSS
+  dualSelf = computeDualPolygon();
   dualOther = other.computeDualPolygon();
-  dualSelf = this.computeDualPolygon();
+
+  // Translation of the DSS such that the smallest abscissa is set to the origin
+  Point myFirst=getFirstPoint(), otherFirst=other.getFirstPoint();
   
-  inter = intersectionDualPolygons(dualOther,dualSelf);
+  trace.info() << "first point DSS1:" << myFirst << " first point DSS2:" << otherFirst << std::endl;
+
+  if(myFirst<otherFirst)
+    {
+      dualSelf.transform(myFirst);
+      dualOther.transform(myFirst);
+    }
+  else
+    {
+      dualSelf.transform(otherFirst);
+      dualOther.transform(otherFirst);
+    }
   
+  // Compute the list of vertices of the intersection of the two dual polygons
+  typename DGtal::FareyFan<TInteger>::Polygon::PointList l;
+  dualSelf.intersect(dualOther,&l);
+
+  typename DGtal::FareyFan<TInteger>::Polygon::PointList::iterator it;
   
+  PointR minCharac = *(l.begin());
+  for(it = l.begin();it != l.end();it++)
+    {
+      if((*it)[1] < minCharac[1] || ((*it)[1] == minCharac[1] && (*it)[2] < minCharac[2]))
+	{
+	  minCharac = *it;
+	}
+      std::cout << *it;
+    }
+  
+  //TODO: find the point (a,b,mu) of smallest b in the list l, which is neither the min nor the max.
+  
+  trace.info() << "min charac " << minCharac << std::endl;
+
+  trace.info() << "end union\n";
   
 }
 
@@ -905,7 +944,7 @@ typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
 DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon() const {
   
   //vector<Fraction > vertex(2);  
-  PointR vertex;
+  PointR A,B,C,D;
   DualPolygon dual;
   
   IntegerComputer<Integer> ic;
@@ -914,76 +953,70 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon() co
   assert(myB>0);
   assert(myA>=0);
   
+  trace.info() << "Dual Polygon: \n";
+  
       
   // LeftMost vertex of the dual polygon (lower slope)
   Integer g = ic.gcd(myUl[1]-(myLf[1]+1),myUl[0]-myLf[0]);
   
-  //vertex[0] = Fraction((myUl[1]-(myLf[1]+1))/g,(myUl[0]-myLf[0])/g);
-  vertex[0] = (myUl[1]-(myLf[1]+1))/g;
-  vertex[1] = (myUl[0]-myLf[0])/g;
+  A[0] = (myUl[1]-(myLf[1]+1))/g;
+  A[1] = (myUl[0]-myLf[0])/g;
 
-  g = ic.gcd(myUl[1]*vertex[1]-myUl[0]*vertex[0],vertex[1]);
-  //vertex[1] = Fraction((myUl[1]*vertex[0].q()-myUl[0]*vertex[0].p())/g,(vertex[0].q())/g);
-  vertex[2] = (myUl[1]*vertex[1]-myUl[0]*vertex[0])/g;
-  vertex[3] = vertex[1]/g;
+  //g = ic.gcd(myUl[1]*vertex[1]-myUl[0]*vertex[0],vertex[1]);
+  //vertex[2] = (myUl[1]*vertex[1]-myUl[0]*vertex[0])/g;
+  //vertex[3] = vertex[1]/g;
+  A[2] = (myUl[1]*A[1]-myUl[0]*A[0]);
   
-  trace.info() << vertex[0] << "/" << vertex[1] << " - ";
-  trace.info() << vertex[2] << "/" << vertex[3] << std::endl;
   
-  dual.push_back(vertex);
+  trace.info() << A[0] << "/" << A[1] << " - ";
+  trace.info() << A[2] << "/" << A[1] << std::endl;
   
-  if(myUf != myUl)
-    {
+  //dual.push_back(vertex);
+  
+  // if(myUf != myUl)
+  //{
       // Lower middle vertex
-      //vertex[0] = Fraction(myA,myB); 
-      //vertex[1] = Fraction(-myMu,myB);
+      B[0] = myA;
+      B[1] = myB;
+      B[2] = -myMu;
       
-      vertex[0] = myA;
-      vertex[1] = myB;
-      vertex[2] = -myMu;
-      vertex[3] = myB;
-
-      trace.info() << vertex[0] << "/" << vertex[1] << " - ";
-      trace.info() << vertex[2] << "/" << vertex[3] << std::endl;
+      trace.info() << B[0] << "/" << B[1] << " - ";
+      trace.info() << B[2] << "/" << B[1] << std::endl;
      
-      dual.push_back(vertex);
-    }
+      //    dual.push_back(vertex);
+      //}
   
   // RightMost vertex (greater slope)
   g = ic.gcd(myLl[1]+1-myUf[1],myLl[0]-myUf[0]);
   
-  //vertex[0] = Fraction((myLl[1]+1-myUf[1])/g,(myLl[0]-myUf[0])/g);
-  vertex[0] = (myLl[1]+1-myUf[1])/g;
-  vertex[1] = (myLl[0]-myUf[0])/g;
+  C[0] = (myLl[1]+1-myUf[1])/g;
+  C[1] = (myLl[0]-myUf[0])/g;
 
-  g = ic.gcd(myUf[1]*vertex[1]-myUf[0]*vertex[0],vertex[1]);
-  //vertex[1] = Fraction((myUf[1]*vertex[0].q()-myUf[0]*vertex[0].p())/g,(vertex[0].q())/g);
+  //g = ic.gcd(myUf[1]*vertex[1]-myUf[0]*vertex[0],vertex[1]);
+  //vertex[2] = (myUf[1]*vertex[1]-myUf[0]*vertex[0])/g;
+  //vertex[3] = vertex[1]/g;
+  C[2] = (myUf[1]*C[1]-myUf[0]*C[0]);
   
-  vertex[2] = (myUf[1]*vertex[1]-myUf[0]*vertex[0])/g;
-  vertex[3] = vertex[1]/g;
     
-  trace.info() << vertex[0] << "/" << vertex[1] << " - ";
-  trace.info() << vertex[2] << "/" << vertex[3] << std::endl;
+  trace.info() << C[0] << "/" << C[1] << " - ";
+  trace.info() << C[2] << "/" << C[1] << std::endl;
   
-  dual.push_back(vertex);
+  // dual.push_back(vertex);
   
-  if(myLl != myLf)
-    {
+  //if(myLl != myLf)
+  //{
       // Upper middle vertex
-      //vertex[0] = Fraction(myA,myB);
-      //vertex[1] = Fraction(-myMu+1,myB);
-
-      vertex[0] = myA;
-      vertex[1] = myB;
-      vertex[2] = -myMu+1;
-      vertex[3] = myB;
-      
-      trace.info() << vertex[0] << "/" << vertex[1] << " - ";
-      trace.info() << vertex[2] << "/" << vertex[3] << std::endl;
-
-      dual.push_back(vertex);
-    }
+  D[0] = myA;
+  D[1] = myB;
+  D[2] = -myMu+1;
   
+  trace.info() << D[0] << "/" << D[1] << " - ";
+  trace.info() << D[2] << "/" << D[1] << std::endl;
+  
+  // dual.push_back(vertex);
+  // }
+  
+  dual = DualPolygon(A,B,C,D);
   return dual;
 }
 

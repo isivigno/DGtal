@@ -47,6 +47,7 @@
 #include "DGtal/kernel/domains/HyperRectDomain.h"
 #include "DGtal/geometry/curves/ArithmeticalDSS.h"
 #include "DGtal/io/boards/Board2D.h"
+#include "DGtal/geometry/curves/ArithDSSIterator.h"
 
 #include "DGtal/geometry/curves/CBidirectionalSegmentComputer.h"
 #include "DGtal/io/boards/CDrawableWithBoard2D.h"
@@ -158,7 +159,6 @@ bool testDSS8drawing()
     DSS8::DualPolygon dual = theDSS8.computeDualPolygon();
     
     
-
     
     HyperRectDomain< SpaceND<2,int> > domain( Point(0,0), Point(10,10) );
 
@@ -364,22 +364,64 @@ void testArithDSSConceptChecking()
 }
 
 
+bool testUnionDSS()
+{
+  typedef PointVector<2,int> Point;
+  typedef ArithDSSIterator<int,8> myIterator;
+  
+  Point p1(0,0);
+  myIterator it1(1,3,0,p1);
+  
+  typedef ArithmeticalDSS<myIterator,int,8> ArithDSS;
+  
+  ArithDSS myDSS1(it1);
+  
+  int xmax1=3;
+  
+  while ( (*(myDSS1.end()))[0] <=xmax1 && myDSS1.extendForward())
+    {}
+  
+  std::cout << myDSS1.getA() << " " << myDSS1.getB() << " " << myDSS1.getMu() << " " <<   std::endl; 
+
+  Point p2(4,1);
+  myIterator it2(1,2,1,p2);
+  
+  ArithDSS myDSS2(it2);
+  int xmax2 = 6;
+
+  while ( (*(myDSS2.end()))[0] <=xmax2 && myDSS2.extendForward())
+    {}
+  
+  std::cout << myDSS2.getA() << " " << myDSS2.getB() << " " << myDSS2.getMu() << " " <<   std::endl; 
+
+  myDSS1.unionDSS(myDSS2);
+
+  trace.info() << "end test\n";
+
+  return 1;
+  
+}
+
+
+
+
 int main(int argc, char **argv)
 {
-
+  
   trace.beginBlock ( "Testing class ArithmeticalDSS" );
   trace.info() << "Args:";
   for ( int i = 0; i < argc; ++i )
     trace.info() << " " << argv[ i ];
   trace.info() << endl;
 
-   
+  
   {//concept checking
     testArithDSSConceptChecking();
   }
   
-  bool res = testDSS4drawing() 
-    && testDSS8drawing()
+  bool res = //testDSS4drawing() 
+    //&& testDSS8drawing() && 
+    testUnionDSS()
     /*    && testExtendretractForward()
     && testCorner()
 #ifdef WITH_BIGINTEGER

@@ -53,6 +53,7 @@
 #include "DGtal/base/ReverseIterator.h"
 #include "DGtal/io/Color.h"
 #include "DGtal/arithmetic/IntegerComputer.h"
+#include "DGtal/geometry/curves/FareyFan.h"
 
 #include "DGtal/geometry/curves/SegmentComputerUtils.h"
 
@@ -216,8 +217,10 @@ Steps:
 
     typedef PointVector<2,double> PointD;  
     
-    typedef PointVector<4,Integer> PointR; // stores a rational point P of coordinates (P[0]/P[1],P[2]/P[3])
-    typedef vector<PointR> DualPolygon;
+    typedef typename FareyFan<Integer>::PointR PointR;
+    typedef typename FareyFan<Integer>::Polygon DualPolygon;
+    //typedef PointVector<3,Integer> PointR; // stores a rational point P of coordinates (P[0]/P[1],P[2]/P[3])
+    //typedef vector<PointR> DualPolygon;
 
 
     /* typedef SternBrocot<DGtal::int32_t,DGtal::int32_t> SB; */
