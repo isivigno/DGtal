@@ -61,6 +61,17 @@
 
 //////////////////////////////////////////////////////////////////////////////
 
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry/io/wkt/wkt.hpp>
+#include <boost/rational.hpp>
+#include <boost/foreach.hpp>
+#include <boost/assign.hpp>
+#include <boost/geometry/geometries/adapted/boost_tuple.hpp>
+#include <boost/geometry/strategies/transform/matrix_transformers.hpp>
+
+
 
 namespace DGtal
 {
@@ -217,8 +228,14 @@ Steps:
 
     typedef PointVector<2,double> PointD;  
     
-    typedef typename FareyFan<Integer>::PointR PointR;
-    typedef typename FareyFan<Integer>::Polygon DualPolygon;
+    typedef boost::rational<Integer> Rational;
+    typedef boost::tuple<Rational,Rational> PointR;
+    typedef boost::geometry::model::polygon<PointR > DualPolygon;
+
+    
+    /* typedef typename FareyFan<Integer>::PointR PointR; */
+    /* typedef typename FareyFan<Integer>::Polygon DualPolygon; */
+    
     //typedef PointVector<3,Integer> PointR; // stores a rational point P of coordinates (P[0]/P[1],P[2]/P[3])
     //typedef vector<PointR> DualPolygon;
 
@@ -487,8 +504,10 @@ Steps:
      * The dual polygon is computed from the DSS parameters and leaning points. 
      * @return dual polygon (preimage) of the DSS.
      */
-    DualPolygon computeDualPolygon() const;
+    void computeDualPolygon() const;
     
+    
+    DualPolygon transformDualPolygon(const Point p) const;
 
     /**
      *  
@@ -689,6 +708,8 @@ Steps:
     */
     Integer myNbLowPat; 
     
+    DualPolygon myDualPolygon;
+
     /**
     * Steps of the DSS (eg. right and up in the first octant)
     */

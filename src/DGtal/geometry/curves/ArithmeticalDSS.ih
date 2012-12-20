@@ -190,44 +190,50 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( const Arithme
   DualPolygon dualOther, dualSelf;
   
   // compute the dual polygon of each DSS
-  dualSelf = computeDualPolygon();
-  dualOther = other.computeDualPolygon();
+  //dualSelf = computeDualPolygon();
+  //dualOther = other.computeDualPolygon();
 
-  // Translation of the DSS such that the smallest abscissa is set to the origin
-  Point myFirst=getFirstPoint(), otherFirst=other.getFirstPoint();
+  computeDualPolygon();
+  other.computeDualPolygon();
   
-  trace.info() << "first point DSS1:" << myFirst << " first point DSS2:" << otherFirst << std::endl;
+  // Translation of the DSS such that the smallest abscissa is set to the origin
+  // Point myFirst=getFirstPoint(), otherFirst=other.getFirstPoint();
+  
+  // trace.info() << "first point DSS1:" << myFirst << " first point DSS2:" << otherFirst << std::endl;
 
-  if(myFirst<otherFirst)
-    {
-      dualSelf.transform(myFirst);
-      dualOther.transform(myFirst);
-    }
-  else
-    {
-      dualSelf.transform(otherFirst);
-      dualOther.transform(otherFirst);
-    }
+  // DualPolygon dual1,dual2;
+  
+
+  // if(myFirst<otherFirst)
+  //   {
+  //     dual1 = dualSelf.transformDualPolygon(myFirst);
+  //     dual2 = dualOther.transformDualPolygon(myFirst);
+  //   }
+  // else
+  //   {
+  //     dual1 = dualSelf.transformDualPolygon(otherFirst);
+  //     dual2 = dualOther.transformDualPolygon(otherFirst);
+  //   }
   
   // Compute the list of vertices of the intersection of the two dual polygons
-  typename DGtal::FareyFan<TInteger>::Polygon::PointList l;
-  dualSelf.intersect(dualOther,&l);
+  // typename DGtal::FareyFan<TInteger>::Polygon::PointList l;
+  // dualSelf.intersect(dualOther,&l);
 
-  typename DGtal::FareyFan<TInteger>::Polygon::PointList::iterator it;
+  // typename DGtal::FareyFan<TInteger>::Polygon::PointList::iterator it;
   
-  PointR minCharac = *(l.begin());
-  for(it = l.begin();it != l.end();it++)
-    {
-      if((*it)[1] < minCharac[1] || ((*it)[1] == minCharac[1] && (*it)[2] < minCharac[2]))
-	{
-	  minCharac = *it;
-	}
-      std::cout << *it;
-    }
+  // PointR minCharac = *(l.begin());
+  // for(it = l.begin();it != l.end();it++)
+  //   {
+  //     if((*it)[1] < minCharac[1] || ((*it)[1] == minCharac[1] && (*it)[2] < minCharac[2]))
+  // 	{
+  // 	  minCharac = *it;
+  // 	}
+  //     std::cout << *it;
+  //   }
   
   //TODO: find the point (a,b,mu) of smallest b in the list l, which is neither the min nor the max.
   
-  trace.info() << "min charac " << minCharac << std::endl;
+  //trace.info() << "min charac " << minCharac << std::endl;
 
   trace.info() << "end union\n";
   
@@ -938,89 +944,146 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::getFront() const {
 
 
 
+// template <typename TIterator, typename TInteger, int connectivity>
+// inline
+// typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
+// DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon() const {
+  
+//   //vector<Fraction > vertex(2);  
+//   PointR A,B,C,D;
+//   DualPolygon dual;
+  
+//   IntegerComputer<Integer> ic;
+
+//   assert(myB>=myA);
+//   assert(myB>0);
+//   assert(myA>=0);
+  
+//   trace.info() << "Dual Polygon: \n";
+  
+      
+//   // LeftMost vertex of the dual polygon (lower slope)
+//   Integer g = ic.gcd(myUl[1]-(myLf[1]+1),myUl[0]-myLf[0]);
+  
+//   A[0] = (myUl[1]-(myLf[1]+1))/g;
+//   A[1] = (myUl[0]-myLf[0])/g;
+
+//   //g = ic.gcd(myUl[1]*vertex[1]-myUl[0]*vertex[0],vertex[1]);
+//   //vertex[2] = (myUl[1]*vertex[1]-myUl[0]*vertex[0])/g;
+//   //vertex[3] = vertex[1]/g;
+//   A[2] = (myUl[1]*A[1]-myUl[0]*A[0]);
+  
+  
+//   trace.info() << A[0] << "/" << A[1] << " - ";
+//   trace.info() << A[2] << "/" << A[1] << std::endl;
+  
+//   //dual.push_back(vertex);
+  
+//   // if(myUf != myUl)
+//   //{
+//       // Lower middle vertex
+//       B[0] = myA;
+//       B[1] = myB;
+//       B[2] = -myMu;
+      
+//       trace.info() << B[0] << "/" << B[1] << " - ";
+//       trace.info() << B[2] << "/" << B[1] << std::endl;
+     
+//       //    dual.push_back(vertex);
+//       //}
+  
+//   // RightMost vertex (greater slope)
+//   g = ic.gcd(myLl[1]+1-myUf[1],myLl[0]-myUf[0]);
+  
+//   C[0] = (myLl[1]+1-myUf[1])/g;
+//   C[1] = (myLl[0]-myUf[0])/g;
+
+//   //g = ic.gcd(myUf[1]*vertex[1]-myUf[0]*vertex[0],vertex[1]);
+//   //vertex[2] = (myUf[1]*vertex[1]-myUf[0]*vertex[0])/g;
+//   //vertex[3] = vertex[1]/g;
+//   C[2] = (myUf[1]*C[1]-myUf[0]*C[0]);
+  
+    
+//   trace.info() << C[0] << "/" << C[1] << " - ";
+//   trace.info() << C[2] << "/" << C[1] << std::endl;
+  
+//   // dual.push_back(vertex);
+  
+//   //if(myLl != myLf)
+//   //{
+//       // Upper middle vertex
+//   D[0] = myA;
+//   D[1] = myB;
+//   D[2] = -myMu+1;
+  
+//   trace.info() << D[0] << "/" << D[1] << " - ";
+//   trace.info() << D[2] << "/" << D[1] << std::endl;
+  
+//   // dual.push_back(vertex);
+//   // }
+  
+//   dual = DualPolygon(A,B,C,D);
+//   return dual;
+// }
+
+
+
 template <typename TIterator, typename TInteger, int connectivity>
 inline
-typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
-DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon() const {
+//typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
+void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon() const {
   
   //vector<Fraction > vertex(2);  
-  PointR A,B,C,D;
-  DualPolygon dual;
-  
-  IntegerComputer<Integer> ic;
+  //Point A,B,C,D;
 
   assert(myB>=myA);
   assert(myB>0);
   assert(myA>=0);
   
   trace.info() << "Dual Polygon: \n";
-  
       
   // LeftMost vertex of the dual polygon (lower slope)
-  Integer g = ic.gcd(myUl[1]-(myLf[1]+1),myUl[0]-myLf[0]);
+  //Integer g = ic.gcd(myUl[1]-(myLf[1]+1),myUl[0]-myLf[0]);
   
-  A[0] = (myUl[1]-(myLf[1]+1))/g;
-  A[1] = (myUl[0]-myLf[0])/g;
-
-  //g = ic.gcd(myUl[1]*vertex[1]-myUl[0]*vertex[0],vertex[1]);
-  //vertex[2] = (myUl[1]*vertex[1]-myUl[0]*vertex[0])/g;
-  //vertex[3] = vertex[1]/g;
-  A[2] = (myUl[1]*A[1]-myUl[0]*A[0]);
+  Integer p,q;
+  p = myUl[1]-(myLf[1]+1);
+  q = myUl[0]-myLf[0];
   
+  PointR A = boost::make_tuple(Rational(p,q),Rational(myUl[1]*q-myUl[0]*p,q));
   
-  trace.info() << A[0] << "/" << A[1] << " - ";
-  trace.info() << A[2] << "/" << A[1] << std::endl;
+  // Lower middle vertex
+  PointR B = boost::make_tuple(Rational(myA,myB),Rational(-myMu,myB));
   
-  //dual.push_back(vertex);
+  // Rightmost vertex
+  p = myLl[1]+1-myUf[1];
+  q = myLl[0]-myUf[0];
   
-  // if(myUf != myUl)
-  //{
-      // Lower middle vertex
-      B[0] = myA;
-      B[1] = myB;
-      B[2] = -myMu;
-      
-      trace.info() << B[0] << "/" << B[1] << " - ";
-      trace.info() << B[2] << "/" << B[1] << std::endl;
-     
-      //    dual.push_back(vertex);
-      //}
+  PointR C = boost::make_tuple(Rational(p,q),Rational(myUf[1]*q-myUf[0]*p,q));
   
-  // RightMost vertex (greater slope)
-  g = ic.gcd(myLl[1]+1-myUf[1],myLl[0]-myUf[0]);
+  // Upper middle vertex
+  PointR D = boost::make_tuple(Rational(myA,myB),Rational(-myMu+1,myB));
   
-  C[0] = (myLl[1]+1-myUf[1])/g;
-  C[1] = (myLl[0]-myUf[0])/g;
-
-  //g = ic.gcd(myUf[1]*vertex[1]-myUf[0]*vertex[0],vertex[1]);
-  //vertex[2] = (myUf[1]*vertex[1]-myUf[0]*vertex[0])/g;
-  //vertex[3] = vertex[1]/g;
-  C[2] = (myUf[1]*C[1]-myUf[0]*C[0]);
+  // Construction of the dual polygon (vertices in clockwise order)
   
-    
-  trace.info() << C[0] << "/" << C[1] << " - ";
-  trace.info() << C[2] << "/" << C[1] << std::endl;
+  boost::geometry::append(myDualPolygon,A);   
+  boost::geometry::append(myDualPolygon,D);   
+  boost::geometry::append(myDualPolygon,C);   
+  boost::geometry::append(myDualPolygon,B);   
   
-  // dual.push_back(vertex);
-  
-  //if(myLl != myLf)
-  //{
-      // Upper middle vertex
-  D[0] = myA;
-  D[1] = myB;
-  D[2] = -myMu+1;
-  
-  trace.info() << D[0] << "/" << D[1] << " - ";
-  trace.info() << D[2] << "/" << D[1] << std::endl;
-  
-  // dual.push_back(vertex);
-  // }
-  
-  dual = DualPolygon(A,B,C,D);
-  return dual;
 }
 
-
+template <typename TIterator, typename TInteger, int connectivity>
+inline
+typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
+DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::transformDualPolygon(const Point p) const {
+  
+  DualPolygon dual;
+  boost::geometry::strategy::transform::ublas_transformer<PointR, PointR, 2, 2> myTransform(1,0,0,-p[0],1,p[1],0,0,1);
+  
+  boost::geometry::transform(myDualPolygon,dual,myTransform);
+  
+  return dual;
+}
 
 
 
