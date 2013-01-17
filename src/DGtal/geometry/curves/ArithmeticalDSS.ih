@@ -179,63 +179,274 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::operator!=(
   return (!(*this == other));
 }
 
+
+
+
+  
+  // We look for the vertex that is neither the one of  smallest nor
+  // greatest abscissa, and such that the denominator of its absicssa is
+  // minimal.   
+
+template <typename TIterator, typename TInteger, int connectivity>
+inline
+typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::PointR
+DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::findCharacteristicVertex(std::vector<PointR > pts, bool areConnected) 
+{
+    
+  typename std::vector<PointR >::iterator it, itMin, itMax;
+  
+  // for(it = pts.begin();it!=pts.end();it++)
+  //   {
+  //     std::cout << boost::geometry::dsv(*it) << std::endl;
+  //   }
+  
+  // std::cout << std::endl;
+  
+  // We look for the vertex that is neither the one of  smallest nor
+  // greatest abscissa, and such that the denominator of its absicssa is
+  // minimal.   
+  
+  PointR firstPoint = *(pts.begin());
+  
+  // Compute the minimal and maxima absissas
+  Rational absMax = firstPoint.template get<0>();
+  Rational absMin = absMax;
+  itMin = pts.begin();
+  
+  for(it=pts.begin();it!=pts.end();it++)
+    {
+      PointR pt = *it; 
+      Rational r = pt.template get<0>();
+      if(r<absMin)
+	{
+	  absMin = r;
+	  itMin = it;
+	}
+    }
+  
+  
+  // Change the origin of the vector: the first point is the one of
+  // minimal abscissa
+  std::vector<PointR > ptsTrans;
+    
+  if(itMin != pts.begin())
+    {
+      for(it = itMin;it!=pts.end();it++)
+	{
+	  PointR pt = *it;
+	  ptsTrans.push_back(pt);
+	}
+      
+      for(it=++(pts.begin()); it != itMin;it++)
+	{
+	  PointR pt = *it;
+	  ptsTrans.push_back(pt);
+	}
+      ptsTrans.push_back(*(ptsTrans.begin()));
+    }
+   else
+    ptsTrans = pts;
+  
+#ifdef TRACE
+  for(it=ptsTrans.begin();it!=ptsTrans.end();it++)
+    std::cout << boost::geometry::dsv(*it);
+  std::cout << std::endl;
+#endif
+
+  firstPoint = *(ptsTrans.begin());
+  absMax = firstPoint.template get<0>();
+  itMax = ptsTrans.begin();
+  // Look for the point of maximal abscissa
+  for(it=ptsTrans.begin();it!=ptsTrans.end();it++)
+    {
+      PointR pt = *it; 
+      Rational r = pt.template get<0>();
+      if(r>absMax)
+	{
+	  absMax = r;
+	  itMax = it;
+	}
+    }
+  
+  
+  PointR solution;
+  
+  TInteger denMin = -1;
+  bool beforeMax = true;
+  bool foundBeforeMax = true;
+  
+  for(it=ptsTrans.begin();it!=ptsTrans.end();it++)
+    {
+      PointR pt = (*it);
+      Rational r = pt.template get<0>();
+      TInteger d = r.denominator();
+     
+      if(it==itMax)
+	beforeMax = false;
+ 
+      if(denMin == -1 && r != absMax && r!=absMin)
+	{
+  	  denMin = d;
+  	  solution = pt;
+	  if(!beforeMax)
+	    foundBeforeMax = false;
+	}
+      else
+	if((d<=denMin && r != absMax && r != absMin))
+	  {
+	    denMin = d;
+	    solution = pt;
+	    if(!beforeMax)
+	      foundBeforeMax = false;
+	  }
+    }
+  
+  
+  if(foundBeforeMax)
+    {
+      if(areConnected)
+	{
+	  
+#ifdef TRACE
+	  std::cout << "foundBeforeMax" << std::endl;
+#endif
+	  Rational slope = solution.template get<0>();
+	  TInteger slopeDen = slope.denominator(); 
+	  Rational intercept = solution.template get<1>();
+	  TInteger interceptNum = intercept.numerator();
+	  TInteger interceptDen = intercept.denominator();
+	  interceptNum = (interceptNum*slopeDen/interceptDen)-1; 
+	  intercept = Rational(interceptNum,slopeDen);
+	  solution = make_tuple(slope,intercept);	    
+	}
+      else
+	{
+	  // TO BE TESTED !!!
+	  Rational slope = solution.template get<0>();
+#ifdef TRACE
+	  std::cout << boost::geometry::dsv(solution) << std::endl;
+#endif
+	  
+	  
+	  PointR pt = *itMax;
+#ifdef TRACE
+	  std::cout << "lower enveloppe tracking " << boost::geometry::dsv(pt) << std::endl;
+#endif
+	  it = itMax;
+	  Rational r = pt.template get<0>();
+	  while(r>slope && it!=ptsTrans.end())
+	    {
+	      it++;
+	      pt = *it;	      
+#ifdef TRACE
+	      std::cout << "in the loop " << r << " " << boost::geometry::dsv(pt) << std::endl;
+#endif
+	      r = pt.template get<0>();
+	    }
+	  it--;
+	  PointR prec = *it;
+
+#ifdef TRACE
+	  std::cout << "pt = " << boost::geometry::dsv(pt) << std::endl;
+#endif
+
+#ifdef TRACE
+	  std::cout << "prec = " << boost::geometry::dsv(prec) << std::endl;
+#endif
+
+
+	  assert(pt.template get<0>() != prec.template get<0>());
+	  Rational segmentSlope = (pt.template get<1>() - prec.template get<1>())/(pt.template get<0>() - prec.template get<0>()); 
+	  Rational segmentIntercept = pt.template get<1>() - segmentSlope*(pt.template get<0>());
+	  
+	  Rational solutionIntercept = segmentSlope*slope + segmentIntercept;
+	  solution = make_tuple(slope,solutionIntercept);
+	  
+	}
+    }
+  
+  return solution;
+
+}
+
 template <typename TIterator, typename TInteger, int connectivity>
 inline
 typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::Self
-DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( const ArithmeticalDSS<TIterator,TInteger,connectivity> & other ) const {
+DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( ArithmeticalDSS<TIterator,TInteger,connectivity> & other, TInteger *aa, TInteger *bb, TInteger *muu ) {
   
-
-  // TODO: Make sure that dualSelf is th left most dual 
-
-  DualPolygon dualOther, dualSelf;
+  bool areConnected;
   
+  Point myFirst=getFirstPoint(), otherFirst=other.getFirstPoint();
+  Point myLast=getLastPoint(), otherLast=other.getLastPoint();
+
+  if((myFirst[0] >= otherFirst[0] && myFirst[0] <= otherLast[0]) || (otherFirst[0] >= myFirst[0] && otherFirst[0] <= myLast[0]) || myFirst[0] == otherLast[0]+1 || otherFirst[0] == myLast[0]+1)
+    areConnected = true;
+  else
+    areConnected = false;
+  
+  assert(areConnected==false);
+
   // compute the dual polygon of each DSS
-  //dualSelf = computeDualPolygon();
-  //dualOther = other.computeDualPolygon();
 
   computeDualPolygon();
   other.computeDualPolygon();
   
-  // Translation of the DSS such that the smallest abscissa is set to the origin
-  // Point myFirst=getFirstPoint(), otherFirst=other.getFirstPoint();
+  // trace.info() << boost::geometry::dsv(getDualPolygon()) << std::endl;
+  // trace.info() << boost::geometry::dsv(other.getDualPolygon()) << std::endl;
   
-  // trace.info() << "first point DSS1:" << myFirst << " first point DSS2:" << otherFirst << std::endl;
+  
+  // Compute the intersection of the two dual polygons
+  // In the general case, output is a list of polygons
+  std::vector<DualPolygon > output;
+  boost::geometry::intersection(getDualPolygon(), other.getDualPolygon(), output);
+  
+  DualPolygon intersectionPolygon;
+  
+  // In our specific case, the intersection is either empty or a single convex polygon
+  // If the intersection is empty, then the union of the two DSSs is not a DSS
+  if(output.begin() == output.end())
+    {
+      std::cout << "The dual polygons do not intersect. The union of the two DSSs is not a DSS." << std::endl;
+      return ArithmeticalDSS();
+    }
+  
+  //Otherwise, we consider the intersection polygon
+  intersectionPolygon = *(output.begin());
+  
+#ifdef TRACE
+  std::cout << boost::geometry::dsv(intersectionPolygon) << std::endl;
+#endif
+  
+  // Get the list of points of the intersection polygon
+  // If the two DSSs are connected, the intersection polygon is a cell
+  // of a Farey fan, thus having 3 or four vertices (if four, two
+  // vertices have the same abscissa).  
+  typedef std::vector<PointR> PtList;
+  std::vector<PointR >  pts = intersectionPolygon.outer();
+  
+  PointR solution = findCharacteristicVertex(pts, areConnected);
+  
+  
+  // Output the solution 
+  *aa = (solution.template get<0>()).numerator();
+  *bb = (solution.template get<0>()).denominator();
+  *muu = -(solution.template get<1>()).numerator()*((solution.template get<0>()).denominator()/(solution.template get<1>()).denominator());
+  
+  Point f;
+  
+  if(myFirst[0] < otherFirst[0])
+    f = myFirst;
+  else
+    f = otherFirst;
+  
+  typedef ArithDSSIterator<TInteger,connectivity> myDSSIterator;
+  myDSSIterator DSSit(*aa,*bb,*muu,f);
+  
+  Self solutionDSS(DSSit);
+  
+  //trace.info() << solutionDSS << std::endl;
 
-  // DualPolygon dual1,dual2;
-  
-
-  // if(myFirst<otherFirst)
-  //   {
-  //     dual1 = dualSelf.transformDualPolygon(myFirst);
-  //     dual2 = dualOther.transformDualPolygon(myFirst);
-  //   }
-  // else
-  //   {
-  //     dual1 = dualSelf.transformDualPolygon(otherFirst);
-  //     dual2 = dualOther.transformDualPolygon(otherFirst);
-  //   }
-  
-  // Compute the list of vertices of the intersection of the two dual polygons
-  // typename DGtal::FareyFan<TInteger>::Polygon::PointList l;
-  // dualSelf.intersect(dualOther,&l);
-
-  // typename DGtal::FareyFan<TInteger>::Polygon::PointList::iterator it;
-  
-  // PointR minCharac = *(l.begin());
-  // for(it = l.begin();it != l.end();it++)
-  //   {
-  //     if((*it)[1] < minCharac[1] || ((*it)[1] == minCharac[1] && (*it)[2] < minCharac[2]))
-  // 	{
-  // 	  minCharac = *it;
-  // 	}
-  //     std::cout << *it;
-  //   }
-  
-  //TODO: find the point (a,b,mu) of smallest b in the list l, which is neither the min nor the max.
-  
-  //trace.info() << "min charac " << minCharac << std::endl;
-
-  trace.info() << "end union\n";
+  return solutionDSS;
   
 }
 
@@ -902,6 +1113,15 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::getLl() const {
 
 template <typename TIterator, typename TInteger, int connectivity>
 inline
+typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
+DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::getDualPolygon() const {
+  return myDualPolygon;
+}
+
+
+
+template <typename TIterator, typename TInteger, int connectivity>
+inline
 typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::Point
 DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::getBackPoint() const {
   return (*myF);
@@ -1031,19 +1251,19 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::getFront() const {
 template <typename TIterator, typename TInteger, int connectivity>
 inline
 //typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
-void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon() const {
+void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon(){
   
   //vector<Fraction > vertex(2);  
   //Point A,B,C,D;
-
+  
   assert(myB>=myA);
   assert(myB>0);
   assert(myA>=0);
   
-  trace.info() << "Dual Polygon: \n";
+  //  trace.info() << "Dual Polygon: \n";
       
-  // LeftMost vertex of the dual polygon (lower slope)
-  //Integer g = ic.gcd(myUl[1]-(myLf[1]+1),myUl[0]-myLf[0]);
+  // // LeftMost vertex of the dual polygon (lower slope)
+  // //Integer g = ic.gcd(myUl[1]-(myLf[1]+1),myUl[0]-myLf[0]);
   
   Integer p,q;
   p = myUl[1]-(myLf[1]+1);
@@ -1065,10 +1285,18 @@ void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon
   
   // Construction of the dual polygon (vertices in clockwise order)
   
+  // boost::geometry::append(res,A);   
+  // boost::geometry::append(res,D);   
+  // boost::geometry::append(res,C);   
+  // boost::geometry::append(res,B);   
+  
+  // return res;
+
   boost::geometry::append(myDualPolygon,A);   
   boost::geometry::append(myDualPolygon,D);   
   boost::geometry::append(myDualPolygon,C);   
-  boost::geometry::append(myDualPolygon,B);   
+  boost::geometry::append(myDualPolygon,B);
+  boost::geometry::append(myDualPolygon,A);
   
 }
 
@@ -1081,6 +1309,7 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::transformDualPolygon(co
   boost::geometry::strategy::transform::ublas_transformer<PointR, PointR, 2, 2> myTransform(1,0,0,-p[0],1,p[1],0,0,1);
   
   boost::geometry::transform(myDualPolygon,dual,myTransform);
+  //boost::geometry::transform(D,dual,myTransform);
   
   return dual;
 }

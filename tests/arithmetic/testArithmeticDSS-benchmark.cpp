@@ -71,7 +71,7 @@ bool checkSubArithmeticDSS( const DSL & D,
             << A[0] << " " << A[1] << " " << B[0] << " " << B[1] 
             << std::endl;
 
-  return true;
+  Return true;
 }
 
 // template <typename Fraction>

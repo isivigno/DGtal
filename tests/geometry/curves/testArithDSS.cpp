@@ -155,10 +155,10 @@ bool testDSS8drawing()
       &&(theDSS8.extendForward()) ) {}
 
     trace.info() << theDSS8 << " " << theDSS8.isValid() << std::endl;
-
-    DSS8::DualPolygon dual = theDSS8.computeDualPolygon();
     
+    theDSS8.computeDualPolygon();
     
+    std::cout << boost::geometry::dsv(theDSS8.getDualPolygon()) << std::endl;
     
     HyperRectDomain< SpaceND<2,int> > domain( Point(0,0), Point(10,10) );
 
@@ -368,12 +368,17 @@ bool testUnionDSS()
 {
   typedef PointVector<2,int> Point;
   typedef ArithDSSIterator<int,8> myIterator;
+ 
   
   Point p1(0,0);
   myIterator it1(1,3,0,p1);
   
-  typedef ArithmeticalDSS<myIterator,int,8> ArithDSS;
   
+  typedef ArithmeticalDSS<myIterator,int,8> ArithDSS;
+  typedef ArithDSS::DualPolygon DP;
+  typedef ArithDSS::PointR PointR;
+  typedef ArithDSS::Rational Rational;
+
   ArithDSS myDSS1(it1);
   
   int xmax1=3;
@@ -381,20 +386,34 @@ bool testUnionDSS()
   while ( (*(myDSS1.end()))[0] <=xmax1 && myDSS1.extendForward())
     {}
   
-  std::cout << myDSS1.getA() << " " << myDSS1.getB() << " " << myDSS1.getMu() << " " <<   std::endl; 
+  //std::cout << myDSS1.getA() << " " << myDSS1.getB() << " " << myDSS1.getMu() << " " <<   std::endl; 
+  trace.info() << myDSS1 << std::endl;
+
+  // myDSS1.computeDualPolygon();
+
+  // trace.info() << boost::geometry::dsv(myDSS1.getDualPolygon()) << std::endl;
 
   Point p2(4,1);
   myIterator it2(1,2,1,p2);
   
   ArithDSS myDSS2(it2);
-  int xmax2 = 6;
+  int xmax2 = 7;
 
   while ( (*(myDSS2.end()))[0] <=xmax2 && myDSS2.extendForward())
     {}
   
-  std::cout << myDSS2.getA() << " " << myDSS2.getB() << " " << myDSS2.getMu() << " " <<   std::endl; 
+  trace.info() << myDSS2 << std::endl;
 
-  myDSS1.unionDSS(myDSS2);
+  // myDSS2.computeDualPolygon();
+  // trace.info() << boost::geometry::dsv(myDSS2.getDualPolygon()) << std::endl;
+  
+  int a,b,mu;
+
+  myDSS1.unionDSS(myDSS2,&a,&b,&mu);
+  
+  
+
+  trace.info() << a << " " << b << " " << mu << std::endl;
 
   trace.info() << "end test\n";
 
@@ -420,7 +439,8 @@ int main(int argc, char **argv)
   }
   
   bool res = //testDSS4drawing() 
-    //&& testDSS8drawing() && 
+    //&& 
+    //testDSS8drawing() && 
     testUnionDSS()
     /*    && testExtendretractForward()
     && testCorner()

@@ -150,7 +150,7 @@ public:
      * Forbidden by default.
      */
     ArithDSSIterator ( const ArithDSSIterator & other );
-
+    
     /**
      * Assignment.
      * @param other the object to copy.

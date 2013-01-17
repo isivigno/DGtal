@@ -46,6 +46,7 @@
 // Inclusions
 #include <iostream>
 #include <list>
+#include <vector>
 #include "DGtal/base/Exceptions.h"
 #include "DGtal/base/Common.h"
 #include "DGtal/kernel/PointVector.h"
@@ -54,6 +55,7 @@
 #include "DGtal/io/Color.h"
 #include "DGtal/arithmetic/IntegerComputer.h"
 #include "DGtal/geometry/curves/FareyFan.h"
+#include "DGtal/geometry/curves/ArithDSSIterator.h" 
 
 #include "DGtal/geometry/curves/SegmentComputerUtils.h"
 
@@ -71,7 +73,8 @@
 #include <boost/geometry/geometries/adapted/boost_tuple.hpp>
 #include <boost/geometry/strategies/transform/matrix_transformers.hpp>
 
-
+BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
+//#define TRACE
 
 namespace DGtal
 {
@@ -227,7 +230,8 @@ Steps:
     BOOST_STATIC_ASSERT(( Point::dimension == 2 ));
 
     typedef PointVector<2,double> PointD;  
-    
+
+    // Type for the dual polygon definition
     typedef boost::rational<Integer> Rational;
     typedef boost::tuple<Rational,Rational> PointR;
     typedef boost::geometry::model::polygon<PointR > DualPolygon;
@@ -325,7 +329,12 @@ Steps:
     bool operator!=( const Self & other ) const;
 
     
-    Self unionDSS(const Self & other) const;
+    Self unionDSS( Self & other, Integer *a, Integer *b, Integer *mu);
+    //bool unionDSS( Self & other);
+
+    PointR findCharacteristicVertex(std::vector<PointR > pts, bool areConnected); 
+
+
 
     /**
      * Destructor.
@@ -461,6 +470,15 @@ Steps:
      * @return last lower leaning point.
      */
     Point getLl() const;
+
+    /**
+     * Accessor to the dual polygon
+     * @return dual polygon.
+     */
+    DualPolygon getDualPolygon() const;
+    
+
+
     /**
      * @deprecated
      * Accessor to the first added point to the DSS
@@ -504,7 +522,7 @@ Steps:
      * The dual polygon is computed from the DSS parameters and leaning points. 
      * @return dual polygon (preimage) of the DSS.
      */
-    void computeDualPolygon() const;
+    void computeDualPolygon();
     
     
     DualPolygon transformDualPolygon(const Point p) const;

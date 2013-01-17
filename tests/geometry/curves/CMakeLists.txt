@@ -20,7 +20,8 @@ SET(DGTAL_TESTS_SRC
   # testLrSBreversedSmartDSS
   # testSBreversedSmartDSS	
   # testArithDSSIterator
-  testFareyFan
+  # testFareyFan
+  testUnionOfDSS
 	)
 
 FOREACH(FILE ${DGTAL_TESTS_SRC})
