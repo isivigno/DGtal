@@ -384,7 +384,7 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( ArithmeticalD
   else
     areConnected = false;
   
-  assert(areConnected==false);
+  assert(areConnected==true);
 
   // compute the dual polygon of each DSS
 
@@ -407,6 +407,8 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( ArithmeticalD
   if(output.begin() == output.end())
     {
       std::cout << "The dual polygons do not intersect. The union of the two DSSs is not a DSS." << std::endl;
+      std::cout << boost::geometry::dsv(getDualPolygon()) << std::endl;
+      std::cout << boost::geometry::dsv(other.getDualPolygon()) << std::endl;
       return ArithmeticalDSS();
     }
   

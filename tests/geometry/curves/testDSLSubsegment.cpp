@@ -50,7 +50,7 @@ using namespace DGtal;
 // Functions for testing class DSLSubsegment.
 ///////////////////////////////////////////////////////////////////////////////
 
-#define CHECK_RES
+//#define CHECK_RES
 
 
 template <typename Integer>
@@ -74,7 +74,7 @@ bool testDSLSubsegment( unsigned int nbtries, Integer moda, Integer modb, Intege
 
   
   // std::cout << "# a b mu a1 b1 mu1 Ax Ay Bx By" << std::endl;
-  
+  int nb = 0;
   clock_t timeBegin, timeEnd;
   timeBegin = clock();
   for ( unsigned int i = 0; i < nbtries; ++i )
@@ -84,6 +84,7 @@ bool testDSLSubsegment( unsigned int nbtries, Integer moda, Integer modb, Intege
       
       if ( ic.gcd( a, b ) == 1 )
         {
+	  nb++;
           for ( unsigned int j = 0; j < 5; ++j )
             {
               Integer mu = random() % (moda+modb);
@@ -132,7 +133,8 @@ bool testDSLSubsegment( unsigned int nbtries, Integer moda, Integer modb, Intege
   long double CPUTime;
   CPUTime =  ((double)timeEnd-(double)timeBegin)/((double)CLOCKS_PER_SEC)*1000;  
   
-  std::cout << " " << (long double) CPUTime/(nbtries*5*10) ;
+  //std::cout << " " << (long double) CPUTime/(nbtries*5*10) ;
+  std::cout << " " << (long double) CPUTime/(nb*5*10) ;
  
 
   return true;
@@ -151,7 +153,7 @@ int main( int argc, char** argv )
   typedef DGtal::int64_t Integer;
   
   
-  Integer modb = 10000000;
+  Integer modb = 1000000;
   Integer moda = modb;
   
   unsigned int nbtries = ( argc > 1 ) ? atoi( argv[ 1 ] ) :100;
