@@ -54,26 +54,26 @@
 #include "DGtal/base/ReverseIterator.h"
 #include "DGtal/io/Color.h"
 #include "DGtal/arithmetic/IntegerComputer.h"
-#include "DGtal/geometry/curves/FareyFan.h"
 #include "DGtal/geometry/curves/ArithDSSIterator.h" 
 
 #include "DGtal/geometry/curves/SegmentComputerUtils.h"
 
 #include "DGtal/math/arithmetic/SternBrocot.h"
+#include "DGtal/geometry/curves/Polygon.h"
 
 //////////////////////////////////////////////////////////////////////////////
 
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/geometries/polygon.hpp>
-#include <boost/geometry/io/wkt/wkt.hpp>
-#include <boost/rational.hpp>
-#include <boost/foreach.hpp>
-#include <boost/assign.hpp>
-#include <boost/geometry/geometries/adapted/boost_tuple.hpp>
-#include <boost/geometry/strategies/transform/matrix_transformers.hpp>
+/* #include <boost/geometry.hpp> */
+/* #include <boost/geometry/geometries/point_xy.hpp> */
+/* #include <boost/geometry/geometries/polygon.hpp> */
+/* #include <boost/geometry/io/wkt/wkt.hpp> */
+ #include <boost/rational.hpp> 
+/* #include <boost/foreach.hpp> */
+/* #include <boost/assign.hpp> */
+/* #include <boost/geometry/geometries/adapted/boost_tuple.hpp> */
+/* #include <boost/geometry/strategies/transform/matrix_transformers.hpp> */
 
-BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
+//BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 //#define TRACE
 
 namespace DGtal
@@ -233,31 +233,10 @@ Steps:
 
     // Type for the dual polygon definition
     typedef boost::rational<Integer> Rational;
-    typedef boost::tuple<Rational,Rational> PointR;
-    typedef boost::geometry::model::polygon<PointR > DualPolygon;
-
+    typedef DGtal::Polygon<Rational> DualPolygon;
+    typedef typename DualPolygon::Point PointR;
     
-    /* typedef typename FareyFan<Integer>::PointR PointR; */
-    /* typedef typename FareyFan<Integer>::Polygon DualPolygon; */
     
-    //typedef PointVector<3,Integer> PointR; // stores a rational point P of coordinates (P[0]/P[1],P[2]/P[3])
-    //typedef vector<PointR> DualPolygon;
-
-
-    /* typedef SternBrocot<DGtal::int32_t,DGtal::int32_t> SB; */
-    /* typedef SB::Fraction Fraction; */
-    /* typedef vector<vector<Fraction> > DualPolygon; // ideally, we should */
-						   // do typedef
-						   // vector<PointVector<2,
-						   // Fraction> >
-						   // DualPolygon
-                                                   //->
-						   // does not work
-						   // because Fraction
-						   // is not a model of
-						   // CEuclideanRing.   
-    
-
     // ----------------------- Standard services ------------------------------
   public:
     
@@ -524,9 +503,6 @@ Steps:
      */
     void computeDualPolygon();
     
-    
-    DualPolygon transformDualPolygon(const Point p) const;
-
     /**
      *  
      * @return begin iterator of the DSS range.

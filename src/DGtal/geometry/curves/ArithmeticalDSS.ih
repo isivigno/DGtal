@@ -209,14 +209,14 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::findCharacteristicVerte
   PointR firstPoint = *(pts.begin());
   
   // Compute the minimal and maxima absissas
-  Rational absMax = firstPoint.template get<0>();
+  Rational absMax = firstPoint[0];
   Rational absMin = absMax;
   itMin = pts.begin();
   
   for(it=pts.begin();it!=pts.end();it++)
     {
       PointR pt = *it; 
-      Rational r = pt.template get<0>();
+      Rational r = pt[0];
       if(r<absMin)
 	{
 	  absMin = r;
@@ -248,19 +248,17 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::findCharacteristicVerte
     ptsTrans = pts;
   
 #ifdef TRACE
-  for(it=ptsTrans.begin();it!=ptsTrans.end();it++)
-    std::cout << boost::geometry::dsv(*it);
-  std::cout << std::endl;
+  
 #endif
 
   firstPoint = *(ptsTrans.begin());
-  absMax = firstPoint.template get<0>();
+  absMax = firstPoint[0];
   itMax = ptsTrans.begin();
   // Look for the point of maximal abscissa
   for(it=ptsTrans.begin();it!=ptsTrans.end();it++)
     {
       PointR pt = *it; 
-      Rational r = pt.template get<0>();
+      Rational r = pt[0];
       if(r>absMax)
 	{
 	  absMax = r;
@@ -278,7 +276,7 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::findCharacteristicVerte
   for(it=ptsTrans.begin();it!=ptsTrans.end();it++)
     {
       PointR pt = (*it);
-      Rational r = pt.template get<0>();
+      Rational r = pt[0];
       TInteger d = r.denominator();
      
       if(it==itMax)
@@ -310,57 +308,60 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::findCharacteristicVerte
 #ifdef TRACE
 	  std::cout << "foundBeforeMax" << std::endl;
 #endif
-	  Rational slope = solution.template get<0>();
+	  Rational slope = solution[0];
 	  TInteger slopeDen = slope.denominator(); 
-	  Rational intercept = solution.template get<1>();
+	  Rational intercept = solution[1];
 	  TInteger interceptNum = intercept.numerator();
 	  TInteger interceptDen = intercept.denominator();
 	  interceptNum = (interceptNum*slopeDen/interceptDen)-1; 
 	  intercept = Rational(interceptNum,slopeDen);
-	  solution = make_tuple(slope,intercept);	    
+	  solution.push_back(slope);
+	  solution.push_back(intercept);
+
 	}
       else
 	{
 	  // TO BE TESTED !!!
-	  Rational slope = solution.template get<0>();
+	  Rational slope = solution[0];
 #ifdef TRACE
-	  std::cout << boost::geometry::dsv(solution) << std::endl;
+	  //  std::cout << boost::geometry::dsv(solution) << std::endl;
 #endif
 	  
 	  
 	  PointR pt = *itMax;
 #ifdef TRACE
-	  std::cout << "lower enveloppe tracking " << boost::geometry::dsv(pt) << std::endl;
+	  //std::cout << "lower enveloppe tracking " << boost::geometry::dsv(pt) << std::endl;
 #endif
 	  it = itMax;
-	  Rational r = pt.template get<0>();
+	  Rational r = pt[0];
 	  while(r>slope && it!=ptsTrans.end())
 	    {
 	      it++;
 	      pt = *it;	      
 #ifdef TRACE
-	      std::cout << "in the loop " << r << " " << boost::geometry::dsv(pt) << std::endl;
+	      //  std::cout << "in the loop " << r << " " << boost::geometry::dsv(pt) << std::endl;
 #endif
-	      r = pt.template get<0>();
+	      r = pt[0];
 	    }
 	  it--;
 	  PointR prec = *it;
 
 #ifdef TRACE
-	  std::cout << "pt = " << boost::geometry::dsv(pt) << std::endl;
+	  //std::cout << "pt = " << boost::geometry::dsv(pt) << std::endl;
 #endif
 
 #ifdef TRACE
-	  std::cout << "prec = " << boost::geometry::dsv(prec) << std::endl;
+	  // std::cout << "prec = " << boost::geometry::dsv(prec) << std::endl;
 #endif
 
 
-	  assert(pt.template get<0>() != prec.template get<0>());
-	  Rational segmentSlope = (pt.template get<1>() - prec.template get<1>())/(pt.template get<0>() - prec.template get<0>()); 
-	  Rational segmentIntercept = pt.template get<1>() - segmentSlope*(pt.template get<0>());
+	  assert(pt[0] != prec[0]);
+	  Rational segmentSlope = (pt[1] - prec[1])/(pt[0] - prec[0]); 
+	  Rational segmentIntercept = pt[1] - segmentSlope*(pt[0]);
 	  
 	  Rational solutionIntercept = segmentSlope*slope + segmentIntercept;
-	  solution = make_tuple(slope,solutionIntercept);
+	  solution.push_back(slope);
+	  solution.push_back(solutionIntercept);
 	  
 	}
     }
@@ -385,7 +386,7 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( ArithmeticalD
     areConnected = false;
   
   assert(areConnected==true);
-
+  
   // compute the dual polygon of each DSS
 
   computeDualPolygon();
@@ -397,42 +398,30 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( ArithmeticalD
   
   // Compute the intersection of the two dual polygons
   // In the general case, output is a list of polygons
-  std::vector<DualPolygon > output;
-  boost::geometry::intersection(getDualPolygon(), other.getDualPolygon(), output);
   
+  DualPolygon DP1 = getDualPolygon(), DP2 = other.getDualPolygon();
   DualPolygon intersectionPolygon;
-  
-  // In our specific case, the intersection is either empty or a single convex polygon
-  // If the intersection is empty, then the union of the two DSSs is not a DSS
-  if(output.begin() == output.end())
-    {
-      std::cout << "The dual polygons do not intersect. The union of the two DSSs is not a DSS." << std::endl;
-      std::cout << boost::geometry::dsv(getDualPolygon()) << std::endl;
-      std::cout << boost::geometry::dsv(other.getDualPolygon()) << std::endl;
-      return ArithmeticalDSS();
-    }
-  
-  //Otherwise, we consider the intersection polygon
-  intersectionPolygon = *(output.begin());
+  DP1.convexIntersect(DP2,&intersectionPolygon);
+
   
 #ifdef TRACE
-  std::cout << boost::geometry::dsv(intersectionPolygon) << std::endl;
+  std::cout << intersectionPolygon << std::endl;
 #endif
   
-  // Get the list of points of the intersection polygon
-  // If the two DSSs are connected, the intersection polygon is a cell
-  // of a Farey fan, thus having 3 or four vertices (if four, two
-  // vertices have the same abscissa).  
-  typedef std::vector<PointR> PtList;
-  std::vector<PointR >  pts = intersectionPolygon.outer();
+//   // Get the list of points of the intersection polygon
+//   // If the two DSSs are connected, the intersection polygon is a cell
+//   // of a Farey fan, thus having 3 or four vertices (if four, two
+//   // vertices have the same abscissa).  
+  typedef typename DualPolygon::PointList PtList;
+  PtList pts = intersectionPolygon.getPoints();
   
   PointR solution = findCharacteristicVertex(pts, areConnected);
   
   
   // Output the solution 
-  *aa = (solution.template get<0>()).numerator();
-  *bb = (solution.template get<0>()).denominator();
-  *muu = -(solution.template get<1>()).numerator()*((solution.template get<0>()).denominator()/(solution.template get<1>()).denominator());
+  *aa = (solution[0]).numerator();
+  *bb = (solution[0]).denominator();
+  *muu = -(solution[1]).numerator()*((solution[0]).denominator()/(solution[1]).denominator());
   
   Point f;
   
@@ -1165,94 +1154,8 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::getFront() const {
 }
 
 
-
-// template <typename TIterator, typename TInteger, int connectivity>
-// inline
-// typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
-// DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon() const {
-  
-//   //vector<Fraction > vertex(2);  
-//   PointR A,B,C,D;
-//   DualPolygon dual;
-  
-//   IntegerComputer<Integer> ic;
-
-//   assert(myB>=myA);
-//   assert(myB>0);
-//   assert(myA>=0);
-  
-//   trace.info() << "Dual Polygon: \n";
-  
-      
-//   // LeftMost vertex of the dual polygon (lower slope)
-//   Integer g = ic.gcd(myUl[1]-(myLf[1]+1),myUl[0]-myLf[0]);
-  
-//   A[0] = (myUl[1]-(myLf[1]+1))/g;
-//   A[1] = (myUl[0]-myLf[0])/g;
-
-//   //g = ic.gcd(myUl[1]*vertex[1]-myUl[0]*vertex[0],vertex[1]);
-//   //vertex[2] = (myUl[1]*vertex[1]-myUl[0]*vertex[0])/g;
-//   //vertex[3] = vertex[1]/g;
-//   A[2] = (myUl[1]*A[1]-myUl[0]*A[0]);
-  
-  
-//   trace.info() << A[0] << "/" << A[1] << " - ";
-//   trace.info() << A[2] << "/" << A[1] << std::endl;
-  
-//   //dual.push_back(vertex);
-  
-//   // if(myUf != myUl)
-//   //{
-//       // Lower middle vertex
-//       B[0] = myA;
-//       B[1] = myB;
-//       B[2] = -myMu;
-      
-//       trace.info() << B[0] << "/" << B[1] << " - ";
-//       trace.info() << B[2] << "/" << B[1] << std::endl;
-     
-//       //    dual.push_back(vertex);
-//       //}
-  
-//   // RightMost vertex (greater slope)
-//   g = ic.gcd(myLl[1]+1-myUf[1],myLl[0]-myUf[0]);
-  
-//   C[0] = (myLl[1]+1-myUf[1])/g;
-//   C[1] = (myLl[0]-myUf[0])/g;
-
-//   //g = ic.gcd(myUf[1]*vertex[1]-myUf[0]*vertex[0],vertex[1]);
-//   //vertex[2] = (myUf[1]*vertex[1]-myUf[0]*vertex[0])/g;
-//   //vertex[3] = vertex[1]/g;
-//   C[2] = (myUf[1]*C[1]-myUf[0]*C[0]);
-  
-    
-//   trace.info() << C[0] << "/" << C[1] << " - ";
-//   trace.info() << C[2] << "/" << C[1] << std::endl;
-  
-//   // dual.push_back(vertex);
-  
-//   //if(myLl != myLf)
-//   //{
-//       // Upper middle vertex
-//   D[0] = myA;
-//   D[1] = myB;
-//   D[2] = -myMu+1;
-  
-//   trace.info() << D[0] << "/" << D[1] << " - ";
-//   trace.info() << D[2] << "/" << D[1] << std::endl;
-  
-//   // dual.push_back(vertex);
-//   // }
-  
-//   dual = DualPolygon(A,B,C,D);
-//   return dual;
-// }
-
-
-
 template <typename TIterator, typename TInteger, int connectivity>
 inline
-//typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
 void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon(){
   
   //vector<Fraction > vertex(2);  
@@ -1271,52 +1174,37 @@ void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon
   p = myUl[1]-(myLf[1]+1);
   q = myUl[0]-myLf[0];
   
-  PointR A = boost::make_tuple(Rational(p,q),Rational(myUl[1]*q-myUl[0]*p,q));
+  PointR A;
+  A.push_back(Rational(p,q));
+  A.push_back(Rational(myUl[1]*q-myUl[0]*p,q));
   
   // Lower middle vertex
-  PointR B = boost::make_tuple(Rational(myA,myB),Rational(-myMu,myB));
+  PointR B;
+  B.push_back(Rational(myA,myB));
+  B.push_back(Rational(-myMu,myB));
   
   // Rightmost vertex
   p = myLl[1]+1-myUf[1];
   q = myLl[0]-myUf[0];
   
-  PointR C = boost::make_tuple(Rational(p,q),Rational(myUf[1]*q-myUf[0]*p,q));
+  PointR C;
+  C.push_back(Rational(p,q));
+  C.push_back(Rational(myUf[1]*q-myUf[0]*p,q));
   
   // Upper middle vertex
-  PointR D = boost::make_tuple(Rational(myA,myB),Rational(-myMu+1,myB));
+  PointR D;
+  D.push_back(Rational(myA,myB));
+  D.push_back(Rational(-myMu+1,myB));
   
-  // Construction of the dual polygon (vertices in clockwise order)
+  // Construction of the dual polygon (vertices in anticlockwise order)
+  // No repetition of the first point
   
-  // boost::geometry::append(res,A);   
-  // boost::geometry::append(res,D);   
-  // boost::geometry::append(res,C);   
-  // boost::geometry::append(res,B);   
-  
-  // return res;
-
-  boost::geometry::append(myDualPolygon,A);   
-  boost::geometry::append(myDualPolygon,D);   
-  boost::geometry::append(myDualPolygon,C);   
-  boost::geometry::append(myDualPolygon,B);
-  boost::geometry::append(myDualPolygon,A);
-  
+  myDualPolygon.addPoint(A);
+  myDualPolygon.addPoint(B);
+  myDualPolygon.addPoint(C);
+  myDualPolygon.addPoint(D);
+    
 }
-
-template <typename TIterator, typename TInteger, int connectivity>
-inline
-typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
-DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::transformDualPolygon(const Point p) const {
-  
-  DualPolygon dual;
-  boost::geometry::strategy::transform::ublas_transformer<PointR, PointR, 2, 2> myTransform(1,0,0,-p[0],1,p[1],0,0,1);
-  
-  boost::geometry::transform(myDualPolygon,dual,myTransform);
-  //boost::geometry::transform(D,dual,myTransform);
-  
-  return dual;
-}
-
-
 
 template <typename TIterator, typename TInteger, int connectivity>
 inline

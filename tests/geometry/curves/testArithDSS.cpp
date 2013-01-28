@@ -156,10 +156,6 @@ bool testDSS8drawing()
 
     trace.info() << theDSS8 << " " << theDSS8.isValid() << std::endl;
     
-    theDSS8.computeDualPolygon();
-    
-    std::cout << boost::geometry::dsv(theDSS8.getDualPolygon()) << std::endl;
-    
     HyperRectDomain< SpaceND<2,int> > domain( Point(0,0), Point(10,10) );
 
     
@@ -389,10 +385,14 @@ bool testUnionDSS()
   //std::cout << myDSS1.getA() << " " << myDSS1.getB() << " " << myDSS1.getMu() << " " <<   std::endl; 
   trace.info() << myDSS1 << std::endl;
 
-  // myDSS1.computeDualPolygon();
-
-  // trace.info() << boost::geometry::dsv(myDSS1.getDualPolygon()) << std::endl;
-
+  myDSS1.computeDualPolygon();
+  
+  DP dual1 = myDSS1.getDualPolygon();
+  
+  std::cout << dual1 << std::endl;
+  
+  
+  
   Point p2(4,1);
   myIterator it2(1,2,1,p2);
   
@@ -404,13 +404,20 @@ bool testUnionDSS()
   
   trace.info() << myDSS2 << std::endl;
 
-  // myDSS2.computeDualPolygon();
-  // trace.info() << boost::geometry::dsv(myDSS2.getDualPolygon()) << std::endl;
+  myDSS2.computeDualPolygon();
   
+  DP dual2 = myDSS2.getDualPolygon();
+  
+  std::cout << dual2 << std::endl;
+
   int a,b,mu;
 
   myDSS1.unionDSS(myDSS2,&a,&b,&mu);
+  DP inter;
   
+  dual1.convexIntersect(dual2, &inter);
+
+  std::cout << inter << std::endl;
   
 
   trace.info() << a << " " << b << " " << mu << std::endl;
