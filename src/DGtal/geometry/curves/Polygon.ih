@@ -117,7 +117,7 @@ not removed.
 ---------------------------------------------------------------------*/
 template <typename TCoordinate>
 inline
-void  DGtal::Polygon<TCoordinate>::convexIntersect(const Polygon & other, Polygon *Res )
+bool  DGtal::Polygon<TCoordinate>::convexIntersect(const Polygon & other, Polygon *Res )
 /* P(=this) has n vertices, Q(=other) has m vertices. */
 {
    int     a, b;           /* indices on P and Q (resp.) */
@@ -225,14 +225,71 @@ void  DGtal::Polygon<TCoordinate>::convexIntersect(const Polygon & other, Polygo
 #ifdef DEBUG
        std::cout << "(" << p0[0] << "," << p0[1] << ")" << std::endl;
 #endif
- if(p0[0] != (Res->getLast())[0] || p0[1] != (Res->getLast())[1])
+       if(p0[0] != (Res->getLast())[0] || p0[1] != (Res->getLast())[1])
 	 Res->addPoint(p0);
      }
-  
-
-   /* Deal with special cases: not implemented. */
-   if ( inflag == Unknown) 
-      printf("%%The boundaries of P and Q do not cross.\n");
+   
+   if(inflag !=Unknown)
+     return 1;
+   else
+   /* Deal with special cases: not implemented. (O'Rourke) */
+     /* Completed by I. Sivignon (2013) */
+     //if ( inflag == Unknown) 
+     {
+#ifdef DEBUG
+       printf("%%The boundaries of P and Q do not cross.\n");
+#endif 
+       // Test if Q in included in P
+       a = 0; b=0; aa =0;
+       a1 = (a + n - 1) % n; // compute point a-1
+       bool bIn = true;
+       //Test is Q[0] is inside P 
+       while (aa<n)
+	 {
+	   bHA   = AreaSign( P.at(a1), P.at(a), Q.at(b) );
+	   bIn = bIn && (bHA>=0);
+	   aa++;
+	   a1 = a;
+	   a = (a+1)%n;
+	 }
+       if(bIn)
+	 {
+	   *Res = other;
+#ifdef DEBUG
+	   std::cout << "Q in contained in P. The intersection is equal to Q." << std::endl;
+#endif
+	   return 1;
+	 }
+       
+       // Test if P in included in Q
+       b = 0; b=a; ba =0;
+       b1 = (b + m - 1) % m; // compute point b-1
+       bool aIn = true;
+       //Test if P[0] is inside Q
+       while (ba<m)
+	 {
+	   aHB   = AreaSign( Q[b1], Q[b], P[a] );
+	   aIn = aIn && (aHB>=0);
+	   ba++;
+	   b1=b;
+	   b = (b+1)%m;
+	 }
+       if(aIn)
+	 {
+	   *Res = *this;
+#ifdef DEBUG
+	   std::cout << "P in contained in Q. The intersection is equal to P." << std::endl;
+#endif
+	   return 1;
+	 }
+      
+#ifdef DEBUG 
+       std::cout << "The polygons are disjoint. The intersection is empty." << std::endl;
+#endif     
+       return 0;
+       
+       
+     }
 }
 
 
@@ -345,9 +402,10 @@ int	DGtal::Polygon<TCoordinate>::AreaSign( Point a, Point b, Point c )
 #endif
   
   /* The area should be an integer. */
-  if      ( area2 >  0.5 ) return  1;
-  else if ( area2 < -0.5 ) return -1;
-  else                     return  0;
+  if(area2==0) return 0;
+  else if      ( area2 >  0 ) return  1;
+    else if ( area2 < 0 ) return -1;
+  //else                     return  0;
 }
 
 
@@ -408,11 +466,11 @@ char	DGtal::Polygon<TCoordinate>::SegSegInt( Point a, Point b, Point c, Point d,
 #endif
 
    
-   if      ( (0.0 < s) && (s < 1.0) &&
-             (0.0 < t) && (t < 1.0) )
+   if      ( (0 < s) && (s < 1) &&
+             (0 < t) && (t < 1) )
      code = '1';
-   else if ( (0.0 > s) || (s > 1.0) ||
-             (0.0 > t) || (t > 1.0) )
+   else if ( (0 > s) || (s > 1) ||
+             (0 > t) || (t > 1) )
      code = '0';
    
    (*p).push_back(a[0] + s * ( b[0] - a[0] ));

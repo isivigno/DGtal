@@ -63,17 +63,9 @@
 
 //////////////////////////////////////////////////////////////////////////////
 
-/* #include <boost/geometry.hpp> */
-/* #include <boost/geometry/geometries/point_xy.hpp> */
-/* #include <boost/geometry/geometries/polygon.hpp> */
-/* #include <boost/geometry/io/wkt/wkt.hpp> */
  #include <boost/rational.hpp> 
-/* #include <boost/foreach.hpp> */
-/* #include <boost/assign.hpp> */
-/* #include <boost/geometry/geometries/adapted/boost_tuple.hpp> */
-/* #include <boost/geometry/strategies/transform/matrix_transformers.hpp> */
 
-//BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
+
 //#define TRACE
 
 namespace DGtal

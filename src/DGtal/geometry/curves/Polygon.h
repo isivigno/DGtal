@@ -119,7 +119,7 @@ namespace DGtal
     Point getLast();
 
 
-    void convexIntersect(const Polygon & other, Polygon *Res);
+    bool convexIntersect(const Polygon & other, Polygon *Res);
 
 
     typedef enum { Pin, Qin, Unknown } InFlag;

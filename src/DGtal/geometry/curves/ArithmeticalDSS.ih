@@ -195,12 +195,8 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::findCharacteristicVerte
     
   typename std::vector<PointR >::iterator it, itMin, itMax;
   
-  // for(it = pts.begin();it!=pts.end();it++)
-  //   {
-  //     std::cout << boost::geometry::dsv(*it) << std::endl;
-  //   }
-  
-  // std::cout << std::endl;
+
+  // Requires that the points pts are given in anti-clockwise order. 
   
   // We look for the vertex that is neither the one of  smallest nor
   // greatest abscissa, and such that the denominator of its absicssa is
@@ -300,13 +296,14 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::findCharacteristicVerte
     }
   
   
-  if(foundBeforeMax)
+  if(!foundBeforeMax)
     {
       if(areConnected)
 	{
 	  
 #ifdef TRACE
-	  std::cout << "foundBeforeMax" << std::endl;
+	  std::cout << "!foundBeforeMax" << std::endl;
+	  std::cout << solution[0] << " " << solution[1] << std::endl;
 #endif
 	  Rational slope = solution[0];
 	  TInteger slopeDen = slope.denominator(); 
@@ -315,9 +312,10 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::findCharacteristicVerte
 	  TInteger interceptDen = intercept.denominator();
 	  interceptNum = (interceptNum*slopeDen/interceptDen)-1; 
 	  intercept = Rational(interceptNum,slopeDen);
+	  solution.clear();
 	  solution.push_back(slope);
 	  solution.push_back(intercept);
-
+	  
 	}
       else
 	{
@@ -349,7 +347,7 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::findCharacteristicVerte
 #ifdef TRACE
 	  //std::cout << "pt = " << boost::geometry::dsv(pt) << std::endl;
 #endif
-
+	  
 #ifdef TRACE
 	  // std::cout << "prec = " << boost::geometry::dsv(prec) << std::endl;
 #endif
@@ -402,9 +400,10 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( ArithmeticalD
   DualPolygon DP1 = getDualPolygon(), DP2 = other.getDualPolygon();
   DualPolygon intersectionPolygon;
   DP1.convexIntersect(DP2,&intersectionPolygon);
-
+  
   
 #ifdef TRACE
+  std::cout << DP1 << DP2 << std::endl;
   std::cout << intersectionPolygon << std::endl;
 #endif
   
