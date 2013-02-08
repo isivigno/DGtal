@@ -45,7 +45,7 @@
 #include <vector>
 //////////////////////////////////////////////////////////////////////////////
 
-
+#define DEBUG
 
 namespace DGtal
 {
@@ -157,7 +157,10 @@ not removed.
     InFlag InOut( Point p, InFlag inflag, int aHB, int bHA, Polygon *Res );
     int     Advance( int a, int *aa, int n, bool inside, Point v, Polygon *Res );
 
-
+    bool  convexIntersectWithoutComputation(const Polygon & other, vector<int> *res );
+    char SegSegTest(Point a, Point b, Point c, Point d);
+    InFlag InOutWithoutComputation(InFlag inflag, int aHB, int bHA);
+    int AdvanceWithoutComputation( int a, int *aa, int n, bool inside, int i, vector<int> *res );
 
 
 
