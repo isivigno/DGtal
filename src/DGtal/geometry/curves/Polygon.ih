@@ -679,16 +679,20 @@ bool  DGtal::Polygon<TCoordinate>::convexIntersectWithoutComputation(const Polyg
      printf("%%SegSegTest: code = %c\n", code );
 #endif     
      
-     
-     if(code=='1' || code == 'v') // the edge with origin a and the one with origin b intersect
+     // If the segments intersect, initialisation and update inflag
+     if(code == '1' || code == 'v' || code == 'w')
        {
 	 if ( inflag == Unknown && FirstPoint ) 
 	   {
 	     aa = ba = 0;
 	     FirstPoint = false;
 	   }
-
+	 
 	 inflag = InOutWithoutComputation(inflag, aHB, bHA);
+       }
+     
+     if(code=='1' || code == 'v') // the edge with origin a and the one with origin b intersect
+       {
 	 //recall that the edges intersect if they are both forward or both backward
 	 if(forwardEdge(a)*forwardEdge(b+n)==1)
 	   {
@@ -700,6 +704,52 @@ bool  DGtal::Polygon<TCoordinate>::convexIntersectWithoutComputation(const Polyg
 	   }
        }
      
+     if(code=='w') // the edges share an extremity
+       {
+	 std::cout << "segments share an extremity" << std::endl;
+	 
+	 // the only case when the intersection should be reported is
+	 // when the common extremity is the origin of both edges  
+	 if(P[a]==Q[b])
+	   {
+	     std::cout << "inflag = " << inflag << std::endl;
+	     if(inflag == Unknown)
+	       if(cross < 0)
+		 inflag = Qin;
+	       else
+		 if(cross > 0)
+		   inflag = Pin;
+	     std::cout << "inflag = " << inflag << std::endl;
+	     if(cross < 0)
+	       {
+		 if(inflag == Pin && forwardEdge(a)*forwardEdge(a-1)==1)
+		   {
+		     res->push_back(a-1);
+		     res->push_back(a);
+		   }
+		 else
+		   if(inflag == Qin && forwardEdge(b-1+n)*forwardEdge(a)==1)
+		     {
+		       res->push_back(b-1+n);
+		       res->push_back(a);
+		     } 
+	       }
+	     if(cross > 0)
+	       {
+		 if(inflag == Pin && forwardEdge(b+n)*forwardEdge(a-1)==1)
+		   {
+		     res->push_back(a-1);
+		     res->push_back(b+n);
+		   }
+		 else
+		   if(inflag == Qin && forwardEdge(b-1+n)*forwardEdge(b+n)==1)
+		     {
+		       res->push_back(b-1+n);
+		       res->push_back(b+n);
+		     } 
+	       }    
+	   }
+       }
      
      /*-----Advance rules-----*/
      
@@ -852,7 +902,7 @@ Test whether the two segments intersect or not. Does not compute the intersectio
    '1': The segments intersect properly (i.e., they share a point and
         neither 'v' nor 'e' holds).
    '0': The segments do not intersect (i.e., they share no points).
-
+   'w': The two segments share exactly one extremity.
 ---------------------------------------------------------------------*/
 template <typename TCoordinate>
 inline
@@ -872,23 +922,16 @@ char DGtal::Polygon<TCoordinate>::SegSegTest(Point a, Point b, Point c, Point d)
       if(cAB*dAB == -1 || aCD*bCD == -1)
 	return 'v';
       else // cAB*dAB == 0 && aCD*bCD == 0
-	// if(aCD == 0 && bCD == 0 && cAB == 0 && dAB ==0)
-	//   {
-	//     if(Between(a,b,c) || Between(a,b,d) || Between(c,d,a) || Between(c,d,b))
-	//       return 'e';
-	//     else
-	//       return '0';
-	//   }
-	// else // (aCD!=0 || bCD!=0) && (cAB!=0 || dAB!=0)
-	//   if(
-	    
-	if((aCD!=0 || bCD!=0) && (cAB!=0 || dAB!=0))
-	  return 'v';
-	else
-	  if(Between(a,b,c) || Between(a,b,d) || Between(c,d,a) || Between(c,d,b))
-	    return 'e';
-	  else
-	    return '0';
+	if(aCD == 0 && bCD == 0 && cAB == 0 && dAB ==0)
+	  {
+	    if(Between(a,b,c) || Between(a,b,d) || Between(c,d,a) || Between(c,d,b))
+	      return 'e';
+	    else
+	      return '0';
+	  }
+	else // (aCD!=0 || bCD!=0) && (cAB!=0 || dAB!=0)
+	  return 'w';
+	     
 }
 
 
