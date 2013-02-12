@@ -66,7 +66,8 @@ public:
   typedef DGtal::PointVector<2,Integer> Point; // integer point (a,b)
   typedef DGtal::PointVector<3,Integer> PointR; // rational point (p,q,r) = (p/q,r/q)
   typedef DGtal::PointVector<2,Integer> Vector;
-
+  typedef DGtal::PointVector<2,Integer> Rational; // rational number
+						  // (p,q) = p/q
   
   /**
      * Destructor.
@@ -76,17 +77,17 @@ public:
     
     typedef enum Position
     {
-      ABOVE,
-      BELOW,
-      ONTO
+      BELOW = -1,
+      ONTO,
+      ABOVE
     } Position;
     
 
     class Ray
     {
     public :
-      Integer x;
-      Integer y;
+      Integer myX;
+      Integer myY;
       
       /**
        * Default constructor.
@@ -112,15 +113,31 @@ public:
        */
       Ray(const PointR p, const PointR q);
       
-      PointR intersect(Ray r);
+      
+      /**
+       * Equality operator.
+       * @param other the object to compare with.
+       * @return 'true' either if the leaning points perfectly match
+       * or if the first leaning points match to the last ones
+       * (same DSS scanned in the reverse way) 
+       * and 'false' otherwise
+       */
+      bool operator==( const Ray & other ) const;
+      
 
+      /**
+       * Compute the intersection point of this with another ray r.
+       * @param r a Ray
+       * @return a PointR 
+       */
+      PointR intersect(Ray r);
       
       // Compute the position of point with respect to a ray
       // Return BELOW, ABOVE or ONTO
       Position positionWrtRay(PointR p);
       
-    ~Ray();
-    
+      ~Ray();
+      
 
     };
     
@@ -132,15 +149,17 @@ public:
        *
        */
       typedef vector<PointR> PointList;
-      PointList Points;
+      PointList myPoints;
       
       /* List of rays of the polygon 
        *
        */
       typedef vector<Ray> RayList;
       
-      RayList Rays;
+      RayList myRays;
 
+      typedef enum { Pin, Qin, Unknown } InFlag;
+      
       /**
        * Default constructor.
        * not valid
@@ -162,14 +181,14 @@ public:
        */
       Polygon(const PointR a,const PointR b,const PointR c,const PointR d, const Ray rab,const Ray rbc,const Ray rcd,const Ray rda);
       
-      /** 
-       * Intersection of the polygon with the edge [A,B]
-       * Assume that the abscissa of A is greater than the left most point of the polygon. 
-       */
+      /* /\**  */
+      /*  * Intersection of the polygon with the edge [A,B] */
+      /*  * Assume that the abscissa of A is greater than the left most point of the polygon.  */
+      /*  *\/ */
       
-      void intersect(const PointR A, const PointR B, const Ray rab, PointList *res);
+      /* void intersect(const PointR A, const PointR B, const Ray rab, PointList *res); */
       
-      void intersect(const Polygon P, PointList *res);
+      /* void intersect(const Polygon P, PointList *res); */
       
       /* Affine tranformation of the polygon P according to the matrix 
        * (1 0 / -P[0] 1)(x y) + (0 p[1])
@@ -178,11 +197,23 @@ public:
        */ 
       void transform(const Point P);
       
+      /* Intersection of two convex polygons in a Farey fan for the
+	 union of two DSSs: the result is the set of vertices that have
+	 neither the maximum nor the minimum abscissa.*/     
 
+      bool convexIntersectForDSSUnion(const Polygon P, PointList *res);
+    
+      /* Test whether the segments [ab] and [cd] intersect or not */
+      char SegSegTest(PointR a, PointR b, PointR c, PointR d);
+      
+      
       ~Polygon();
       
     };
     
+    
+    
+
 
     // ----------------------- Interface --------------------------------------
  public:

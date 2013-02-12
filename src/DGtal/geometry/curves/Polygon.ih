@@ -115,7 +115,7 @@ not removed.
 
 /*---------------------------------------------------------------------
 ---------------------------------------------------------------------*/
-template <typename TCoordinate>
+Template <typename TCoordinate>
 inline
 bool  DGtal::Polygon<TCoordinate>::convexIntersect(const Polygon & other, Polygon *Res )
 /* P(=this) has n vertices, Q(=other) has m vertices. */

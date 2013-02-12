@@ -50,16 +50,16 @@ template <typename TInteger>
 inline
 DGtal::FareyFan<TInteger>::Ray::Ray(const Integer x0, const Integer y0)
 {
-  x = x0;
-  y = y0;
+  myX = x0;
+  myY = y0;
 } 
 
 template <typename TInteger>
 inline
 DGtal::FareyFan<TInteger>::Ray::Ray(const PointR p, const Integer slope)
 {
-  x = slope;
-  y = (p[2]+p[0]*x)/p[1];
+  myX = slope;
+  myY = (p[2]+p[0]*myX)/p[1];
 }
 
 
@@ -71,9 +71,16 @@ DGtal::FareyFan<TInteger>::Ray::Ray(const PointR p, const PointR q)
   // Compute the slope of the line through (p=p[0]/p[1],p[2]/p[1]) and
   // (q=q[0]/q[1],q[2]/q[1])
   
-  x = (p[2]*q[1] - q[2]*p[1])/(q[0]*p[1]-q[1]*p[0]);
-  y = (p[2]+p[0]*x)/p[1];
+  myX = (p[2]*q[1] - q[2]*p[1])/(q[0]*p[1]-q[1]*p[0]);
+  myY = (p[2]+p[0]*myX)/p[1];
   
+}
+
+template <typename TInteger>
+inline
+bool DGtal::FareyFan<TInteger>::Ray::operator==(const Ray & other) const
+{
+  return (myX == other.myX && myY==other.myY);
 }
 
 
@@ -88,7 +95,7 @@ template <typename TInteger>
 inline
 typename DGtal::FareyFan<TInteger>::Position DGtal::FareyFan<TInteger>::Ray::positionWrtRay(PointR p)
 {
-  Integer v = -p[0]*x + y*p[1] - p[2];
+  Integer v = -p[0]*myX + myY*p[1] - p[2];
   
   if(v == 0)
     return ONTO;
@@ -109,8 +116,8 @@ typename DGtal::FareyFan<TInteger>::PointR DGtal::FareyFan<TInteger>::Ray::inter
   PointR res;
   DGtal::IntegerComputer<TInteger> ic;
 
-  res[0] = r.y - y;
-  res[1] = r.x - x;
+  res[0] = r.myY - myY;
+  res[1] = r.myX - myX;
   
   if(res[0] < 0 && res[1] <0)
     {
@@ -122,7 +129,7 @@ typename DGtal::FareyFan<TInteger>::PointR DGtal::FareyFan<TInteger>::Ray::inter
   res[0] = res[0]/g;
   res[1] = res[1]/g;
 
-  res[2] = -res[0]*x + res[1]*y;
+  res[2] = -res[0]*myX + res[1]*myY;
   
   return res;
 }
@@ -136,18 +143,18 @@ template <typename TInteger>
 inline
 DGtal::FareyFan<TInteger>::Polygon::Polygon(const PointR a,const PointR b,const PointR c,const PointR d)
 {
-  Points.push_back(a);
-  Points.push_back(b);
-  Points.push_back(c);
-  Points.push_back(d);
-  // Points[1] = b;
-  // Points[2] = c;
-  // Points[3] = c;
+  myPoints.push_back(a);
+  myPoints.push_back(b);
+  myPoints.push_back(c);
+  myPoints.push_back(d);
+  // myPoints[1] = b;
+  // myPoints[2] = c;
+  // myPoints[3] = c;
   
-  Rays.push_back(Ray(a,b));
-  Rays.push_back(Ray(b,c));
-  Rays.push_back(Ray(c,d));
-  Rays.push_back(Ray(d,a));
+  myRays.push_back(Ray(a,b));
+  myRays.push_back(Ray(b,c));
+  myRays.push_back(Ray(c,d));
+  myRays.push_back(Ray(d,a));
 } 
 
 
@@ -155,18 +162,18 @@ template <typename TInteger>
 inline
 DGtal::FareyFan<TInteger>::Polygon::Polygon(const PointR a,const PointR b,const PointR c,const PointR d, const Ray rab, const Ray rbc, const Ray rcd, const Ray rda)
 {
-  Points.push_back(a);
-  Points.push_back(b);
-  Points.push_back(c);
-  Points.push_back(d);
-  // Points[1] = b;
-  // Points[2] = c;
-  // Points[3] = c;
+  myPoints.push_back(a);
+  myPoints.push_back(b);
+  myPoints.push_back(c);
+  myPoints.push_back(d);
+  // myPoints[1] = b;
+  // myPoints[2] = c;
+  // myPoints[3] = c;
   
-  Rays.push_back(rab);
-  Rays.push_back(rbc);
-  Rays.push_back(rcd);
-  Rays.push_back(rda);
+  myRays.push_back(rab);
+  myRays.push_back(rbc);
+  myRays.push_back(rcd);
+  myRays.push_back(rda);
 
 
 } 
@@ -174,100 +181,100 @@ DGtal::FareyFan<TInteger>::Polygon::Polygon(const PointR a,const PointR b,const 
 
 
 // Assumes that xA < xB
-template <typename TInteger>
-inline
-void DGtal::FareyFan<TInteger>::Polygon::intersect(const PointR A, const PointR B, const Ray rab, PointList *res)
-{
-  double m,M;
-  PointList intersectPoints;
-  bool found = false;
+// template <typename TInteger>
+// inline
+// void DGtal::FareyFan<TInteger>::Polygon::intersect(const PointR A, const PointR B, const Ray rab, PointList *res)
+// {
+//   double m,M;
+//   PointList intersectPoints;
+//   bool found = false;
 
-  for(int i=0;i<4;i++)
-    {
-      PointR P=Points[i],Q=Points[(i+1)%4];
+//   for(int i=0;i<4;i++)
+//     {
+//       PointR P=myPoints[i],Q=myPoints[(i+1)%4];
       
-      Ray r = Rays[i];
+//       Ray r = myRays[i];
       
-      if(!((double) A[0]/A[1]>(double) Q[0]/Q[1] || (double) B[0]/B[1]<(double) P[0]/P[1]))
-	{
-	  if(i==0 || i==1) // xP < xQ
-	    {
-	      m = std::max((double) A[0]/(double) A[1],(double) P[0]/(double) P[1]);
-	      M = std::min((double) B[0]/(double) B[1],(double) Q[0]/(double) Q[1]);
-	    }
-	  else // xQ < xP
-	    {
-	      m = std::max((double) A[0]/A[1],(double) Q[0]/Q[1]);
-	      M = std::min((double) B[0]/B[1],(double) P[0]/P[1]);
-	    }
+//       if(!((double) A[0]/A[1]>(double) Q[0]/Q[1] || (double) B[0]/B[1]<(double) P[0]/P[1]))
+// 	{
+// 	  if(i==0 || i==1) // xP < xQ
+// 	    {
+// 	      m = std::max((double) A[0]/(double) A[1],(double) P[0]/(double) P[1]);
+// 	      M = std::min((double) B[0]/(double) B[1],(double) Q[0]/(double) Q[1]);
+// 	    }
+// 	  else // xQ < xP
+// 	    {
+// 	      m = std::max((double) A[0]/A[1],(double) Q[0]/Q[1]);
+// 	      M = std::min((double) B[0]/B[1],(double) P[0]/P[1]);
+// 	    }
 	  
-	  PointR s = r.intersect(rab);
+// 	  PointR s = r.intersect(rab);
 	  
-	  trace.info() << s << std::endl;
-	  trace.info() << m << " " << M << std::endl;
+// 	  trace.info() << s << std::endl;
+// 	  trace.info() << m << " " << M << std::endl;
 	  
-	  if((double) s[0]/s[1] >= m && (double) s[0]/s[1] <= M)
-	    {
-	      trace.info() << "keep\n";
-	      res->push_back(s);
-	      found =true;
-	    }
-	  else // keep the point in mind
-	    {
-	      intersectPoints.push_back(s);
-	    }
-	}
+// 	  if((double) s[0]/s[1] >= m && (double) s[0]/s[1] <= M)
+// 	    {
+// 	      trace.info() << "keep\n";
+// 	      res->push_back(s);
+// 	      found =true;
+// 	    }
+// 	  else // keep the point in mind
+// 	    {
+// 	      intersectPoints.push_back(s);
+// 	    }
+// 	}
       
-    }
+//     }
   
-  if(!found) // check if [AB] in included in the polygon   
-    {
-      PointR s1 = intersectPoints[0];
-      PointR s2 = intersectPoints[1];
-      PointR tmp;
-      if((double) s1[0]/s1[1]>(double) s2[0]/s2[1])
-	{
-	  tmp = s2;
-	  s2 = s1;
-	  s1 = tmp;
-	}
+//   if(!found) // check if [AB] in included in the polygon   
+//     {
+//       PointR s1 = intersectPoints[0];
+//       PointR s2 = intersectPoints[1];
+//       PointR tmp;
+//       if((double) s1[0]/s1[1]>(double) s2[0]/s2[1])
+// 	{
+// 	  tmp = s2;
+// 	  s2 = s1;
+// 	  s1 = tmp;
+// 	}
       
-      if((double) A[0]/A[1]<=(double) s2[0]/s2[1] && (double) A[0]/A[1]>(double) s1[0]/s1[1] && (double) B[0]/B[1]<=(double) s2[0]/s2[1] && (double) B[0]/B[1]>(double) s1[0]/s1[1])
-	{
-	  res->push_back(A);
-	  res->push_back(B);
-	}
+//       if((double) A[0]/A[1]<=(double) s2[0]/s2[1] && (double) A[0]/A[1]>(double) s1[0]/s1[1] && (double) B[0]/B[1]<=(double) s2[0]/s2[1] && (double) B[0]/B[1]>(double) s1[0]/s1[1])
+// 	{
+// 	  res->push_back(A);
+// 	  res->push_back(B);
+// 	}
       
-    }
+//     }
   
-}
+// }
  
-template <typename TInteger>
-inline
-void DGtal::FareyFan<TInteger>::Polygon::intersect(const Polygon P, PointList *res)
-{
-  PointR A,B;
-  for(int i=0;i<4;i++)
-    {
-      if(i==0 || i==1)
-	{
-	  A = P.Points[i];
-	  B = P.Points[i+1];
-	}
-      else
-	{
-	  A = P.Points[(i+1)%4];
-	  B = P.Points[i];
-	}
-      std::cout << A << " " << B << " " << std::endl;
-      intersect(A,B,P.Rays[i],res);
+// template <typename TInteger>
+// inline
+// void DGtal::FareyFan<TInteger>::Polygon::intersect(const Polygon P, PointList *res)
+// {
+//   PointR A,B;
+//   for(int i=0;i<4;i++)
+//     {
+//       if(i==0 || i==1)
+// 	{
+// 	  A = P.myPoints[i];
+// 	  B = P.myPoints[i+1];
+// 	}
+//       else
+// 	{
+// 	  A = P.myPoints[(i+1)%4];
+// 	  B = P.myPoints[i];
+// 	}
+//       std::cout << A << " " << B << " " << std::endl;
+//       intersect(A,B,P.myRays[i],res);
       
-    }
+//     }
   
-  trace.info() << "end intersect\n";
+//   trace.info() << "end intersect\n";
   
 
-}  
+// }  
 
 
 template <typename TInteger>
@@ -275,14 +282,561 @@ inline
 void DGtal::FareyFan<TInteger>::Polygon::transform(const Point P)
 {
   for(unsigned int i=0;i<4;i++)
-    Points[i][2] += -Points[i][0]*P[0]+Points[i][1]*P[1]; 
+    myPoints[i][2] += -myPoints[i][0]*P[0]+myPoints[i][1]*P[1]; 
   
   for(unsigned int i=0;i<4;i++)
-    Rays[i] = Ray(Points[i],Points[(i+1)%4]);
+    myRays[i] = Ray(myPoints[i],myPoints[(i+1)%4]);
   
   
 }
 
+/*************************************************************************/
+/* This algorithm computes the intersection of two convex polygons of
+  the Farey Fan. The intersection is not entirely computed and only the
+  vertices of abscissa that is neither maximum nor minimum are
+  returned. This is used in the computation of the parameters of the
+  union of two DSSs. The base of the algorithm is the convex polygon intersection
+  of O'Rourke (1997). See note below.  */
+  
+/**** Intersection of convex polygons ************************************/
+/*
+This code is described in "Computational Geometry in C" (Second Edition),
+Chapter 7.  It is not written to be comprehensible without the
+explanation in that book.
+
+Written by Joseph O'Rourke.
+Last modified: December 1997
+Questions to orourke@cs.smith.edu.
+--------------------------------------------------------------------
+This code is Copyright 1997 by Joseph O'Rourke.  It may be freely
+redistributed in its entirety provided that this copyright notice is
+not removed.
+--------------------------------------------------------------------
+*/
+/* Translated in C++ for inclusion in DGtal + modification for  */
+
+/*************************************************************************/
+
+
+/*---------------------------------------------------------------------
+---------------------------------------------------------------------*/
+template <typename TInteger>
+inline
+bool  DGtal::FareyFan<TInteger>::Polygon::convexIntersectForDSSUnion(const Polygon & other, PointList *res )
+/* P(=this) has n vertices, Q(=other) has m vertices. */
+{
+   int     a, b;           /* indices on P and Q (resp.) */
+   int     a1, b1;         /* a+1, b+1 (resp.) */
+   PointR A, B;           /* directed edges on P and Q (resp.) */
+   int     cross;          /* sign of z-component of A x B */
+   int     bHA, aHB;       /* b in H(A); a in H(b). */
+   PointR Origin = Point(2,0); /* (0,0) */
+   PointR p;              /* double point of intersection */
+   PointR q;              /* second point of intersection */
+   InFlag inflag;         /* {Pin, Qin, Unknown}: which inside */
+   int     aa, ba;         /* # advances on a & b indices (after 1st inter.) (counters)*/
+   bool    FirstPoint;     /* Is this the first point? (used to initialize).*/
+   PointR p0;             /* The first point. */
+   char     code;           /* SegSegTest return code. */ 
+
+   PointList P=myPoints;
+   PointList Q=other.myPoints;
+
+   RayList R = myRays;
+
+   int n = P.size();
+   int m = Q.size();
+   
+   
+  
+     /* Initialize variables. */
+     a = 0; b = 0; aa = 0; ba = 0;
+   inflag = Unknown; FirstPoint = true;
+   
+   do {
+     
+     /* Computations of key variables. */
+     a1 = (a + 1) % n; // compute point a+1
+     b1 = (b + 1) % m; // compute point b+1
+     
+     
+
+#ifdef DEBUG
+     std::cout << "loop: a = " << a << " b = " << b << std::endl;
+     std::cout << "A = ";
+#endif
+     A = directionVector(a);
+     //A = SubVec( P[a1], P[a]); // compute vector A = aa1
+#ifdef DEBUG
+     std::cout << "B = ";
+#endif
+     B = other.directionVector(b);
+     //B = SubVec( Q[b1], Q[b]); // compute vector B = bb1
+     
+     cross = AreaSign( Origin, A, B );
+     aHB = other.relativePosition(b,P[a1]); // could be done using
+				      // AreaSign(Q[b],Q[b1],P[a1]) ->
+				      // maybe more efficient this way ? 
+     //aHB   = AreaSign( Q.at(b), Q.at(b1), P.at(a1) ); // compute
+     // position of a1
+     // wrt halfplane
+     // defined by B
+     bHA = relativePosition(a,b1);
+     //bHA   = AreaSign( P.at(a), P.at(a1), Q.at(b1) ); // compute position of b1 wrt halfplane defined by A
+#ifdef DEBUG
+     printf("%%cross=%d, aHB=%d, bHA=%d\n", cross, aHB, bHA );
+#endif
+     /* If A & B intersect, update inflag. */
+     code = SegSegTest(P[a], P[a1], Q[b], Q[b1]);
+#ifdef DEBUG 
+     printf("%%SegSegTest: code = %c\n", code );
+#endif     
+     
+     // If the segments intersect, initialisation and update inflag
+     if(code == '1' || code == 'v' || code == 'w')
+       {
+	 if ( inflag == Unknown && FirstPoint ) 
+	   {
+	     aa = ba = 0;
+	     FirstPoint = false;
+	   }
+	 
+	 inflag = InOut(inflag, aHB, bHA);
+       }
+     
+     if(code=='1' || code == 'v') // the edge with origin a and the one with origin b intersect
+       {
+	 //recall that the edges intersect if they are both forward or both backward
+	 if(forwardEdge(a)*forwardEdge(b)==1)
+	   {
+#ifdef DEBUG
+	     std::cout << "Add point " << a << " " << b+n << std::endl;
+#endif 
+	     res->push_back(myRays[a].intersect(other.myRays[b]));
+	     //  res->push_back(a); // Edges from P are numbered from 0 to n-1
+	     //res->push_back(b+n); // Edges from Q are numbered from n to n+m-1	 
+	   }
+       }
+     
+     if(code=='w') // the edges share an extremity
+       {
+	 std::cout << "segments share an extremity" << std::endl;
+	 
+	 // the only case when the intersection should be reported is
+	 // when the common extremity is the origin of both edges  
+	 if(P[a]==Q[b])
+	   {
+	     std::cout << "inflag = " << inflag << std::endl;
+	     if(inflag == Unknown)
+	       if(cross < 0)
+		 inflag = Qin;
+	       else
+		 if(cross > 0)
+		   inflag = Pin;
+	     std::cout << "inflag = " << inflag << std::endl;
+	     if(cross < 0)
+	       {
+		 if(inflag == Pin && forwardEdge(a)*forwardEdge(a-1)==1)
+		   {
+		     res->push_back(myRays[a].intersect(myRays[a-1]));
+		     //res->push_back(a-1);
+		     //res->push_back(a);
+		   }
+		 else
+		   if(inflag == Qin && forwardEdge(b-1+n)*forwardEdge(a)==1)
+		     {
+		       res->push_back(myRays[a].intersect(other.myRays[b-1]));
+		       //res->push_back(b-1+n);
+		       //res->push_back(a);
+		     } 
+	       }
+	     if(cross > 0)
+	       {
+		 if(inflag == Pin && forwardEdge(b+n)*forwardEdge(a-1)==1)
+		   {
+		     res->push_back(myRays[a-1].intersect(other.myRays[b]));
+		     // res->push_back(a-1);
+		     // res->push_back(b+n);
+		   }
+		 else
+		   if(inflag == Qin && forwardEdge(b-1+n)*forwardEdge(b+n)==1)
+		     {
+		       res->push_back((other.myRays[b]).intersect(other.myRays[b-1]));
+		       // res->push_back(b-1+n);
+		       // res->push_back(b+n);
+		     } 
+	       }    
+	   }
+       }
+     
+     /*-----Advance rules-----*/
+     
+     /* Special case: A & B overlap (collinear and share a point) and oppositely oriented. */
+     if ( ( code == 'e' ) && (DotSign( A, B ) < 0) )
+       { 
+	 res->push_back(myRays[a].intersect(other.myRays[b]));
+	 // res->push_back(a);
+	 // res->push_back(b+n);
+	 exit(EXIT_SUCCESS);
+       }
+     
+     /* Special case: A & B parallel and separated. */
+     if ( (cross == 0) && ( aHB < 0) && ( bHA < 0 ) )
+       printf("%%P and Q are disjoint.\n"), exit(EXIT_SUCCESS);
+      
+      else 
+	/* Special case: A & B collinear. */
+	if ( (cross == 0) && ( aHB == 0) && ( bHA == 0 ) ) 
+	  {
+	  /* Advance but do not output point. */
+	    if ( inflag == Pin )
+	      b = Advance( b, &ba, m, false, b+n, res );
+	    else
+	      a = Advance( a, &aa, n, false, a, res );
+	  }
+     
+     /* Generic cases. */
+	else 
+	  if ( cross >= 0 ) {
+	    if ( bHA > 0)
+	      a = Advance( a, &aa, n, inflag == Pin, a, res );
+	    else
+	      b = Advance( b, &ba, m, inflag == Qin, b+n, res );
+	  }
+	  else /* if ( cross < 0 ) */{
+	    if ( aHB > 0)
+	      b = Advance( b, &ba, m, inflag == Qin, b+n, res );
+	    else
+	      a = Advance( a, &aa, n, inflag == Pin, a, res );
+	  }
+#ifdef DEBUG
+      printf("%%After advances:a=%d, b=%d; aa=%d, ba=%d; inflag=%d\n", a, b, aa, ba, inflag);
+#endif      
+
+   /* Quit when both adv. indices have cycled, or one has cycled twice. */
+   } while ( ((aa < n) || (ba < m)) && (aa < 2*n) && (ba < 2*m) );
+   
+   
+   if(inflag !=Unknown)
+     return 1;
+   else
+   /* Deal with special cases: not implemented. (O'Rourke) */
+     /* Completed by I. Sivignon (2013) */
+     //if ( inflag == Unknown) 
+     {
+#ifdef DEBUG
+       printf("%%The boundaries of P and Q do not cross.\n");
+#endif 
+       // Test if Q in included in P
+       a = 0; b=0; aa =0;
+       a1 = (a + 1) % n; // compute point a-1
+       bool bIn = true;
+       //Test is Q[0] is inside P 
+       while (aa<n)
+	 {
+	   bHA = relativePosition(a,Q[b]);
+	   // bHA   = AreaSign( P.at(a), P.at(a1), Q.at(b) );
+	   bIn = bIn && (bHA>=0);
+	   aa++;
+	   a = a1;
+	   a1 = (a+1)%n;
+	 }
+       if(bIn)
+	 {
+	   // res = Q
+	   res->push_back(other.myPoints[1]);
+	   res->push_back(other.myPoints[3]);
+	   // res->push_back(n);
+	   // for(int i=1;i<m;i++)
+	   //   {
+	       
+	   //     res->push_back(i+n);
+	   //     res->push_back(i+n);
+	   //   }
+	   // res->push_back(n);
+#ifdef DEBUG
+	   std::cout << "Q in contained in P. The intersection is equal to Q." << std::endl;
+#endif
+	   return 1;
+	 }
+       
+       // Test if P in included in Q
+       b = 0; b=a; ba =0;
+       b1 = (b + 1) % m; // compute point b-1
+       bool aIn = true;
+       //Test if P[0] is inside Q
+       while (ba<m)
+	 {
+	   aHB = relativePosition(b,P[a]);
+	   //aHB   = AreaSign( Q[b1], Q[b], P[a] );
+	   aIn = aIn && (aHB>=0);
+	   ba++;
+	   b=b1;
+	   b1 = (b+1)%m;
+	 }
+       if(aIn)
+	 {
+	   // res = P
+	   res->push_back(myPoints[1]);
+	   res->push_back(myPoints[3]);
+	   // res->push_back(0);
+	   // for(int i=1;i<n;i++)
+	   //   {
+	   //     res->push_back(i);
+	   //     res->push_back(i);
+	   //   }
+	   // res->push_back(0);
+#ifdef DEBUG
+	   std::cout << "P in contained in Q. The intersection is equal to P." << std::endl;
+#endif
+	   return 1;
+	 }
+      
+#ifdef DEBUG 
+       std::cout << "The polygons are disjoint. The intersection is empty." << std::endl;
+#endif     
+       return 0;
+       
+       
+     }
+}
+
+
+
+
+
+
+
+/*****************************************************/
+int forwardEdge(int i)
+{
+  if(i<4)
+    if(i==0 || i==1)
+      return 1;
+    else
+      return -1;
+  else
+    std::cerr << "Error: this does not work for random polygons. Polygons must be preimage-like (4 vertices, etc)" << std::endl;
+}
+/*******************************************************/
+
+
+/*---------------------------------------------------------------------
+   Advances and prints out an inside vertex if appropriate.
+---------------------------------------------------------------------*/
+template <typename TInteger>
+inline
+int  DGtal::FareyFan<TInteger>::Polygon::Advance( int a, int *aa, int n, bool inside, int i, vector<int> *res )
+{
+  if ( inside )
+    {
+#ifdef DEBUG
+      std::cout << "Advance push " << i << " and " << i+1 << std::endl;
+      //std::cout << "(" << v[0] << "," << v[1] << ")" << std::endl;
+#endif
+      if(forwardEdge(i)*forwardEdge(i+1)==1)
+	{
+	  res->push_back(i);
+	  res->push_back(i+1);
+	}
+    }
+  (*aa)++;
+  return  (a+1) % n;
+}
+
+
+
+/** Toggles inflag */ 
+template <typename TInteger>
+inline
+typename DGtal::FareyFan<TInteger>::Polygon::InFlag DGtal::FareyFan<TInteger>::Polygon::InOut(InFlag inflag, int aHB, int bHA)
+{
+  /* Update inflag. */
+  if      ( aHB > 0)
+    return Pin;
+  else if ( bHA > 0)
+    return Qin;
+  else    /* Keep status quo. */
+    return inflag;
+}
+
+
+
+
+/*---------------------------------------------------------------------
+Test whether the two segments  intersect or not. Does not compute the intersection point. 
+   'e': The segments collinearly overlap, sharing a point.
+   'v': An endpoint (vertex) of one segment is on the other segment,
+   but 'e' doesn't hold.
+   '1': The segments intersect properly (i.e., they share a point and
+   neither 'v' nor 'e' holds).
+   '0': The segments do not intersect (i.e., they share no points).
+   'w': The two segments share exactly one extremity.
+   ---------------------------------------------------------------------*/
+template <typename TInteger>
+inline
+char DGtal::FareyFan<TInteger>::Polygon::SegSegTest(PointR a, PointR a1, PointR b, PointR b1)
+{
+  int cAB = relativePosition(a,b); // relative position of b wrt to ray
+				   // number a (which supported edge [aa1])
+  int dAB = relativePosition(a,b1);
+  
+  int aCD = relativePosition(b,a); //relative position of a wrt to ray
+				   //number b (which supported edge [bb1])
+  int bCD = relativePosition(b,a1);
+
+  
+  if(cAB*dAB == -1 && aCD*bCD == -1)
+    return '1'; 
+  else
+    if(cAB*dAB  == 1 || aCD*bCD == 1)
+      return '0';
+    else
+      if(cAB*dAB == -1 || aCD*bCD == -1)
+	return 'v';
+      else // cAB*dAB == 0 && aCD*bCD == 0
+	if(aCD == 0 && bCD == 0 && cAB == 0 && dAB ==0)
+	  {
+	    if(Between(a,a1,b) || Between(a,a1,b1) || Between(b,b1,a) || Between(b,b1,a1))
+	      return 'e';
+	    else
+	      return '0';
+	  }
+	else // (aCD!=0 || bCD!=0) && (cAB!=0 || dAB!=0)
+	  return 'w';
+	     
+}
+
+
+/*---------------------------------------------------------------------
+  Returns TRUE iff point c lies on the closed segement ab.
+  Assumes it is already known that abc are collinear.
+  ---------------------------------------------------------------------*/
+template <typename TInteger>
+inline
+bool DGtal::FareyFan<TInteger>::Between( PointR a, PointR b, PointR c )
+{
+  Rational a0, b0, c0;
+  Rational a1, b1, c1;
+  
+  a0 = Rational(a[0],a[1]);
+  b0 = Rational(b[0],b[1]);
+  c0 = Rational(c[0],c[1]);
+
+  a1 = Rational(a[2],a[1]);
+  b1 = Rational(b[2],b[1]);
+  c1 = Rational(c[2],c[1]);
+  
+/* If ab not vertical, check betweenness on x; else on y. */
+  if ( !(equalTo(a0,b0)))
+    return ( (lowerThan(a0,c0) && lowerThan(c0,b0))||
+	     (greaterThan(a0,c0) && greaterThan(c0,b0)));
+  else
+    return ((lowerThan(a1,c1) && lowerThan(c1,b1)) ||
+	    (greaterThan(a1,c1) && greaterThan(c1,b1)));
+}
+
+/************************************************************************/
+/** Basic comparisons on rational numbers */
+/** ====> to be moved in a proper class Rational **/
+/************************************************************************/
+
+
+// Returns true if a <= b
+template <typename TInteger>
+inline 
+bool DGtal::FareyFan<TInteger>::lowerThan(Rational a, Rational b)
+{
+  if(a[0]*b[1]-a[1]*b[0]<=0)
+    return 1;
+  else
+    return 0;
+}
+
+// Returns true if a >= b
+template <typename TInteger>
+inline 
+bool DGtal::FareyFan<TInteger>::greaterThan(Rational a, Rational b)
+{
+  if(a[0]*b[1]-a[1]*b[0]>=0)
+    return 1;
+  else
+    return 0;
+}
+
+
+// Returns true if a = b
+template <typename TInteger>
+inline 
+bool DGtal::FareyFan<TInteger>::equalTo(Rational a, Rational b)
+{
+  if(a[0]*b[1]-a[1]*b[0]==0)
+    return 1;
+  else
+    return 0;
+}
+
+/*************************************************************************/
+
+
+
+// Compute the direction vector of the edge number i. According to the
+// structure of a DSS preimage, edges number 0 and 1 
+// are oriented downward (and left to right), whereas edges number 2 and
+// 3 are oriented upward (and right to left). 
+template <typename TInteger>
+inline
+typename DGtal::FareyFan<TInteger>::PointR DGtal::FareyFan<TInteger>::Polygon::directionVector(int i)
+{
+  if(i==0 || i==1)
+    return PointR(1,1,-myRays[i].myX); // edge number i is supported by
+				      // ray number i
+  else
+    return PointR(-1,1,myRays[i].myX);
+}
+
+// Return the relative position of the point p with respect to the edge
+// i. If p is on the left, returns 1, onto returns 0 and on the right
+// returns -1. Call the positionWRTRay() function and modulate the
+// returned value according to the orientation of the edge (= above and
+// below are translated  to left and right accordingly).
+template <typename TInteger>
+inline
+typename DGtal::FareyFan<TInteger>::PointR DGtal::FareyFan<TInteger>::Polygon::relativePosition(int i, PointR p)
+{
+  if(i==0 || i==1)
+    return myRay[i].positionWrtRay(p); // edge number i is supported by ray number i
+  else
+    return -(myRay[i].positionWrtRay(p));
+}
+
+
+template <typename TInteger>
+inline
+typename DGtal::FareyFan<TInteger>::PointR DGtal::FareyFan<TInteger>::Polygon::AreaSign(PointR A, PointR B, PointR C)
+{
+  // Precondition: rational points (p,q,r) are such that q is always > 0 (the
+  // sign of the rationals is carried by the numerators)
+  TInteger area = (b[0]*a[1] - a[0]*b[1])*(c[2]*a[1] - a[2]*c[1]) - (c[0]*a[1] - a[0]*c[1])*(b[2]*a[1] - a[2]*b[1]);
+  
+  if(area==0) return 0;
+  else if      ( area >  0 ) return  1;
+  else if ( area < 0 ) return -1;
+}
+
+
+template <typename TInteger>
+inline
+typename DGtal::FareyFan<TInteger>::PointR DGtal::FareyFan<TInteger>::Polygon::DotSign(PointR A, PointR B)
+{
+  // Precondition: rational points (p,q,r) are such that q is always > 0 (the
+  // sign of the rationals is carried by the numerators)
+  TInteger dot = a[0]*b[0] + a[2]*b[2];
+  
+  if(dot==0) return 0;
+  else if      ( dot >  0 ) return  1;
+  else if ( dot < 0 ) return -1;
+}
 
 
 
