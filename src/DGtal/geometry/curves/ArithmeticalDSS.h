@@ -228,6 +228,7 @@ Steps:
     typedef DGtal::Polygon<Rational> DualPolygon;
     typedef typename DualPolygon::Point PointR;
     
+        
     
     // ----------------------- Standard services ------------------------------
   public:

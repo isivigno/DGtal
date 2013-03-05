@@ -115,7 +115,7 @@ not removed.
 
 /*---------------------------------------------------------------------
 ---------------------------------------------------------------------*/
-Template <typename TCoordinate>
+template <typename TCoordinate>
 inline
 bool  DGtal::Polygon<TCoordinate>::convexIntersect(const Polygon & other, Polygon *Res )
 /* P(=this) has n vertices, Q(=other) has m vertices. */
@@ -600,7 +600,6 @@ DGtal::Polygon<TCoordinate>::selfDisplay ( std::ostream & out)
     }
   out << "[End Polygon]" <<  endl;
 }
-
 
 int forwardEdge(int i)
 {

@@ -4,7 +4,7 @@ add_subdirectory(estimation)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -qstrict")
 
 SET(DGTAL_TESTS_SRC
-   testArithDSS	
+  # testArithDSS	
   # testArithDSS3d
   # testFreemanChain
   # testDecomposition  
@@ -20,7 +20,7 @@ SET(DGTAL_TESTS_SRC
   # testLrSBreversedSmartDSS
   # testSBreversedSmartDSS	
   # testArithDSSIterator
-  # testFareyFan
+   testFareyFan
    testUnionOfDSS
 testPolygon
 	)
