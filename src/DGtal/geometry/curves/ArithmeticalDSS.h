@@ -59,7 +59,7 @@
 #include "DGtal/geometry/curves/SegmentComputerUtils.h"
 
 #include "DGtal/math/arithmetic/SternBrocot.h"
-#include "DGtal/geometry/curves/Polygon.h"
+#include "DGtal/geometry/curves/FareyFan.h"
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -224,11 +224,14 @@ Steps:
     typedef PointVector<2,double> PointD;  
 
     // Type for the dual polygon definition
-    typedef boost::rational<Integer> Rational;
-    typedef DGtal::Polygon<Rational> DualPolygon;
-    typedef typename DualPolygon::Point PointR;
+    /* typedef boost::rational<Integer> Rational; */
+    /* typedef DGtal::Polygon<Rational> DualPolygon; */
+    /* typedef typename DualPolygon::Point PointR; */
+   
+    typedef typename DGtal::FareyFan<Integer>::Polygon DualPolygon;
+    typedef typename DGtal::FareyFan<Integer>::PointR PointR;
+    typedef typename DGtal::FareyFan<Integer>::Polygon::PointList PointList;
     
-        
     
     // ----------------------- Standard services ------------------------------
   public:
@@ -301,10 +304,10 @@ Steps:
     bool operator!=( const Self & other ) const;
 
     
-    Self unionDSS( Self & other, Integer *a, Integer *b, Integer *mu);
+    void unionDSS( Self & other, Integer *a, Integer *b, Integer *mu);
     //bool unionDSS( Self & other);
 
-    PointR findCharacteristicVertex(std::vector<PointR > pts, bool areConnected); 
+    //PointR findCharacteristicVertex(std::vector<PointR > pts, bool areConnected); 
 
 
 

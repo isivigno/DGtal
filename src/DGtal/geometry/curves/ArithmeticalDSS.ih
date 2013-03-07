@@ -187,191 +187,191 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::operator!=(
   // greatest abscissa, and such that the denominator of its absicssa is
   // minimal.   
 
-template <typename TIterator, typename TInteger, int connectivity>
-inline
-typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::PointR
-DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::findCharacteristicVertex(std::vector<PointR > pts, bool areConnected) 
-{
+// template <typename TIterator, typename TInteger, int connectivity>
+// inline
+// typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::PointR
+// DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::findCharacteristicVertex(std::vector<PointR > pts, bool areConnected) 
+// {
     
-  typename std::vector<PointR >::iterator it, itMin, itMax;
+//   typename std::vector<PointR >::iterator it, itMin, itMax;
   
 
-  // Requires that the points pts are given in anti-clockwise order. 
+//   // Requires that the points pts are given in anti-clockwise order. 
   
-  // We look for the vertex that is neither the one of  smallest nor
-  // greatest abscissa, and such that the denominator of its absicssa is
-  // minimal.   
+//   // We look for the vertex that is neither the one of  smallest nor
+//   // greatest abscissa, and such that the denominator of its absicssa is
+//   // minimal.   
   
-  PointR firstPoint = *(pts.begin());
+//   PointR firstPoint = *(pts.begin());
   
-  // Compute the minimal and maxima absissas
-  Rational absMax = firstPoint[0];
-  Rational absMin = absMax;
-  itMin = pts.begin();
+//   // Compute the minimal and maxima absissas
+//   Rational absMax = firstPoint[0];
+//   Rational absMin = absMax;
+//   itMin = pts.begin();
   
-  for(it=pts.begin();it!=pts.end();it++)
-    {
-      PointR pt = *it; 
-      Rational r = pt[0];
-      if(r<absMin)
-	{
-	  absMin = r;
-	  itMin = it;
-	}
-    }
+//   for(it=pts.begin();it!=pts.end();it++)
+//     {
+//       PointR pt = *it; 
+//       Rational r = pt[0];
+//       if(r<absMin)
+// 	{
+// 	  absMin = r;
+// 	  itMin = it;
+// 	}
+//     }
   
   
-  // Change the origin of the vector: the first point is the one of
-  // minimal abscissa
-  std::vector<PointR > ptsTrans;
+//   // Change the origin of the vector: the first point is the one of
+//   // minimal abscissa
+//   std::vector<PointR > ptsTrans;
     
-  if(itMin != pts.begin())
-    {
-      for(it = itMin;it!=pts.end();it++)
-	{
-	  PointR pt = *it;
-	  ptsTrans.push_back(pt);
-	}
+//   if(itMin != pts.begin())
+//     {
+//       for(it = itMin;it!=pts.end();it++)
+// 	{
+// 	  PointR pt = *it;
+// 	  ptsTrans.push_back(pt);
+// 	}
       
-      for(it=++(pts.begin()); it != itMin;it++)
-	{
-	  PointR pt = *it;
-	  ptsTrans.push_back(pt);
-	}
-      ptsTrans.push_back(*(ptsTrans.begin()));
-    }
-   else
-    ptsTrans = pts;
+//       for(it=++(pts.begin()); it != itMin;it++)
+// 	{
+// 	  PointR pt = *it;
+// 	  ptsTrans.push_back(pt);
+// 	}
+//       ptsTrans.push_back(*(ptsTrans.begin()));
+//     }
+//    else
+//     ptsTrans = pts;
   
-#ifdef TRACE
+// #ifdef TRACE
   
-#endif
+// #endif
 
-  firstPoint = *(ptsTrans.begin());
-  absMax = firstPoint[0];
-  itMax = ptsTrans.begin();
-  // Look for the point of maximal abscissa
-  for(it=ptsTrans.begin();it!=ptsTrans.end();it++)
-    {
-      PointR pt = *it; 
-      Rational r = pt[0];
-      if(r>absMax)
-	{
-	  absMax = r;
-	  itMax = it;
-	}
-    }
+//   firstPoint = *(ptsTrans.begin());
+//   absMax = firstPoint[0];
+//   itMax = ptsTrans.begin();
+//   // Look for the point of maximal abscissa
+//   for(it=ptsTrans.begin();it!=ptsTrans.end();it++)
+//     {
+//       PointR pt = *it; 
+//       Rational r = pt[0];
+//       if(r>absMax)
+// 	{
+// 	  absMax = r;
+// 	  itMax = it;
+// 	}
+//     }
   
   
-  PointR solution;
+//   PointR solution;
   
-  TInteger denMin = -1;
-  bool beforeMax = true;
-  bool foundBeforeMax = true;
+//   TInteger denMin = -1;
+//   bool beforeMax = true;
+//   bool foundBeforeMax = true;
   
-  for(it=ptsTrans.begin();it!=ptsTrans.end();it++)
-    {
-      PointR pt = (*it);
-      Rational r = pt[0];
-      TInteger d = r.denominator();
+//   for(it=ptsTrans.begin();it!=ptsTrans.end();it++)
+//     {
+//       PointR pt = (*it);
+//       Rational r = pt[0];
+//       TInteger d = r.denominator();
      
-      if(it==itMax)
-	beforeMax = false;
+//       if(it==itMax)
+// 	beforeMax = false;
  
-      if(denMin == -1 && r != absMax && r!=absMin)
-	{
-  	  denMin = d;
-  	  solution = pt;
-	  if(!beforeMax)
-	    foundBeforeMax = false;
-	}
-      else
-	if((d<=denMin && r != absMax && r != absMin))
-	  {
-	    denMin = d;
-	    solution = pt;
-	    if(!beforeMax)
-	      foundBeforeMax = false;
-	  }
-    }
+//       if(denMin == -1 && r != absMax && r!=absMin)
+// 	{
+//   	  denMin = d;
+//   	  solution = pt;
+// 	  if(!beforeMax)
+// 	    foundBeforeMax = false;
+// 	}
+//       else
+// 	if((d<=denMin && r != absMax && r != absMin))
+// 	  {
+// 	    denMin = d;
+// 	    solution = pt;
+// 	    if(!beforeMax)
+// 	      foundBeforeMax = false;
+// 	  }
+//     }
   
   
-  if(!foundBeforeMax)
-    {
-      if(areConnected)
-	{
+//   if(!foundBeforeMax)
+//     {
+//       if(areConnected)
+// 	{
 	  
-#ifdef TRACE
-	  std::cout << "!foundBeforeMax" << std::endl;
-	  std::cout << solution[0] << " " << solution[1] << std::endl;
-#endif
-	  Rational slope = solution[0];
-	  TInteger slopeDen = slope.denominator(); 
-	  Rational intercept = solution[1];
-	  TInteger interceptNum = intercept.numerator();
-	  TInteger interceptDen = intercept.denominator();
-	  interceptNum = (interceptNum*slopeDen/interceptDen)-1; 
-	  intercept = Rational(interceptNum,slopeDen);
-	  solution.clear();
-	  solution.push_back(slope);
-	  solution.push_back(intercept);
+// #ifdef TRACE
+// 	  std::cout << "!foundBeforeMax" << std::endl;
+// 	  std::cout << solution[0] << " " << solution[1] << std::endl;
+// #endif
+// 	  Rational slope = solution[0];
+// 	  TInteger slopeDen = slope.denominator(); 
+// 	  Rational intercept = solution[1];
+// 	  TInteger interceptNum = intercept.numerator();
+// 	  TInteger interceptDen = intercept.denominator();
+// 	  interceptNum = (interceptNum*slopeDen/interceptDen)-1; 
+// 	  intercept = Rational(interceptNum,slopeDen);
+// 	  solution.clear();
+// 	  solution.push_back(slope);
+// 	  solution.push_back(intercept);
 	  
-	}
-      else
-	{
-	  // TO BE TESTED !!!
-	  Rational slope = solution[0];
-#ifdef TRACE
-	  //  std::cout << boost::geometry::dsv(solution) << std::endl;
-#endif
+// 	}
+//       else
+// 	{
+// 	  // TO BE TESTED !!!
+// 	  Rational slope = solution[0];
+// #ifdef TRACE
+// 	  //  std::cout << boost::geometry::dsv(solution) << std::endl;
+// #endif
 	  
 	  
-	  PointR pt = *itMax;
-#ifdef TRACE
-	  //std::cout << "lower enveloppe tracking " << boost::geometry::dsv(pt) << std::endl;
-#endif
-	  it = itMax;
-	  Rational r = pt[0];
-	  while(r>slope && it!=ptsTrans.end())
-	    {
-	      it++;
-	      pt = *it;	      
-#ifdef TRACE
-	      //  std::cout << "in the loop " << r << " " << boost::geometry::dsv(pt) << std::endl;
-#endif
-	      r = pt[0];
-	    }
-	  it--;
-	  PointR prec = *it;
+// 	  PointR pt = *itMax;
+// #ifdef TRACE
+// 	  //std::cout << "lower enveloppe tracking " << boost::geometry::dsv(pt) << std::endl;
+// #endif
+// 	  it = itMax;
+// 	  Rational r = pt[0];
+// 	  while(r>slope && it!=ptsTrans.end())
+// 	    {
+// 	      it++;
+// 	      pt = *it;	      
+// #ifdef TRACE
+// 	      //  std::cout << "in the loop " << r << " " << boost::geometry::dsv(pt) << std::endl;
+// #endif
+// 	      r = pt[0];
+// 	    }
+// 	  it--;
+// 	  PointR prec = *it;
 
-#ifdef TRACE
-	  //std::cout << "pt = " << boost::geometry::dsv(pt) << std::endl;
-#endif
+// #ifdef TRACE
+// 	  //std::cout << "pt = " << boost::geometry::dsv(pt) << std::endl;
+// #endif
 	  
-#ifdef TRACE
-	  // std::cout << "prec = " << boost::geometry::dsv(prec) << std::endl;
-#endif
+// #ifdef TRACE
+// 	  // std::cout << "prec = " << boost::geometry::dsv(prec) << std::endl;
+// #endif
 
 
-	  assert(pt[0] != prec[0]);
-	  Rational segmentSlope = (pt[1] - prec[1])/(pt[0] - prec[0]); 
-	  Rational segmentIntercept = pt[1] - segmentSlope*(pt[0]);
+// 	  assert(pt[0] != prec[0]);
+// 	  Rational segmentSlope = (pt[1] - prec[1])/(pt[0] - prec[0]); 
+// 	  Rational segmentIntercept = pt[1] - segmentSlope*(pt[0]);
 	  
-	  Rational solutionIntercept = segmentSlope*slope + segmentIntercept;
-	  solution.push_back(slope);
-	  solution.push_back(solutionIntercept);
+// 	  Rational solutionIntercept = segmentSlope*slope + segmentIntercept;
+// 	  solution.push_back(slope);
+// 	  solution.push_back(solutionIntercept);
 	  
-	}
-    }
+// 	}
+//     }
   
-  return solution;
+//   return solution;
 
-}
+// }
 
 template <typename TIterator, typename TInteger, int connectivity>
 inline
-typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::Self
-DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( ArithmeticalDSS<TIterator,TInteger,connectivity> & other, TInteger *aa, TInteger *bb, TInteger *muu ) {
+//typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::Self
+void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( ArithmeticalDSS<TIterator,TInteger,connectivity> & other, TInteger *aa, TInteger *bb, TInteger *muu ) {
   
   bool areConnected;
   
@@ -396,47 +396,82 @@ DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( ArithmeticalD
   
   // Compute the intersection of the two dual polygons
   // In the general case, output is a list of polygons
+
   
   DualPolygon DP1 = getDualPolygon(), DP2 = other.getDualPolygon();
-  DualPolygon intersectionPolygon;
-  DP1.convexIntersect(DP2,&intersectionPolygon);
+ 
+  //std::cout << DP1 << std::endl;
+  //std::cout << DP2 << std::endl;
   
+  PointList res;
   
-#ifdef TRACE
-  std::cout << DP1 << DP2 << std::endl;
-  std::cout << intersectionPolygon << std::endl;
-#endif
+  DP1.convexIntersectForDSSUnion(DP2,&res);
   
-//   // Get the list of points of the intersection polygon
-//   // If the two DSSs are connected, the intersection polygon is a cell
-//   // of a Farey fan, thus having 3 or four vertices (if four, two
-//   // vertices have the same abscissa).  
-  typedef typename DualPolygon::PointList PtList;
-  PtList pts = intersectionPolygon.getPoints();
+  typename PointList::iterator it;
   
-  PointR solution = findCharacteristicVertex(pts, areConnected);
+  // for(it=res.begin();it !=res.end();it++)
+  //   std::cout << (*it);
+  // std::cout << std::endl;
   
-  
-  // Output the solution 
-  *aa = (solution[0]).numerator();
-  *bb = (solution[0]).denominator();
-  *muu = -(solution[1]).numerator()*((solution[0]).denominator()/(solution[1]).denominator());
-  
-  Point f;
-  
-  if(myFirst[0] < otherFirst[0])
-    f = myFirst;
-  else
-    f = otherFirst;
-  
-  typedef ArithDSSIterator<TInteger,connectivity> myDSSIterator;
-  myDSSIterator DSSit(*aa,*bb,*muu,f);
-  
-  Self solutionDSS(DSSit);
-  
-  //trace.info() << solutionDSS << std::endl;
+  it = res.begin();
+    PointR sol = *it;
+  it ++;
+  for(;it != res.end() ;it++)
+    {
+      PointR q = *it;
+      if(q[1]<sol[1] || (q[1] == sol[1] && q[2]<sol[2]))
+	sol = q;
+      if((q[1] == sol[1] && q[2]<sol[2]))
+	std::cout << "same abscissa" << std::endl;
+    }
+  *aa = sol[0];
+  *bb = sol[1];
+  *muu = -sol[2];
 
-  return solutionDSS;
+
+  // for(it=res.begin();it !=res.end() ; it++)
+  //   {
+  //     std::cout << (*it);
+  //   }
+  // std::cout << std::endl;
+
+
+  
+// #ifdef TRACE
+//   std::cout << DP1 << DP2 << std::endl;
+//   std::cout << intersectionPolygon << std::endl;
+// #endif
+  
+// //   // Get the list of points of the intersection polygon
+// //   // If the two DSSs are connected, the intersection polygon is a cell
+// //   // of a Farey fan, thus having 3 or four vertices (if four, two
+// //   // vertices have the same abscissa).  
+//   typedef typename DualPolygon::PointList PtList;
+//   PtList pts = intersectionPolygon.getPoints();
+  
+//   PointR solution = findCharacteristicVertex(pts, areConnected);
+  
+  
+//   // Output the solution 
+//   *aa = (solution[0]).numerator();
+//   *bb = (solution[0]).denominator();
+//   *muu = -(solution[1]).numerator()*((solution[0]).denominator()/(solution[1]).denominator());
+  
+//   Point f;
+  
+//   if(myFirst[0] < otherFirst[0])
+//     f = myFirst;
+//   else
+//     f = otherFirst;
+  
+//   typedef ArithDSSIterator<TInteger,connectivity> myDSSIterator;
+//   myDSSIterator DSSit(*aa,*bb,*muu,f);
+  
+//   Self solutionDSS(DSSit);
+  
+//   //trace.info() << solutionDSS << std::endl;
+
+//   return solutionDSS;
   
 }
 
@@ -1157,8 +1192,6 @@ template <typename TIterator, typename TInteger, int connectivity>
 inline
 void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon(){
   
-  //vector<Fraction > vertex(2);  
-  //Point A,B,C,D;
   
   assert(myB>=myA);
   assert(myB>0);
@@ -1173,35 +1206,32 @@ void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon
   p = myUl[1]-(myLf[1]+1);
   q = myUl[0]-myLf[0];
   
-  PointR A;
-  A.push_back(Rational(p,q));
-  A.push_back(Rational(myUl[1]*q-myUl[0]*p,q));
+  PointR A(p,q,myUl[1]*q-myUl[0]*p);
+  //A.push_back(Rational(p,q));
+  //A.push_back(Rational(myUl[1]*q-myUl[0]*p,q));
   
   // Lower middle vertex
-  PointR B;
-  B.push_back(Rational(myA,myB));
-  B.push_back(Rational(-myMu,myB));
+  PointR B(myA,myB,-myMu);
+  //B.push_back(Rational(myA,myB));
+  //B.push_back(Rational(-myMu,myB));
   
   // Rightmost vertex
   p = myLl[1]+1-myUf[1];
   q = myLl[0]-myUf[0];
   
-  PointR C;
-  C.push_back(Rational(p,q));
-  C.push_back(Rational(myUf[1]*q-myUf[0]*p,q));
+  PointR C(p,q,myUf[1]*q-myUf[0]*p);
+  //C.push_back(Rational(p,q));
+  //C.push_back(Rational(myUf[1]*q-myUf[0]*p,q));
   
   // Upper middle vertex
-  PointR D;
-  D.push_back(Rational(myA,myB));
-  D.push_back(Rational(-myMu+1,myB));
+  PointR D(myA,myB,-myMu+1);
+  //D.push_back(Rational(myA,myB));
+  //D.push_back(Rational(-myMu+1,myB));
   
   // Construction of the dual polygon (vertices in anticlockwise order)
   // No repetition of the first point
   
-  myDualPolygon.addPoint(A);
-  myDualPolygon.addPoint(B);
-  myDualPolygon.addPoint(C);
-  myDualPolygon.addPoint(D);
+  myDualPolygon = DualPolygon(A,B,C,D);
     
 }
 
