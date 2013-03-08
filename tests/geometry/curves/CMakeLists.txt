@@ -22,7 +22,8 @@ SET(DGTAL_TESTS_SRC
   # testArithDSSIterator
    testFareyFan
    testUnionOfDSS
-   	)
+  
+	)
 
 FOREACH(FILE ${DGTAL_TESTS_SRC})
   add_executable(${FILE} ${FILE})
