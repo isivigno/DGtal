@@ -129,7 +129,7 @@ bool testDSLSubsegment( unsigned int nbtries, Integer bb, Integer modx)
                   Integer x2 = x1 + 1+ random()%modx;
 		  //Integer x2 = x1 + 1 + ( random() % modx );
                   
-                  //std::cout << "(" << a << "," << b << "," << mu << ") (" << alpha << "," << beta << ")" << std::endl;
+                  std::cout << "(" << a << "," << b << "," << mu << ") (" << alpha << "," << beta << ")" << std::endl;
 		  
                   Integer y1 = ic.floorDiv(a*x1+mu,b);
                   Integer y2 = ic.floorDiv(a*x2+mu,b);
@@ -225,11 +225,11 @@ int main( int argc, char** argv )
   Integer b;
   
   
-  for(p=2;p<=m;p++)
+  for(p=3;p<=m;p++)
     {
       b = (Integer) pow(10.0,p);
       //std::cout << b << std::endl;
-      for(Integer modx = 10; modx <= b;modx+=modx/8)
+      for(Integer modx = 10; modx <= b;modx+=modx/2)
 	{
 	  std::setprecision(15);
 	  std::cout << b << " " << modx << " ";
