@@ -33,7 +33,7 @@
 #include <cstdlib>
 //////////////////////////////////////////////////////////////////////////////
 
-//#define DEBUG
+#define DEBUG
 
 ///////////////////////////////////////////////////////////////////////////////
 // Implementation of inline methods                                          //
@@ -1401,6 +1401,8 @@ DGtal::DSLSubsegment<TInteger,TNumber>::DSLSubsegment(Number alpha, Number beta,
   trace.info() << std::setprecision(15) << "alpha = " << alpha << " beta = " << beta << std::endl;
 #endif  
   
+  std::cout << alpha;
+
   
   //convexHullApprox(Vector(1,alpha),n,&inf,&sup);
   convexHullApprox(alpha,n,&inf,&sup);

@@ -54,6 +54,44 @@ using namespace DGtal;
 
 //#define CHECK_RES
 
+template <typename Integer>
+bool singleTest(Integer a, Integer b, Integer mu, Integer x1, Integer x2)
+{
+  typedef double Number;
+  typedef DGtal::DSLSubsegment<Integer,Integer> DSLSubseg;
+  typedef DGtal::DSLSubsegment<Integer,Number> DSLSubsegD;
+  
+  typedef typename DSLSubseg::Point Point;
+  DGtal::IntegerComputer<Integer> ic;
+
+  Integer y1 = ic.floorDiv(a*x1+mu,b);
+  Integer y2 = ic.floorDiv(a*x2+mu,b);
+  Point A = Point(x1,y1);
+  Point B = Point(x2,y2);
+  
+  DSLSubseg D(a,b,mu,A,B);
+  
+  Number alpha = (Number) a/(Number) b;
+  Number beta = (Number) mu/(Number) b;
+  Number precision = (Number) 1/(2*b);
+
+  DSLSubsegD DD(alpha,beta,A,B, precision);
+
+  std::cout << "(" << a << "," << b << "," << mu << ") (" << alpha << "," << beta << "," << precision << ")" << std::endl;
+  std::cout  << A << " " << B << std::endl;
+
+  std::cout << "res = " << "(" << D.aa << "," << D.bb << "," << D.Nu << ")" << std::endl;
+  std::cout << "res float = " << "(" << DD.aa << "," << DD.bb << "," << DD.Nu << ")" << std::endl;
+
+  assert(D.aa == DD.aa && D.bb == DD.bb && D.Nu == DD.Nu);
+  //if(!(D.aa == DD.aa && D.bb == DD.bb && D.Nu == DD.Nu))
+  //nberrors++;
+		
+
+}
+
+
+
 template <typename Integer,typename SmallInteger>
 bool testDSLSubsegment( unsigned int nbtries, Integer bb, Integer modx)
 {
@@ -69,7 +107,7 @@ bool testDSLSubsegment( unsigned int nbtries, Integer bb, Integer modx)
 
   typedef typename DSLSubseg::Point Point;
   
-  DGtal::IntegerComputer<Integer> ic;
+  DGtal::IntegerComputer<Integer> ic; 
   
   // Point A(1,5);
   // Point B(6,9);
@@ -240,20 +278,22 @@ int main( int argc, char** argv )
   //   }
   
   
-  for(p=3;p<=m;p++)
-    {
-      b = (Integer) pow(10.0,p);
-      //std::cout << b << std::endl;
-      for(Integer modx = 10; modx <= b;modx+=5)
-	{
-	  std::setprecision(15);
-	  std::cout << b << " " << modx << " ";
-	  testDSLSubsegment<Integer,SmallInteger>( nbtries, b, modx);
-	  std::cout << std::endl;
-	}
-    }
+  // for(p=3;p<=m;p++)
+  //   {
+  //     b = (Integer) pow(10.0,p);
+  //     //std::cout << b << std::endl;
+  //     for(Integer modx = 10; modx <= b;modx+=5)
+  // 	{
+  // 	  std::setprecision(15);
+  // 	  std::cout << b << " " << modx << " ";
+  // 	  testDSLSubsegment<Integer,SmallInteger>( nbtries, b, modx);
+  // 	  std::cout << std::endl;
+  // 	}
+  //   }
   
-  
+  singleTest<Integer>(41,1000,301,722,732);
+
+ 
   return 1;
 }
 //                                                                           //
