@@ -136,7 +136,7 @@ bool testDSLSubsegment( unsigned int nbtries, Integer bb, Integer modx)
                   Point A = Point(x1,y1);
                   Point B = Point(x2,y2);
 		  
-		  //trace.info() << A << " " << B << std::endl;
+		  std::cout  << A << " " << B << std::endl;
 		  
 		  // DSLSubsegment algorithm
 		  
@@ -145,7 +145,7 @@ bool testDSLSubsegment( unsigned int nbtries, Integer bb, Integer modx)
 		  timeEndSubseg = clock();
 		  timeTotalSubseg += ((double)timeEndSubseg-(double)timeBeginSubseg)/(((double)CLOCKS_PER_SEC)/1000);
 		  
-		  //std::cout << "res = " << "(" << D.aa << "," << D.bb << "," << D.Nu << ")" << std::endl;
+		  std::cout << "res = " << "(" << D.aa << "," << D.bb << "," << D.Nu << ")" << std::endl;
 		  // // DSLSubsegment algorithm using floating points
 		  
 		  timeBeginSubsegD = clock();
@@ -154,7 +154,7 @@ bool testDSLSubsegment( unsigned int nbtries, Integer bb, Integer modx)
 		  DSLSubsegD DD(alpha,beta,A,B,precision);
 		  timeEndSubsegD = clock();
 		  //timeTotalSubsegD += ((double)timeEndSubsegD-(double)timeBeginSubsegD)/(((double)CLOCKS_PER_SEC)/1000);
-		  //std::cout << "res float = " << "(" << DD.aa << "," << DD.bb << "," << DD.Nu << ")" << std::endl;
+		  std::cout << "res float = " << "(" << DD.aa << "," << DD.bb << "," << DD.Nu << ")" << std::endl;
 		  
 		  // Compare both results
 		  assert(D.aa == DD.aa && D.bb == DD.bb && D.Nu == DD.Nu);
@@ -217,19 +217,34 @@ int main( int argc, char** argv )
 {
   typedef DGtal::int64_t Integer;
   typedef DGtal::int32_t SmallInteger;
-  SmallInteger m = 10; // b = 10^p with p <= m
+  SmallInteger m = 3; // b = 10^p with p <= m
   
-  unsigned int nbtries = ( argc > 1 ) ? atoi( argv[ 1 ] ) :1000;
+  unsigned int nbtries = ( argc > 1 ) ? atoi( argv[ 1 ] ) :5;
   
   SmallInteger p = 1;
   Integer b;
+  
+  srand(time(NULL));
+  
+  // for(p=3;p<=m;p++)
+  //   {
+  //     b = (Integer) pow(10.0,p);
+  //     //std::cout << b << std::endl;
+  //     for(Integer modx = 10; modx <= b;modx+=modx/8)
+  // 	{
+  // 	  std::setprecision(15);
+  // 	  std::cout << b << " " << modx << " ";
+  // 	  testDSLSubsegment<Integer,SmallInteger>( nbtries, b, modx);
+  // 	  std::cout << std::endl;
+  // 	}
+  //   }
   
   
   for(p=3;p<=m;p++)
     {
       b = (Integer) pow(10.0,p);
       //std::cout << b << std::endl;
-      for(Integer modx = 10; modx <= b;modx+=modx/2)
+      for(Integer modx = 10; modx <= b;modx+=5)
 	{
 	  std::setprecision(15);
 	  std::cout << b << " " << modx << " ";
@@ -237,6 +252,8 @@ int main( int argc, char** argv )
 	  std::cout << std::endl;
 	}
     }
+  
+  
   return 1;
 }
 //                                                                           //
