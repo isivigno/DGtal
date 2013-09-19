@@ -292,6 +292,7 @@ int main( int argc, char** argv )
   //   }
   
   singleTest<Integer>(41,1000,301,722,732);
+  singleTest<Integer>(547,1000,930,467,471);
 
  
   return 1;
