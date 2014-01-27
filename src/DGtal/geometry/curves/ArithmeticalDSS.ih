@@ -383,7 +383,7 @@ void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( Arithmet
   else
     areConnected = false;
   
-  assert(areConnected==true);
+  //assert(areConnected==true);
   
   // compute the dual polygon of each DSS
 
