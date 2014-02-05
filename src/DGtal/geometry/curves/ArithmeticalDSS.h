@@ -102,10 +102,7 @@ namespace DGtal
     /* typedef boost::rational<Integer> Rational; */
     /* typedef DGtal::Polygon<Rational> DualPolygon; */
     /* typedef typename DualPolygon::Point PointR; */
-   
-    typedef typename DGtal::FareyFan<Integer>::Polygon DualPolygon;
-    typedef typename DGtal::FareyFan<Integer>::PointR PointR;
-    typedef typename DGtal::FareyFan<Integer>::Polygon::PointList PointList;
+  
 
 
     /**
@@ -117,9 +114,7 @@ namespace DGtal
 
   public:
     
-    DualPolygon translateDualPolygon();
-
-
+  
     /**
      * Type used for the points coordinates
      * and the slope parameters. 
@@ -161,12 +156,22 @@ namespace DGtal
      */
     typedef typename DSL::ConstReverseIterator ConstReverseIterator; 
 
+
+  
+  typedef typename DGtal::FareyFan<Integer>::Polygon DualPolygon;
+  typedef typename DGtal::FareyFan<Integer>::PointR PointR;
+  typedef typename DGtal::FareyFan<Integer>::Polygon::PointList PointList;
+  
     
-    void unionDSS( Self & other, Integer *a, Integer *b, Integer *mu);
-    //bool unionDSS( Self & other);
+  void unionDSS( ArithmeticalDSS & other, Integer *a, Integer *b, Integer *mu);
+  //bool unionDSS( Self & other);
+  
+  DualPolygon translateDualPolygon();
+  
 
-    //PointR findCharacteristicVertex(std::vector<PointR > pts, bool areConnected); 
-
+  
+  //PointR findCharacteristicVertex(std::vector<PointR > pts, bool areConnected); 
+  
 
 
     /**

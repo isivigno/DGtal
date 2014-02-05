@@ -941,30 +941,30 @@ void
 DGtal::FareyFan<TInteger>::Polygon::selfDisplay ( std::ostream & out) const
 {
   
-  out << "[Polygon]" <<  endl;
+  out << "[Polygon]" <<  std::endl;
   
   typename PointList::const_iterator it;
   
-  out << "   Points" <<  endl;
+  out << "   Points" <<  std::endl;
   
   for(it = myPoints.begin();it != myPoints.end();it++)
     {
       PointR p = *it;
-      out << "(" << p[0] << "," << p[1] << "," << p[2] << ")" << endl;
+      out << "(" << p[0] << "," << p[1] << "," << p[2] << ")" << std::endl;
     }
   
-  out << "   Rays" <<  endl;
+  out << "   Rays" <<  std::endl;
   
   typename RayList::const_iterator itR; 
 
   for(itR = myRays.begin();itR != myRays.end();itR++)
     {
       Ray r = *itR;
-      out << "(" << r.myX << "," << r.myY << ")" << endl;
+      out << "(" << r.myX << "," << r.myY << ")" << std::endl;
     }
   
 
-  out << "[End Polygon]" <<  endl;
+  out << "[End Polygon]" <<  std::endl;
 }
 
 

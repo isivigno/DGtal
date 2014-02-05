@@ -208,20 +208,20 @@ DGtal::ArithmeticalDSS<TCoordinate, TInteger, adjacency>
 }
 
 
-template <typename TIterator, typename TInteger, int connectivity>
+template <typename TCoordinate, typename TInteger, unsigned short adjacency>
 inline
 //typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::Self
-void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::unionDSS( ArithmeticalDSS<TIterator,TInteger,connectivity> & other, TInteger *aa, TInteger *bb, TInteger *muu ) {
+void DGtal::ArithmeticalDSS<TCoordinate,TInteger,adjacency>::unionDSS(DGtal::ArithmeticalDSS<TCoordinate,TInteger,adjacency> & other, TInteger *aa, TInteger *bb, TInteger *muu ) {
   
-  bool areConnected;
+  // bool areConnected;
   
-  Point myFirst=getFirstPoint(), otherFirst=other.getFirstPoint();
-  Point myLast=getLastPoint(), otherLast=other.getLastPoint();
+  // Point myFirst=getFirstPoint(), otherFirst=other.getFirstPoint();
+  // Point myLast=getLastPoint(), otherLast=other.getLastPoint();
 
-  if((myFirst[0] >= otherFirst[0] && myFirst[0] <= otherLast[0]) || (otherFirst[0] >= myFirst[0] && otherFirst[0] <= myLast[0]) || myFirst[0] == otherLast[0]+1 || otherFirst[0] == myLast[0]+1)
-    areConnected = true;
-  else
-    areConnected = false;
+  // if((myFirst[0] >= otherFirst[0] && myFirst[0] <= otherLast[0]) || (otherFirst[0] >= myFirst[0] && otherFirst[0] <= myLast[0]) || myFirst[0] == otherLast[0]+1 || otherFirst[0] == myLast[0]+1)
+  //   areConnected = true;
+  // else
+  //   areConnected = false;
   
   //assert(areConnected==true);
   
@@ -532,8 +532,8 @@ DGtal::ArithmeticalDSS<TCoordinate, TInteger, adjacency>::rend() const
 //-----------------------------------------------------------------------------
 template <typename TCoordinate, typename TInteger, unsigned short adjacency>
 inline
-typename DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::DualPolygon
-DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::getDualPolygon() const {
+typename DGtal::ArithmeticalDSS<TCoordinate,TInteger,adjacency>::DualPolygon
+DGtal::ArithmeticalDSS<TCoordinate,TInteger,adjacency>::getDualPolygon() const {
   return myDualPolygon;
 }
 
@@ -751,16 +751,16 @@ extendBack( const Point& aNewPoint )
  
   if (flag) //update '*this' if required
     *this = opposite.negate(); 
+}
 
-
-template <typename TIterator, typename TInteger, int connectivity>
+template <typename TCoordinate, typename TInteger, unsigned short adjacency>
 inline
-void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon(){
+void DGtal::ArithmeticalDSS<TCoordinate,TInteger,adjacency>::computeDualPolygon(){
   
   
-  assert(myB>=myA);
-  assert(myB>0);
-  assert(myA>=0);
+  assert(myDSL.myB>=myDSL.myA);
+  assert(myDSL.myB>0);
+  assert(myDSL.myA>=0);
   
   //  trace.info() << "Dual Polygon: \n";
       
@@ -773,7 +773,7 @@ void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon
   PointR A(p,q,myUl[1]*q-myUl[0]*p);
   
   // Lower middle vertex
-  PointR B(myA,myB,-myMu);
+  PointR B(myDSL.myA,myDSL.myB,-myDSL.myMu);
   
   // Rightmost vertex
   p = myLl[1]+1-myUf[1];
@@ -782,7 +782,7 @@ void DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity>::computeDualPolygon
   PointR C(p,q,myUf[1]*q-myUf[0]*p);
     
   // Upper middle vertex
-  PointR D(myA,myB,-myMu+1);
+  PointR D(myDSL.myA,myDSL.myB,-myDSL.myMu+1);
   
   typedef typename DGtal::FareyFan<TInteger>::Ray myRay;
 

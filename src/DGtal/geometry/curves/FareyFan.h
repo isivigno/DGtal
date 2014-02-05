@@ -150,14 +150,14 @@ public:
       /* List of points of the polygon 
        *
        */
-      typedef vector<PointR> PointList;
+      typedef std::vector<PointR> PointList;
       PointList myPoints;
       
       
       /* List of rays of the polygon 
        *
        */
-      typedef vector<Ray> RayList;
+      typedef std::vector<Ray> RayList;
       
       RayList myRays;
 
