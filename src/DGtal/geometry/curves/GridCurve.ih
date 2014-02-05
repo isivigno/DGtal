@@ -183,10 +183,8 @@ DGtal::GridCurve<TKSpace>::initFromPointsRange( const TIterator& itb, const TIte
       throw InputException(); 
     }
     mySCells.push_back( s );
-
   }
-
-
+  
   Point first = *itb;
   Point last = *i;
   Vector v(first - last); 
@@ -195,7 +193,7 @@ DGtal::GridCurve<TKSpace>::initFromPointsRange( const TIterator& itb, const TIte
     ASSERT( isInside( s ) ); //never out of space
     mySCells.push_back( PointVectorTo1SCell(last,v) );
   }
-
+  
   return true;
 }
 

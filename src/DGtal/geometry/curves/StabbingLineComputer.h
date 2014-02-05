@@ -246,6 +246,7 @@ namespace DGtal
      */
     bool extendFront();
 
+    
     /**
      * Forward extension test.
      *
