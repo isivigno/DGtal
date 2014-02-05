@@ -32,7 +32,6 @@
 
 #include <iostream>
 #include <QtGui/qapplication.h>
-#include "DGtal/io/viewers/Viewer3D.h"
 #include "DGtal/io/DrawWithDisplay3DModifier.h"
 #include "DGtal/io/Color.h"
 #include "DGtal/base/Common.h"
@@ -40,18 +39,14 @@
 #include "DGtal/shapes/Shapes.h"
 #include "DGtal/io/colormaps/HueShadeColorMap.h"
 #include "DGtal/io/colormaps/GradientColorMap.h"
+#include "ConfigExamples.h"
+#include "DGtal/io/viewers/Viewer3D.h"
 
+ 
 using namespace std;
 using namespace DGtal;
 using namespace Z3i;
 
-
-/////////////////////
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/variables_map.hpp>
-
-namespace po = boost::program_options;
 
 //image
 #include "DGtal/io/readers/VolReader.h"
@@ -73,51 +68,25 @@ namespace po = boost::program_options;
 int main( int argc, char** argv )
 {
 
-  //////////////////////////////////////////////////////////////////////////////////
-  // parse command line 
-  po::options_description general_opt("Allowed options are");
-  general_opt.add_options()
-    ("help,h", "display this message")
-    ("inputImage,i",  po::value<string>(), "Grey-level image (vol format)" )
-    ("threshold,t",  po::value<int>()->default_value(1), "Set defined by the voxels whose value is below t" )
-    ("width,w",  po::value<double>()->default_value(3.0), "Band width where DT is computed" ); 
-  
-  po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, general_opt), vm);  
-  po::notify(vm);    
-  if(vm.count("help")||argc<=1)
-    {
-      trace.info()<< "3d incremental DT transform" << std::endl
-		  << "Basic usage: "<<std::endl
-		  << argv[0] << " [other options] -i <vol file> -t <threshold> " << std::endl
-		  << general_opt << "\n";
-      return 0;
-    }
-  
+ 
   //Parse options
   //threshold
-  int t = vm["threshold"].as<int>(); 
+  int t =0;
   //width
-  double maximalWidth = vm["width"].as<double>(); 
+  double maximalWidth = 3.0; 
 
 
   //////////////////////////////////////////////////////////////////////////////////
   // image binarization and surface extraction
   //types
   typedef ImageContainerBySTLVector<Domain,short int> LabelImage; 
-  typedef ConstImageAdapter<LabelImage, Thresholder<LabelImage::Value>, bool > BinaryImage;
+  typedef ConstImageAdapter<LabelImage, Domain, DefaultFunctor, bool, Thresholder<LabelImage::Value> > BinaryImage;
   typedef FrontierPredicate<KSpace, BinaryImage> SurfelPredicate;
   typedef LightExplicitDigitalSurface<KSpace, SurfelPredicate> Frontier;
-  typedef Frontier::SurfelConstIterator SurfelIterator;
-
-  if (!(vm.count("inputImage"))) 
-    {
-      trace.emphase() << "you should use option -i" << std::endl; 
-      return 0; 
-    }
-
+  
   //reading image
-  string imageFileName = vm["inputImage"].as<std::string>();
+  std::string imageFileName = examplesPath + "samples/Al.100.vol"; 
+
   trace.emphase() << imageFileName <<std::endl; 
   DGtal::trace.beginBlock("image reading..."); 
   LabelImage labelImage = VolReader<LabelImage>::importVol( imageFileName);
@@ -125,8 +94,9 @@ int main( int argc, char** argv )
 
   DGtal::trace.beginBlock("binarization..."); 
 
+  DefaultFunctor g;
   Thresholder<LabelImage::Value> thresholder( t ); 
-  BinaryImage binaryImage(labelImage, thresholder);
+  BinaryImage binaryImage(labelImage, labelImage.domain(), g, thresholder);
   trace.info() << "threshold: "
 	       << t
 	       << std::endl;
@@ -139,7 +109,7 @@ int main( int argc, char** argv )
 
   try { 
     //getting a bel
-    bel = Surfaces<KSpace>::findABel( ks, binaryImage,  d.size() );
+    bel = Surfaces<KSpace>::findABel( ks, binaryImage, d.size() );
 
     trace.info() << "starting bel: "
 		 << bel
@@ -190,7 +160,7 @@ int main( int argc, char** argv )
   //////////////////////////////////////////////////////////////////////////////////
   //visualisation
   QApplication application(argc,argv);
-  Viewer3D viewer;
+  Viewer3D<> viewer;
   viewer.show();
 
   //
@@ -204,8 +174,8 @@ int main( int argc, char** argv )
       viewer << CustomColors3D( colorMap(it->second), colorMap(it->second) ) ;
       viewer << p;
     }
-
-  Vector extent = d.extent(); 
+  Point p = Point::diagonal(1);
+  Vector extent =  (d.upperBound() - d.lowerBound()) + p;
   double a = -extent[0]/2, b = extent[1]/2;
   double c = 0, mu = (a+b);  
   trace.info() << "clipping plane (" 
@@ -213,7 +183,7 @@ int main( int argc, char** argv )
 	       << std::endl;  
   viewer << ClippingPlane(a,b,c,mu); 
   
-  viewer << Viewer3D::updateDisplay;
+  viewer << Viewer3D<>::updateDisplay;
   return application.exec();
 }
 //                                                                           //

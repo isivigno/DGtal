@@ -30,12 +30,14 @@
 //////////////////////////////////////////////////////////////////////////////
 // Inclusions
 #include <iostream>
-#include "DGtal/images/Morton.h"
 //////////////////////////////////////////////////////////////////////////////
 
 namespace DGtal
   {
 
+    template  <typename THashKey, typename TPoint >
+    const Dimension Morton<THashKey, TPoint>::dimension = TPoint::dimension;  
+    
   template  <typename HashKey, typename Point >
   Morton<HashKey,Point>::Morton()
   {

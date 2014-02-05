@@ -34,10 +34,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Interface - public :
 
-template <typename T>
+template <typename T, typename TFunctor>
 inline
 T 
-DGtal::RawReader<T>::importRaw8 (const std::string & filename, const Vector & extent ) throw(DGtal::IOException)
+DGtal::RawReader<T, TFunctor >::importRaw8 (const std::string & filename, const Vector & extent, 
+				 const Functor & aFunctor ) throw(DGtal::IOException)
 {
   FILE * fin;
   DGtal::IOException dgtalerror;
@@ -45,7 +46,7 @@ DGtal::RawReader<T>::importRaw8 (const std::string & filename, const Vector & ex
   fin = fopen( filename.c_str() , "r" );
 
   if (fin == NULL) 
-      trace.error() << "RawReader : can't open "<< filename<<endl;
+    trace.error() << "RawReader : can't open "<< filename<<std::endl;
   
   
   typename T::Point firstPoint;
@@ -72,7 +73,7 @@ DGtal::RawReader<T>::importRaw8 (const std::string & filename, const Vector & ex
   while ((fin) && (it != itend))
     {
       val = getc(fin);  
-      image.setValue( (*it),val);
+      image.setValue( (*it),aFunctor(val));
       it++;
       count++;
     }
@@ -81,7 +82,7 @@ DGtal::RawReader<T>::importRaw8 (const std::string & filename, const Vector & ex
   
   if (count != size )
     {
-      trace.error() << "RawReader: error while opening file "<<filename<<endl;
+      trace.error() << "RawReader: error while opening file "<<filename<<std::endl;
       throw dgtalerror;
     }
   else

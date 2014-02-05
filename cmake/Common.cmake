@@ -30,11 +30,15 @@ foreach(p LIB BIN INCLUDE DATA)
 endforeach()
 
 # -----------------------------------------------------------------------------
-# Doxygen doc target
+# Doxygen targets
 # -----------------------------------------------------------------------------
+message(STATUS "-------------------------------------------------------------------------------")
+message(STATUS "Checking if doxygen/dot is installed:")
+message(STATUS " ")
 set(INSTALL_DOC_PATH ${CMAKE_INSTALL_PREFIX}/doc/${CMAKE_PROJECT_NAME} )
-INCLUDE(${CMAKE_MODULE_PATH}/doxygen.cmake)
-INCLUDE(${CMAKE_MODULE_PATH}/TargetDoxygenDoc.cmake OPTIONAL)
+INCLUDE(doxygen)
+INCLUDE(TargetDoxygenDoc OPTIONAL)
+INCLUDE(TargetDoxygenDox OPTIONAL)
 
 # -----------------------------------------------------------------------------
 # uninstall target
@@ -50,22 +54,24 @@ ADD_CUSTOM_TARGET(uninstall
 # Parsing cmake options
 # -----------------------------------------------------------------------------
 OPTION(BUILD_SHARED_LIBS "Build shared libraries." ON)
-OPTION(DEBUG_VERBOSE "Verbose messages in debug mode." OFF)
+OPTION(BUILD_TESTING "Build testing." OFF)
+OPTION(DEBUG_VERBOSE "Verbose debug messages." OFF)
+OPTION(VERBOSE "Verbose messages." OFF)
+option(DGTAL_NO_ESCAPED_CHAR_IN_TRACE "Avoid printing special color and font weight terminal escaped char in program output." OFF)
 
-if ( ${CMAKE_BUILD_TYPE} MATCHES "Debug" )
-  IF (DEBUG_VERBOSE)
-    ADD_DEFINITIONS(-DDEBUG_VERBOSE)
-    MESSAGE(STATUS "Debug verbose mode activated")
-  ENDIF(DEBUG_VERBOSE)
-endif( ${CMAKE_BUILD_TYPE} MATCHES "Debug" )
+SET(VERBOSE_DGTAL 0)
+SET(DEBUG_VERBOSE_DGTAL 0)
 
-# Functions are INLINE only in Release mode
-if ( ${CMAKE_BUILD_TYPE} MATCHES "Release" )
-    ADD_DEFINITIONS(-DINLINE=inline)
-    ADD_DEFINITIONS(-DBUILD_INLINE=)
-else ( ${CMAKE_BUILD_TYPE} MATCHES "Release" )
-    ADD_DEFINITIONS(-DINLINE=)
-endif ( ${CMAKE_BUILD_TYPE} MATCHES "Release" )
+IF (DEBUG_VERBOSE)
+  SET(DEBUG_VERBOSE_DGTAL 1)
+  ADD_DEFINITIONS(-DDEBUG_VERBOSE)
+  MESSAGE(STATUS "Debug verbose mode activated")
+ENDIF(DEBUG_VERBOSE)
+IF (VERBOSE)
+  SET(VERBOSE_DGTAL 1)
+  ADD_DEFINITIONS(-DVERBOSE)
+  MESSAGE(STATUS "Verbose mode activated")
+ENDIF(VERBOSE)
 
 # -----------------------------------------------------------------------------
 # Benchmark target
@@ -91,3 +97,13 @@ IF(PROJECT_BINARY_DIR STREQUAL ${PROJECT_SOURCE_DIR})
   MESSAGE(STATUS "Building in the source tree is not a good idea ! Remove the file 'CMakeCache.txt' and the folder 'CMakeFiles' an
 d build outside the sources (for example 'mkdir build ; cmake <DGTAL_DIR>'.")
 ENDIF(PROJECT_BINARY_DIR STREQUAL ${PROJECT_SOURCE_DIR})
+
+
+# -----------------------------------------------------------------------------
+# Debug specific options
+# -----------------------------------------------------------------------------
+OPTION(WARNING_AS_ERROR "Transform compiler warnings as errors (in Debug build type)." OFF)
+IF (WARNING_AS_ERROR)
+  SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror")
+  MESSAGE(STATUS "Warnings as Errors ENABLED.")
+ENDIF(WARNING_AS_ERROR)

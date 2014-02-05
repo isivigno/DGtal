@@ -44,6 +44,7 @@
 #include <map>
 #include <string>
 #include "DGtal/base/Common.h"
+#include "DGtal/base/CowPtr.h"
 
 #include "DGtal/base/BasicFunctors.h"
 #include "DGtal/base/IteratorAdapter.h"
@@ -86,7 +87,7 @@ namespace DGtal
 
     typedef Pair1st<Point> Functor; 
     typedef ConstIteratorAdapter<typename Image::ConstIterator, Functor, Point> ConstIterator;
-    typedef ConstIteratorAdapter<typename Image::Iterator, Functor, Point> Iterator;
+    typedef ConstIteratorAdapter<typename Image::ConstIterator, Functor, Point> Iterator;
 
     // ------------------------- Protected Datas ------------------------------
   protected:
@@ -146,6 +147,11 @@ namespace DGtal
      * @return the embedding domain.
      */
     const Domain & domain() const;
+
+    /**
+     * @return a counted pointer on the embedding domain.
+     */
+    CowPtr<Domain> domainPointer() const;
 
     /**
      * @return the number of elements in the set.
@@ -271,6 +277,15 @@ namespace DGtal
     template< typename TDigitalSet >
     Self & operator+=
     ( const TDigitalSet & aSet );
+
+    // ----------------------- Model of CPointPredicate -----------------------------
+  public:
+
+    /**
+       @param p any point.
+       @return 'true' if and only if \a p belongs to this set.
+    */
+    bool operator()( const Point & p ) const;
 
     // ----------------------- Other Set services -----------------------------
   public:

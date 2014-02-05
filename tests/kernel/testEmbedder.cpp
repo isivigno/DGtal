@@ -34,9 +34,9 @@
 #include "DGtal/kernel/CPointEmbedder.h"
 #include "DGtal/kernel/CWithGradientMap.h"
 #include "DGtal/kernel/CanonicEmbedder.h"
-#include "DGtal/kernel/CanonicCellEmbedder.h"
-#include "DGtal/kernel/CanonicSCellEmbedder.h"
-#include "DGtal/kernel/CanonicDigitalSurfaceEmbedder.h"
+#include "DGtal/topology/CanonicCellEmbedder.h"
+#include "DGtal/topology/CanonicSCellEmbedder.h"
+#include "DGtal/topology/CanonicDigitalSurfaceEmbedder.h"
 #include "DGtal/kernel/RegularPointEmbedder.h"
 #include "DGtal/topology/CCellEmbedder.h"
 #include "DGtal/topology/CSCellEmbedder.h"
@@ -93,8 +93,8 @@ bool testEmbedder()
   typedef DigitalSurface<DigitalSurfaceContainer> MyDigitalSurface;
   typedef CanonicDigitalSurfaceEmbedder<MyDigitalSurface> MyDSEmbedder1;
   BOOST_CONCEPT_ASSERT(( CDigitalSurfaceEmbedder< MyDSEmbedder1 > ));
-  typedef ConstantConvolutionWeights< MyDigitalSurface::Size > Kernel;
-  typedef LocalConvolutionNormalVectorEstimator
+  typedef deprecated::ConstantConvolutionWeights< MyDigitalSurface::Size > Kernel;
+  typedef deprecated::LocalConvolutionNormalVectorEstimator
     < MyDigitalSurface, Kernel > MyEstimator;
   typedef DigitalSurfaceEmbedderWithNormalVectorEstimator
     < MyDSEmbedder1, MyEstimator > MyDSEmbedder2;

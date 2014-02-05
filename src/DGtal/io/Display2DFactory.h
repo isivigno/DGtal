@@ -45,6 +45,7 @@
 
 #include "DGtal/math/AngleLinearMinimizer.h"
 #include "DGtal/geometry/curves/ArithmeticalDSS.h"
+#include "DGtal/geometry/curves/ArithmeticalDSSComputer.h"
 #include "DGtal/shapes/fromPoints/CircleFrom2Points.h"
 #include "DGtal/shapes/fromPoints/CircleFrom3Points.h"
 #include "DGtal/kernel/sets/DigitalSetBySTLSet.h"
@@ -52,18 +53,22 @@
 #include "DGtal/geometry/curves/GridCurve.h"
 #include "DGtal/geometry/curves/FP.h"
 #include "DGtal/geometry/curves/FreemanChain.h"
-#include "DGtal/geometry/curves/GeometricalDSS.h"
-#include "DGtal/geometry/curves/GeometricalDCA.h"
+#include "DGtal/geometry/curves/StabbingLineComputer.h"
+#include "DGtal/geometry/curves/StabbingCircleComputer.h"
+#include "DGtal/geometry/curves/FrechetShortcut.h"
 #include "DGtal/kernel/domains/HyperRectDomain.h"
 #include "DGtal/images/ImageContainerByHashTree.h"
 #include "DGtal/images/ImageContainerBySTLVector.h"
+#include "DGtal/images/ImageAdapter.h"
 #include "DGtal/topology/KhalimskySpaceND.h"
 #include "DGtal/topology/Object.h"
 #include "DGtal/kernel/PointVector.h"
 #include "DGtal/geometry/tools/Preimage2D.h"
 #include "DGtal/shapes/fromPoints/StraightLineFrom2Points.h"
+#include "DGtal/arithmetic/LatticePolytope2D.h"
+#include "DGtal/topology/CanonicSCellEmbedder.h"
 
-#include "DGtal/io/boards/Board2D.h"
+//#include "DGtal/io/boards/Board2D.h"
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -85,19 +90,32 @@ namespace DGtal
 static void draw( DGtal::Board2D & board, const DGtal::AngleLinearMinimizer & );
 // AngleLinearMinimizer
     
-    
 // ArithmeticalDSS
+template <typename TCoordinate, typename TInteger, unsigned short adjacency>
+  static void drawAsBoundingBox( DGtal::Board2D & aBoard, 
+			  const DGtal::ArithmeticalDSS<TCoordinate,TInteger,adjacency> & );
+
+template <typename TCoordinate, typename TInteger, unsigned short adjacency>
+  static void drawAsDigitalPoints( DGtal::Board2D & aBoard, 
+			    const DGtal::ArithmeticalDSS<TCoordinate,TInteger,adjacency> & );
+
+template <typename TCoordinate, typename TInteger, unsigned short adjacency>
+  static void draw( DGtal::Board2D & board, const DGtal::ArithmeticalDSS<TCoordinate,TInteger,adjacency> & );
+// ArithmeticalDSS
+
+    
+// ArithmeticalDSSComputer
 template <typename TIterator, typename TInteger, int connectivity>
   static void drawAsBoundingBox( DGtal::Board2D & aBoard, 
-			  const DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity> & );
+			  const DGtal::ArithmeticalDSSComputer<TIterator,TInteger,connectivity> & );
 
 template <typename TIterator, typename TInteger, int connectivity>
   static void drawAsDigitalPoints( DGtal::Board2D & aBoard, 
-			    const DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity> & );
+			    const DGtal::ArithmeticalDSSComputer<TIterator,TInteger,connectivity> & );
 
 template <typename TIterator, typename TInteger, int connectivity>
-  static void draw( DGtal::Board2D & board, const DGtal::ArithmeticalDSS<TIterator,TInteger,connectivity> & );
-// ArithmeticalDSS
+  static void draw( DGtal::Board2D & board, const DGtal::ArithmeticalDSSComputer<TIterator,TInteger,connectivity> & );
+// ArithmeticalDSSComputer
     
     
 // CircleFrom2Points
@@ -125,8 +143,8 @@ static void draw(Board2D & aBoard, const DGtal::CircleFrom3Points<TPoint> & );
     
     
 // DigitalSetBySTLSet
-template<typename Domain>
-static void draw( DGtal::Board2D & board, const DGtal::DigitalSetBySTLSet<Domain> & );
+template<typename Domain, typename Compare>
+static void draw( DGtal::Board2D & board, const DGtal::DigitalSetBySTLSet<Domain, Compare> & );
 // DigitalSetBySTLSet
     
     
@@ -157,21 +175,29 @@ static void draw( DGtal::Board2D & aBoard, const DGtal::FreemanChain<TInteger> &
 // FreemanChain
     
     
-// GeometricalDSS
+// StabbingLineComputer
 template <typename TConstIterator>
-static void draw(DGtal::Board2D & aBoard, const DGtal::GeometricalDSS<TConstIterator> & );
-// GeometricalDSS
-    
-// GeometricalDCA
+static void draw(DGtal::Board2D & aBoard, const DGtal::StabbingLineComputer<TConstIterator> & );
+// StabbingLineComputer
+
+// StabbingCircleComputer
 template <typename TConstIterator>
-static void draw(DGtal::Board2D & aBoard, const DGtal::GeometricalDCA<TConstIterator> & );
-// GeometricalDCA
+static void draw(DGtal::Board2D & aBoard, const DGtal::StabbingCircleComputer<TConstIterator> & );
+// StabbingCircleComputer
+
+
+//FrechetShortcut
+template <typename TIterator, typename TInteger>
+static  void draw(DGtal::Board2D & aBoard, const DGtal::FrechetShortcut<TIterator,TInteger> & );
+//FrechetShortcut
 
     
 // GridCurve
 template <typename TKSpace>
 static void draw( DGtal::Board2D & aBoard, 
            const GridCurve<TKSpace> & object );
+template <typename TKSpace>
+static void drawFill( DGtal::Board2D & aBoard, const GridCurve<TKSpace> & object );
 // GridCurve
     
 // SCellsRange
@@ -189,7 +215,7 @@ static void draw( DGtal::Board2D & aBoard,
 // MidPointsRange
 template <typename TIterator, typename TKSpace>
 static void draw( DGtal::Board2D & aBoard, 
-           const ConstRangeAdapter<TIterator, SCellToMidPoint<TKSpace>, 
+           const ConstRangeAdapter<TIterator, CanonicSCellEmbedder<TKSpace>,
            typename TKSpace::Space::RealPoint> & object );
 // MidPointsRange
 
@@ -236,7 +262,7 @@ static void draw( DGtal::Board2D & board, const DGtal::HyperRectDomain<TSpace> &
 // ImageContainerByHashTree
 template <typename C, typename Domain, typename Value, typename HashKey>
 static void drawImageRecursive( DGtal::Board2D & aBoard, 
-                         const DGtal::ImageContainerByHashTree<Domain, Value, HashKey> & i,
+                         const DGtal::experimental::ImageContainerByHashTree<Domain, Value, HashKey> & i,
                          HashKey key,
                          const double p[2],
                          const double len,
@@ -244,16 +270,20 @@ static void drawImageRecursive( DGtal::Board2D & aBoard,
                          const C& cmap );
 
 template <typename C, typename Domain, typename Value, typename HashKey>
-static void drawImage( Board2D & board,
-                const DGtal::ImageContainerByHashTree<Domain, Value, HashKey> &, 
+static void drawImageHashTree( Board2D & board,
+                const DGtal::experimental::ImageContainerByHashTree<Domain, Value, HashKey> &,
                 const Value &, const Value & );
 // ImageContainerByHashTree
 
 
-// ImageContainerBySTLVector
-template <typename Colormap, typename D, typename V>
-  static void drawImage( DGtal::Board2D & board, const DGtal::ImageContainerBySTLVector<D, V> &, const V &, const V & );
-// ImageContainerBySTLVector
+// ImageContainerBySTLVector, ImageContainerByHashTree, Image and ImageAdapter...
+// minV and maxV are bounds values of colormap
+template <typename Colormap, typename Image>
+  static void drawImage( DGtal::Board2D & board,
+                          const Image & i,
+                          const typename Image::Value & minV,
+                          const typename Image::Value & maxV );
+// ImageContainerBySTLVector, ImageContainerByHashTree, Image and ImageAdapter...
     
     
 // KhalimskyCell
@@ -311,6 +341,18 @@ static void draw(Board2D & aBoard, const DGtal::StraightLineFrom2Points<TPoint> 
     
 static void draw( DGtal::Board2D & board, const DGtal::CustomStyle & );
 static void draw( DGtal::Board2D & board, const DGtal::SetMode & );
+
+
+   /**
+      Draw method on Board for LatticePolytope2D.
+      
+      @param aBoard an instance of Board2D.
+      @param cip an instance of convex integer polygon.
+   */
+   template <typename TSpace, typename TSequence>
+   static
+   void draw( DGtal::Board2D & aBoard, 
+              const DGtal::LatticePolytope2D<TSpace, TSequence> & cip );
 
     
   }; // end of struct Display2DFactory

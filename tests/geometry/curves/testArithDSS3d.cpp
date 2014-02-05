@@ -28,7 +28,7 @@
 
 /**
  * Description of testArithDSS3d <p>
- * Aim: simple test of \ref ArithmeticalDSS3d
+ * Aim: simple test of \ref StandardDSS6Computer
  */
 
 
@@ -45,7 +45,7 @@
 #include "DGtal/base/Exceptions.h"
 #include "DGtal/kernel/SpaceND.h"
 #include "DGtal/kernel/domains/HyperRectDomain.h"
-#include "DGtal/geometry/curves/ArithmeticalDSS3d.h"
+#include "DGtal/geometry/curves/StandardDSS6Computer.h"
 #include "DGtal/geometry/curves/GreedySegmentation.h"
 
 using namespace DGtal;
@@ -53,7 +53,7 @@ using namespace std;
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Functions for testing class ArithmeticalDSS.
+// Functions for testing class StandardDSS6Computer.
 ///////////////////////////////////////////////////////////////////////////////
 /**
  * simple test
@@ -64,7 +64,7 @@ bool testDSSreco()
 
   typedef PointVector<3,int> Point;
   typedef std::vector<Point>::iterator Iterator;
-  typedef ArithmeticalDSS3d<Iterator,int,4> SegmentComputer;  
+  typedef StandardDSS6Computer<Iterator,int,4> SegmentComputer;  
   
   std::vector<Point> sequence;
   sequence.push_back(Point(0,0,0));
@@ -93,10 +93,11 @@ bool testDSSreco()
   trace.info() << "init with " << (*i) << std::endl;
 
     while ( (algo.end() != sequence.end())
-	    && algo.extendForward()) {
+	    && algo.extendFront()) {
       trace.info() << "extended with " << (*(--algo.end())) << std::endl;
     }
     
+
     trace.info() << algo << " " << algo.isValid() << std::endl;
 
     trace.endBlock();
@@ -115,7 +116,7 @@ bool testSegmentation()
 
   typedef PointVector<3,int> Point;
   typedef std::vector<Point>::iterator Iterator;
-  typedef ArithmeticalDSS3d<Iterator,int,4> SegmentComputer;  
+  typedef StandardDSS6Computer<Iterator,int,4> SegmentComputer;  
   typedef GreedySegmentation<SegmentComputer> Decomposition;
 
   std::vector<Point> sequence;
@@ -138,7 +139,7 @@ bool testSegmentation()
   
   //Segmentation
   trace.beginBlock("Segmentation test");
-
+    
     SegmentComputer algo;
     Decomposition theDecomposition(sequence.begin(), sequence.end(), algo);
            
@@ -154,10 +155,29 @@ bool testSegmentation()
   return (c==2);
 }
 
+
+void testStandardDSS6ComputerConceptChecking()
+{
+  typedef PointVector<3,int> Point;
+  typedef std::vector<Point>::const_iterator ConstIterator; 
+  typedef StandardDSS6Computer<ConstIterator,int,4> ArithDSS3d; 
+
+  trace.beginBlock("Concept checking");
+
+  BOOST_CONCEPT_ASSERT(( CForwardSegmentComputer<ArithDSS3d> ));
+  
+  trace.endBlock();
+
+}
+
+
+
 int main(int argc, char **argv)
 {
-
-  trace.beginBlock ( "Testing class ArithmeticalDSS" );
+  trace.beginBlock ( "Testing class ArithmeticalDSSComputer" );
+ 
+  testStandardDSS6ComputerConceptChecking();  
+    
   trace.info() << "Args:";
   for ( int i = 0; i < argc; ++i )
     trace.info() << " " << argv[ i ];
@@ -165,6 +185,7 @@ int main(int argc, char **argv)
 
   bool res = testDSSreco() 
         && testSegmentation()
+
   ;
   trace.emphase() << ( res ? "Passed." : "Error." ) << endl;
   trace.endBlock();

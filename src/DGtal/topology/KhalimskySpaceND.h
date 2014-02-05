@@ -45,27 +45,8 @@
 #include <map>
 #include "DGtal/base/Common.h"
 #include "DGtal/kernel/CInteger.h"
-#include "DGtal/kernel/CCommutativeRing.h"
-#include "DGtal/kernel/CSignedInteger.h"
 #include "DGtal/kernel/PointVector.h"
 #include "DGtal/kernel/SpaceND.h"
-//#include "DGtal/io/boards/Board2D.h"
-
-
-//#include "DGtal/io/Display3D.h"
-
-#ifdef _MSC_VER
-#if defined( max )
-#undef max 
-#define _HAS_MSVC_MAX_ true
-#endif
-#if defined( min )
-#undef min 
-#define _HAS_MSVC_MIN_ true
-#endif
-#endif
-
-
 //////////////////////////////////////////////////////////////////////////////
 
 namespace DGtal
@@ -82,12 +63,10 @@ namespace DGtal
 
     //Integer must be a model of the concept CInteger.
     BOOST_CONCEPT_ASSERT(( CInteger<TInteger> ) );
-    //Integer must be signed to characterize a ring.
-    BOOST_CONCEPT_ASSERT(( CSignedInteger<TInteger> ) );
-    
+
   public:
     typedef TInteger Integer;
-    
+
     typedef typename NumberTraits<Integer>::UnsignedVersion UnsignedInteger;
     typedef PointVector< dim, Integer > Point;
 
@@ -96,8 +75,8 @@ namespace DGtal
     /**
      * Constructor.
      */
-    KhalimskyCell();
-    
+    KhalimskyCell( Integer dummy = 0 );
+
     /**
      * Copy constructor.
      *
@@ -108,7 +87,7 @@ namespace DGtal
     /**
      * constructor from point.
      *
-     * @param other any point.
+     * @param point any point.
      */
     KhalimskyCell( const Point & point );
 
@@ -151,12 +130,12 @@ namespace DGtal
      */
     std::string className() const;
 
-  }; 
+  };
 
   template < Dimension dim,
              typename TInteger >
-  std::ostream & 
-  operator<<( std::ostream & out, 
+  std::ostream &
+  operator<<( std::ostream & out,
               const KhalimskyCell< dim, TInteger > & object );
 
   /**
@@ -169,9 +148,7 @@ namespace DGtal
   {
     //Integer must be a model of the concept CInteger.
     BOOST_CONCEPT_ASSERT(( CInteger<TInteger> ) );
-    //Integer must be signed to characterize a ring.
-    BOOST_CONCEPT_ASSERT(( CSignedInteger<TInteger> ) );
- 
+
   public:
     typedef TInteger Integer;
     typedef typename NumberTraits<Integer>::UnsignedVersion UnsignedInteger;
@@ -183,8 +160,8 @@ namespace DGtal
     /**
      * Constructor.
      */
-    SignedKhalimskyCell();
-    
+    SignedKhalimskyCell( Integer dummy = 0 );
+
     /**
      * Copy constructor.
      *
@@ -195,8 +172,8 @@ namespace DGtal
     /**
      * constructor from point.
      *
-     * @param other any point.
-     * @param 'true' if cell has positive sign.
+     * @param point any point.
+     * @param positive if cell has positive sign.
      */
     SignedKhalimskyCell( const Point & point, bool positive );
 
@@ -239,31 +216,31 @@ namespace DGtal
      */
     std::string className() const;
 
-  }; 
+  };
 
   template < Dimension dim,
              typename TInteger >
-  std::ostream & 
-  operator<<( std::ostream & out, 
+  std::ostream &
+  operator<<( std::ostream & out,
               const SignedKhalimskyCell< dim, TInteger > & object );
 
   /**
-     @bried This class is useful for looping on all "interesting" coordinates of a
+     @brief This class is useful for looping on all "interesting" coordinates of a
      cell. For instance, surfels in Z3 have two interesting coordinates (the
      ones spanned by the surfel).
      @code
      KSpace::Cell p;
      KnSpace::DirIterator q;
-     for ( q = ks.uDirs( p ); q != 0; ++q ) 
-     { 
+     for ( q = ks.uDirs( p ); q != 0; ++q )
+     {
      KSpace::Dimension dir = *q;
      ...
-     } 
+     }
      @endcode
   */
   template < Dimension dim,
              typename TInteger = DGtal::int32_t >
-  class CellDirectionIterator 
+  class CellDirectionIterator
   {
   public:
     typedef TInteger Integer;
@@ -293,8 +270,8 @@ namespace DGtal
      * Pre-increment. Go to next direction.
      */
     CellDirectionIterator & operator++();
-    
-    /** 
+
+    /**
      * Fast comparison with unsigned integer (unused
      * parameter). Comparison is 'false' at the end of the iteration.
      *
@@ -302,23 +279,23 @@ namespace DGtal
      */
     bool operator!=( const Integer ) const;
 
-    /** 
+    /**
      * @return 'true' if the iteration is ended.
      */
     bool end() const;
 
-    /** 
+    /**
      * Slow comparison with other iterator. Useful to check for end of loop.
      * @param other any direction iterator.
      */
     bool operator!=( const CellDirectionIterator & other ) const;
 
-    /** 
+    /**
      * Slow comparison with other iterator.
      * @param other any direction iterator.
      */
     bool operator==( const CellDirectionIterator & other ) const;
-    
+
   private:
     /** the current direction. */
     Dimension myDir;
@@ -337,7 +314,7 @@ namespace DGtal
   /////////////////////////////////////////////////////////////////////////////
   // template class KhalimskySpaceND
   /**
-   * Description of template class 'KhalimskySpaceND' <p> 
+   * Description of template class 'KhalimskySpaceND' <p>
    *
    * \brief Aim: This class is a model of CCellularGridSpaceND. It
    * represents the cubical grid as a cell complex, whose cells are
@@ -358,26 +335,26 @@ namespace DGtal
   class KhalimskySpaceND
   {
     //Integer must be signed to characterize a ring.
-    BOOST_CONCEPT_ASSERT(( CCommutativeRing<TInteger> ) );
+    BOOST_CONCEPT_ASSERT(( CInteger<TInteger> ) );
 
   public:
     ///Arithmetic ring induced by (+,-,*) and Integer numbers.
     typedef TInteger Integer;
-    
+
     ///Type used to represent sizes in the digital space.
     typedef typename NumberTraits<Integer>::UnsignedVersion Size;
-      
+
     // Cells
     typedef KhalimskyCell< dim, Integer > Cell;
     typedef SignedKhalimskyCell< dim, Integer > SCell;
     typedef SCell Surfel;
     typedef bool Sign;
     typedef CellDirectionIterator< dim, Integer > DirIterator;
-    
+
     //Points and Vectors
     typedef PointVector< dim, Integer > Point;
     typedef PointVector< dim, Integer > Vector;
-    
+
     typedef SpaceND<dim, Integer> Space;
     typedef KhalimskySpaceND<dim, Integer> KhalimskySpace;
 
@@ -454,13 +431,13 @@ namespace DGtal
      * @return a reference on 'this'.
      */
     KhalimskySpaceND & operator= ( const KhalimskySpaceND & other );
-    
+
     /**
      * Specifies the upper and lower bounds for the maximal cells in
      * this space.
      *
-     * @param lower_included the lowest point in this space (digital coords)
-     * @param upper_included the upper point in this space (digital coords)
+     * @param lower the lowest point in this space (digital coords)
+     * @param upper the upper point in this space (digital coords)
      * @param closed 'true' if this space is closed, 'false' if open.
      *
      * @return true if the initialization was valid (ie, such bounds
@@ -508,7 +485,7 @@ namespace DGtal
     /**
        @return 'true' iff the space is closed.
     */
-    bool isSpaceClosed() const; 
+    bool isSpaceClosed() const;
 
     // ----------------------- Cell creation services --------------------------
   public:
@@ -790,7 +767,7 @@ namespace DGtal
      * @return 'true' if [b] is a surfel (spans all but one coordinate).
      */
     bool sIsSurfel( const SCell & b ) const;
-    
+
     /**
        @param p any cell.
        @param k any direction.
@@ -816,15 +793,15 @@ namespace DGtal
        @code
        KSpace::Cell p;
        ...
-       for ( KSpace::DirIterator q = ks.uDirs( p ); q != 0; ++q ) 
-       { 
+       for ( KSpace::DirIterator q = ks.uDirs( p ); q != 0; ++q )
+       {
          Dimension dir = *q;
        ...
-       } 
+       }
        @endcode
-     
+
        @param p any unsigned cell.
-     
+
        @return an iterator that points on the first coordinate spanned
        by the cell.
     */
@@ -838,59 +815,59 @@ namespace DGtal
        @code
        KSpace::SCell p;
        ...
-       for ( KSpace::DirIterator q = ks.uDirs( p ); q != 0; ++q ) 
-       { 
+       for ( KSpace::DirIterator q = ks.uDirs( p ); q != 0; ++q )
+       {
          Dimension dir = *q;
        ...
-       } 
+       }
        @endcode
-     
+
        @param p any signed cell.
-     
+
        @return an iterator that points on the first coordinate spanned
        by the cell.
     */
     DirIterator sDirs( const SCell & p ) const;
 
     /**
-       Given an unsigned cell [p], returns an iterator to iterate over each 
-       coordinate the cell does not span. (A spel spans all coordinates; 
-       a surfel all but one, etc). Example: 
+       Given an unsigned cell [p], returns an iterator to iterate over each
+       coordinate the cell does not span. (A spel spans all coordinates;
+       a surfel all but one, etc). Example:
 
        @code
        KSpace::Cell p;
        ...
-       for ( KSpace::DirIterator q = ks.uOrthDirs( p ); q != 0; ++q ) 
-       { 
+       for ( KSpace::DirIterator q = ks.uOrthDirs( p ); q != 0; ++q )
+       {
          Dimension dir = *q;
        ...
-       } 
+       }
        @endcode
-     
+
        @param p any unsigned cell.
-     
+
        @return an iterator that points on the first coordinate spanned
        by the cell.
     */
     DirIterator uOrthDirs( const Cell & p ) const;
 
     /**
-       Given a signed cell [p], returns an iterator to iterate over each 
-       coordinate the cell does not span. (A spel spans all coordinates; 
-       a surfel all but one, etc). Example: 
+       Given a signed cell [p], returns an iterator to iterate over each
+       coordinate the cell does not span. (A spel spans all coordinates;
+       a surfel all but one, etc). Example:
 
        @code
        KSpace::SCell p;
        ...
-       for ( KSpace::DirIterator q = ks.uOrthDirs( p ); q != 0; ++q ) 
-       { 
+       for ( KSpace::DirIterator q = ks.uOrthDirs( p ); q != 0; ++q )
+       {
          Dimension dir = *q;
        ...
-       } 
+       }
        @endcode
-     
+
        @param p any signed cell.
-     
+
        @return an iterator that points on the first coordinate spanned
        by the cell.
     */
@@ -899,7 +876,7 @@ namespace DGtal
     /**
        Given an unsigned surfel [s], returns its orthogonal direction (ie,
        the coordinate where the surfel is closed).
-       
+
        @param s an unsigned surfel
        @return the orthogonal direction of [s]
     */
@@ -921,7 +898,7 @@ namespace DGtal
        @return the first cell of the space with the same type as [p].
     */
     Cell uFirst( const Cell & p ) const;
-    
+
     /**
        @return the last cell of the space with the same type as [p].
     */
@@ -931,17 +908,17 @@ namespace DGtal
        NB: you can go out of the space.
        @param p any cell.
        @param k the coordinate that is changed.
-       
+
        @return the same element as [p] except for the incremented
        coordinate [k].
     */
     Cell uGetIncr( const Cell & p, Dimension k ) const;
- 
+
     /**
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the tested coordinate.
-       
+
        @return true if [p] cannot have its [k]-coordinate augmented
        without leaving the space.
     */
@@ -952,27 +929,27 @@ namespace DGtal
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the tested coordinate.
-       
+
        @return true if [p] has its [k]-coordinate within the allowed bounds.
     */
     bool uIsInside( const Cell & p, Dimension k ) const;
- 
+
 
     /**
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the concerned coordinate.
-       
+
        @return the cell similar to [p] but with the maximum allowed
        [k]-coordinate.
     */
     Cell uGetMax( const Cell & p, Dimension k ) const;
-    
+
     /**
        NB: you can go out of the space.
        @param p any cell.
        @param k the coordinate that is changed.
-       
+
        @return the same element as [p] except for an decremented
        coordinate [k].
     */
@@ -982,7 +959,7 @@ namespace DGtal
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the tested coordinate.
-       
+
        @return true if [p] cannot have its [k]-coordinate decreased
        without leaving the space.
     */
@@ -992,19 +969,19 @@ namespace DGtal
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the concerned coordinate.
-       
+
        @return the cell similar to [p] but with the minimum allowed
        [k]-coordinate.
     */
     Cell uGetMin( const Cell & p, Dimension k ) const;
 
-    
+
     /**
        NB: you can go out of the space.
        @param p any cell.
        @param k the coordinate that is changed.
        @param x the increment.
-       
+
        @return the same element as [p] except for a coordinate [k]
        incremented with x.
     */
@@ -1033,14 +1010,14 @@ namespace DGtal
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the coordinate that is tested.
-       
+
        @return the number of decrement to do to reach the minimum
        value.
     */
     Integer uDistanceToMin( const Cell & p, Dimension k ) const;
 
     /**
-       Add the vector [vec] to [p]. 
+       Add the vector [vec] to [p].
        NB: you can go out of the space.
        @param p any cell.
        @param vec any pointel.
@@ -1063,10 +1040,9 @@ namespace DGtal
        Projects [p] along the [k]th direction toward
        [bound]. Otherwise said, p[ k ] == bound[ k ] afterwards.
 
-       @param p any cell.
-       @param bound the element acting as bound (same topology as p).
-       @param k the concerned coordinate.
-       @return the projection.
+       @param [in,out] p any cell.
+       @param [in] bound the element acting as bound (same topology as p).
+       @param [in] k the concerned coordinate.
     */
     void uProject( Cell & p, const Cell & bound, Dimension k ) const;
 
@@ -1076,18 +1052,18 @@ namespace DGtal
 
        \code
        KSpace K;
-       Cell first, last; // lower and upper bounds 
+       Cell first, last; // lower and upper bounds
        Cell p = first;
-       do 
+       do
        { // ... whatever [p] is the current cell
        }
-       while ( K.uNext( p, first, last ) ); 
+       while ( K.uNext( p, first, last ) );
        \endcode
-       
+
        @param p any cell.
        @param lower the lower bound.
        @param upper the upper bound.
-       
+
        @return true if p is still within the bounds, false if the
        scanning is finished.
     */
@@ -1100,7 +1076,7 @@ namespace DGtal
        @return the first cell of the space with the same type as [p].
     */
     SCell sFirst( const SCell & p ) const;
-    
+
     /**
        @return the last cell of the space with the same type as [p].
     */
@@ -1110,17 +1086,17 @@ namespace DGtal
        NB: you can go out of the space.
        @param p any cell.
        @param k the coordinate that is changed.
-       
+
        @return the same element as [p] except for the incremented
        coordinate [k].
     */
     SCell sGetIncr( const SCell & p, Dimension k ) const;
- 
+
     /**
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the tested coordinate.
-       
+
        @return true if [p] cannot have its [k]-coordinate augmented
        without leaving the space.
     */
@@ -1130,7 +1106,7 @@ namespace DGtal
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the tested coordinate.
-       
+
        @return true if [p] has its [k]-coordinate within the allowed bounds.
     */
     bool sIsInside( const SCell & p, Dimension k ) const;
@@ -1139,7 +1115,7 @@ namespace DGtal
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the concerned coordinate.
-       
+
        @return the cell similar to [p] but with the maximum allowed
        [k]-coordinate.
     */
@@ -1149,7 +1125,7 @@ namespace DGtal
        NB: you can go out of the space.
        @param p any cell.
        @param k the coordinate that is changed.
-       
+
        @return the same element as [p] except for an decremented
        coordinate [k].
     */
@@ -1159,7 +1135,7 @@ namespace DGtal
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the tested coordinate.
-       
+
        @return true if [p] cannot have its [k]-coordinate decreased
        without leaving the space.
     */
@@ -1169,7 +1145,7 @@ namespace DGtal
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the concerned coordinate.
-       
+
        @return the cell similar to [p] but with the minimum allowed
        [k]-coordinate.
     */
@@ -1180,7 +1156,7 @@ namespace DGtal
        @param p any cell.
        @param k the coordinate that is changed.
        @param x the increment.
-       
+
        @return the same element as [p] except for a coordinate [k]
        incremented with x.
     */
@@ -1209,14 +1185,14 @@ namespace DGtal
        Useful to check if you are going out of the space.
        @param p any cell.
        @param k the coordinate that is tested.
-       
+
        @return the number of decrement to do to reach the minimum
        value.
     */
     Integer sDistanceToMin( const SCell & p, Dimension k ) const;
 
     /**
-       Add the vector [vec] to [p]. 
+       Add the vector [vec] to [p].
        NB: you can go out of the space.
        @param p any cell.
        @param vec any pointel.
@@ -1242,7 +1218,6 @@ namespace DGtal
        @param p any cell.
        @param bound the element acting as bound (same topology as p).
        @param k the concerned coordinate.
-       @return the projection.
     */
     void sProject( SCell & p, const SCell & bound, Dimension k ) const;
 
@@ -1252,18 +1227,18 @@ namespace DGtal
 
        \code
        KSpace K;
-       Cell first, last; // lower and upper bounds 
+       Cell first, last; // lower and upper bounds
        Cell p = first;
-       do 
+       do
        { // ... whatever [p] is the current cell
        }
-       while ( K.uNext( p, first, last ) ); 
+       while ( K.uNext( p, first, last ) );
        \endcode
-       
+
        @param p any cell.
        @param lower the lower bound.
        @param upper the upper bound.
-       
+
        @return true if p is still within the bounds, false if the
        scanning is finished.
     */
@@ -1276,7 +1251,7 @@ namespace DGtal
        Computes the 1-neighborhood of the cell [c] and returns
        it. It is the set of cells with same topology that are adjacent
        to [c] and which are within the bounds of this space.
-       
+
        @param cell the unsigned cell of interest.
        @return the cells of the 1-neighborhood of [cell].
     */
@@ -1286,7 +1261,7 @@ namespace DGtal
        Computes the 1-neighborhood of the cell [c] and returns
        it. It is the set of cells with same topology that are adjacent
        to [c] and which are within the bounds of this space.
-       
+
        @param cell the signed cell of interest.
        @return the cells of the 1-neighborhood of [cell].
     */
@@ -1297,7 +1272,7 @@ namespace DGtal
        it. It is the set of cells with same topology that are adjacent
        to [c], different from [c] and which are within the bounds of
        this space.
-       
+
        @param cell the unsigned cell of interest.
        @return the cells of the proper 1-neighborhood of [cell].
     */
@@ -1308,7 +1283,7 @@ namespace DGtal
        it. It is the set of cells with same topology that are adjacent
        to [c], different from [c] and which are within the bounds of
        this space.
-       
+
        @param cell the signed cell of interest.
        @return the cells of the proper 1-neighborhood of [cell].
     */
@@ -1320,10 +1295,10 @@ namespace DGtal
        @param k the coordinate that is changed.
        @param up if 'true' the orientation is forward along axis
        [k], otherwise backward.
- 
+
        @return the adjacent element to [p] along axis [k] in the given
        direction and orientation.
-       
+
        @note It is an alias to 'up ? uGetIncr( p, k ) : uGetDecr( p, k )'.
     */
     Cell uAdjacent( const Cell & p, Dimension k, bool up ) const;
@@ -1333,10 +1308,10 @@ namespace DGtal
        @param k the coordinate that is changed.
        @param up if 'true' the orientation is forward along axis
        [k], otherwise backward.
- 
+
        @return the adjacent element to [p] along axis [k] in the given
        direction and orientation.
-       
+
        @note It is an alias to 'up ? sGetIncr( p, k ) : sGetDecr( p, k )'.
     */
     SCell sAdjacent( const SCell & p, Dimension k, bool up ) const;
@@ -1350,7 +1325,7 @@ namespace DGtal
 
        @param up if 'true' the orientation is forward along axis
        [k], otherwise backward.
-       
+
        @return the forward or backward unsigned cell incident to [c]
        along axis [k], depending on [forward].
 
@@ -1368,7 +1343,7 @@ namespace DGtal
 
        @param up if 'true' the orientation is forward along axis
        [k], otherwise backward.
-       
+
        @return the forward or backward signed cell incident to [c]
        along axis [k], depending on [forward]. It is worthy to note
        that the forward and backward cell have opposite
@@ -1425,7 +1400,7 @@ namespace DGtal
        Return 'true' if the direct orientation of [p] along [k] is in
        the positive coordinate direction. The direct orientation in a
        direction allows to go from positive incident cells to positive
-       incident cells.  This means that 
+       incident cells.  This means that
        @code
        K.sSign( K.sIncident( p, k, K.sDirect( p, k ) ) ) == K.POS
        @endcode
@@ -1456,7 +1431,7 @@ namespace DGtal
        cell along [k] whose sign is negative).
     */
     SCell sIndirectIncident( const SCell & p, Dimension k ) const;
-   
+
 
     // ----------------------- Interface --------------------------------------
   public:
@@ -1505,7 +1480,7 @@ namespace DGtal
   template < Dimension dim,
              typename TInteger >
   std::ostream&
-  operator<< ( std::ostream & out, 
+  operator<< ( std::ostream & out,
                const KhalimskySpaceND<dim, TInteger > & object );
 
 } // namespace DGtal

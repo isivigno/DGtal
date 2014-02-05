@@ -37,7 +37,6 @@
 #include "DGtal/kernel/domains/HyperRectDomain.h"
 #include "DGtal/kernel/BasicPointPredicates.h"
 #include "DGtal/kernel/domains/DomainPredicate.h"
-#include "DGtal/kernel/sets/SetPredicate.h"
 #include "DGtal/kernel/sets/DigitalSetFromMap.h"
 #include "DGtal/images/ImageContainerBySTLMap.h"
 #include "DGtal/images/imagesSetsUtils/SimpleThresholdForegroundPredicate.h"
@@ -45,6 +44,7 @@
 //DT
 #include "DGtal/images/ImageSelector.h"
 #include "DGtal/geometry/volumes/distance/DistanceTransformation.h"
+#include "DGtal/geometry/volumes/distance/ExactPredicateLpSeparableMetric.h"
 
 //FMM
 #include "DGtal/geometry/volumes/distance/FMM.h"
@@ -137,7 +137,6 @@ ballGenerator(const int& size, double aCx, double aCy, double aR, GridCurve<TKSp
   // Types
   typedef TKSpace KSpace;  
   typedef typename KSpace::SCell SCell;
-  typedef GridCurve<KSpace> GridCurve; 
   typedef typename KSpace::Space Space;  
   typedef typename Space::Point Point;
 
@@ -169,7 +168,6 @@ void draw( const TIterator& itb, const TIterator& ite, const int& size, std::str
 {
   typedef typename std::iterator_traits<TIterator>::value_type Pair; 
   typedef typename Pair::first_type Point; 
-  typedef typename Pair::second_type Value; 
   HueShadeColorMap<unsigned char, 2> colorMap(0,3*size);
 
   Board2D b; 
@@ -471,7 +469,7 @@ bool testDisplayDTFromCircle(int size)
     //init
     Image map( d ); 
     Set set(map); 
-    GridCurve<KSpace>::OuterPointsRange r = gc.getOuterPointsRange();
+    GridCurve<KSpace>::InnerPointsRange r = gc.getInnerPointsRange();
     FMM::initFromPointsRange(r.begin(), r.end(), map, set, 0.5); 
 
     //computation
@@ -504,12 +502,13 @@ bool testDisplayDTFromCircle(int size)
     //init
     Image map( d ); 
     Set set(map); 
-    GridCurve<KSpace>::InnerPointsRange r = gc.getInnerPointsRange();
+    GridCurve<KSpace>::OuterPointsRange r = gc.getOuterPointsRange();
     FMM::initFromPointsRange(r.begin(), r.end(), map, set, 0.5); 
 
     //computation
-    PointPredicate bp( BallPredicate<Point>(0,0,radius) );
-    Predicate pred( bp, dp, andBF2 ); 
+    BallPredicate<Point> bp(0,0,radius); 
+    PointPredicate nbp( bp );
+    Predicate pred( nbp, dp, andBF2 ); 
     FMM fmm(map, set, pred); 
     fmm.compute(); 
     trace.info() << fmm << std::endl; 
@@ -526,7 +525,7 @@ bool testDisplayDTFromCircle(int size)
   }
   trace.endBlock();
 
-  double dmin = 2*size*size; 
+  double dmin = 0; //2*size*size;
   double dmax = 0; 
   trace.beginBlock ( "Both " );
   {
@@ -537,7 +536,7 @@ bool testDisplayDTFromCircle(int size)
     Image map( d ); 
     Set set(map); 
     GridCurve<KSpace>::IncidentPointsRange r = gc.getIncidentPointsRange();
-    FMM::initFromIncidentPointsRange(r.begin(), r.end(), map, set, 0.5, true); 
+    FMM::initFromIncidentPointsRange(r.begin(), r.end(), map, set, 0.5); 
 
     //computation
     FMM fmm(map, set, dp); 
@@ -621,10 +620,11 @@ bool testComparison(int size, int area, double dist)
   trace.beginBlock ( " DT computation " );
   typedef SimpleThresholdForegroundPredicate<Image> Predicate;
   Predicate aPredicate(image,0);
-  typedef DistanceTransformation<SpaceND<dimension,int>, Predicate, norm> DT; 
-  DT dt(d,aPredicate);
-  typename DT::OutputImage resultImage = dt.compute (  );
-  trace.info() << resultImage << std::endl; 
+  typedef ExactPredicateLpSeparableMetric<SpaceND<dimension,int>, norm> LNorm;
+  typedef DistanceTransformation<SpaceND<dimension,int>, Predicate, LNorm> DT; 
+  LNorm lnorm;
+  DT dt(&d,&aPredicate, &lnorm);
+  trace.info() << dt << std::endl; 
 
   trace.endBlock();
 
@@ -640,7 +640,7 @@ bool testComparison(int size, int area, double dist)
 	flagIsOk = false; 
       else 
 	{
-	  if (resultImage(*it) != map(*it))
+	  if (dt(*it) != map(*it))
 	    flagIsOk = false;
 	}
     }
@@ -680,18 +680,16 @@ int main ( int argc, char** argv )
   res = res && testDisplayDT3d( size, area, std::sqrt(size*size*size) )
     ; 
 
-  //3d L1 and Linf comparison
+  //3d L1 and  comparison
   size = 20; 
   area = int( std::pow(double(2*size+1),3) )+1; 
   res = res  
     && testComparison<3,1>( size, area, 3*size+1 )
-    && testComparison<3,0>( size, area, size+1 )
     ;
   size = 5; 
   area = int( std::pow(double(2*size+1),4) ) + 1;
   res = res
     && testComparison<4,1>( size, area, 4*size+1 )
-    && testComparison<4,0>( size, area, size+1 )
     ;
 
   //&& ... other tests

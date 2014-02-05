@@ -17,9 +17,8 @@
 #include <queue>
 #include <QImageReader>
 #include <QtGui/qapplication.h>
-#include "DGtal/kernel/sets/SetPredicate.h"
-#include "DGtal/io/readers/VolReader.h"
 #include "DGtal/io/viewers/Viewer3D.h"
+#include "DGtal/io/readers/VolReader.h"
 #include "DGtal/io/DrawWithDisplay3DModifier.h"
 #include "DGtal/io/Color.h"
 #include "DGtal/images/ImageSelector.h"
@@ -60,7 +59,6 @@ int main( int argc, char** argv )
   typedef ImageSelector < Domain, int>::Type Image;
   Image image = VolReader<Image>::importVol(inputFilename);
   DigitalSet set3d (image.domain());
-  SetPredicate<DigitalSet> set3dPredicate( set3d );
   SetFromImage<DigitalSet>::append<Image>(set3d, image, 
                                           minThreshold, maxThreshold);
   trace.endBlock();
@@ -88,24 +86,24 @@ int main( int argc, char** argv )
   //! [volTrackBoundary-ExtractingSurface]
   trace.beginBlock( "Extracting boundary by tracking from an initial bel." );
   KSpace::SCellSet boundary;
-  SCell bel = Surfaces<KSpace>::findABel( ks, set3dPredicate, 100000 );
+  SCell bel = Surfaces<KSpace>::findABel( ks, set3d, 100000 );
   Surfaces<KSpace>::trackBoundary( boundary, ks, 
                                    surfAdj,
-                                   set3dPredicate, bel );
+                                   set3d, bel );
   trace.endBlock();
   //! [volTrackBoundary-ExtractingSurface]
 
   //! [volTrackBoundary-DisplayingSurface]
   trace.beginBlock( "Displaying surface in Viewer3D." );
   QApplication application(argc,argv);
-  Viewer3D viewer;
+  Viewer3D<> viewer;
   viewer.show(); 
   viewer << CustomColors3D(Color(250, 0, 0 ), Color( 128, 128, 128 ) );
   unsigned long nbSurfels = 0;
   for ( KSpace::SCellSet::const_iterator it = boundary.begin(),
           it_end = boundary.end(); it != it_end; ++it, ++nbSurfels )
     viewer << *it;
-  viewer << Viewer3D::updateDisplay;
+  viewer << Viewer3D<>::updateDisplay;
   trace.info() << "nb surfels = " << nbSurfels << std::endl;
   trace.endBlock();
   return application.exec();

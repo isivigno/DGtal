@@ -63,7 +63,6 @@ bool testVolReader()
 
   typedef SpaceND<3> Space4Type;
   typedef HyperRectDomain<Space4Type> TDomain;
-  typedef TDomain::Point Point;
   
   //Default image selector = STLVector
   typedef ImageSelector<TDomain, unsigned char>::Type Image;
@@ -88,10 +87,7 @@ bool testVolReader()
   nbok += ( nbval == 8043)  ? 1 : 0; 
   nb++;
 
-  typedef HueShadeColorMap<unsigned char> Hue;
-  typedef GrayscaleColorMap<unsigned char> Gray;
-
-  VolWriter<Image,Gray>::exportVol("catenoid-export.vol",image,0,255);
+  VolWriter<Image>::exportVol("catenoid-export.vol",image);
 
   nbok += ( true )  ? 1 : 0; 
   nb++;
@@ -113,7 +109,6 @@ bool testIOException()
 
   typedef SpaceND<3> Space4Type;
   typedef HyperRectDomain<Space4Type> TDomain;
-  typedef TDomain::Point Point;
   
   //Default image selector = STLVector
   typedef ImageSelector<TDomain, unsigned char>::Type Image;

@@ -45,9 +45,6 @@
 #include <iostream>
 #include "DGtal/base/Common.h"
 #include "DGtal/kernel/CInteger.h"
-#include "DGtal/kernel/CUnsignedInteger.h"
-#include "DGtal/kernel/CSignedInteger.h"
-#include "DGtal/kernel/CCommutativeRing.h"
 #include "DGtal/kernel/PointVector.h"
 //////////////////////////////////////////////////////////////////////////////
 
@@ -68,7 +65,7 @@ namespace DGtal
    * 
    * @tparam dim static constant of type DGtal::Dimension that
    * specifies the static  dimension of the space.
-   * @tparam Integer specifies the integer number type to use as a
+   * @tparam TInteger specifies the integer number type to use as a
    * ring for the computations or as coordinates type. Integer must be
    * a model of CInteger and CSignedInteger concepts.  
    * 
@@ -94,15 +91,12 @@ Point4Int a= {2, 3 , -5 , 6};
    **/
 
   template < Dimension dim,
-       typename TInteger = DGtal::int32_t >
+	     typename TInteger = DGtal::int32_t >
   class SpaceND
   {
     //Integer must be a model of the concept CInteger.
     BOOST_CONCEPT_ASSERT(( CInteger<TInteger> ) );
  
-    //Integer must be signed to characterize a ring.
-    BOOST_CONCEPT_ASSERT(( CCommutativeRing<TInteger> ) );
-
   public:
     ///Arithmetic ring induced by (+,-,*) and Integer numbers.
     typedef TInteger Integer;
@@ -135,7 +129,7 @@ Point4Int a= {2, 3 , -5 , 6};
     typedef DGtal::Dimension Dimension;
     
     ///static constants to store the dimension.
-    static const Dimension dimension = dim;
+    static const Dimension dimension=dim;
 
     ///Define the type of a sub co-Space
     template <Dimension codimension>
@@ -193,6 +187,12 @@ Point4Int a= {2, 3 , -5 , 6};
   private:
 
   }; // end of class SpaceND
+
+  // ///static constants to store the dimension.
+  // template < Dimension dim,
+  // 	     typename TInteger >
+  // const Dimension SpaceND<dim, TInteger>::dimension = dim;
+
 
 } // namespace DGtal
 

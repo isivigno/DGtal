@@ -2,7 +2,7 @@
 ### Visu QGLViewer
 
 SET(QGLVIEWER_BASED_TESTS_SRC
- testMeshFromPointsDisplay
+ testMeshDisplay
    )
 
 if (  WITH_VISU3D_QGLVIEWER )
@@ -24,8 +24,10 @@ SET(DGTAL_TESTS_SRC
   testHalfPlane
   testImplicitFunctionModels
   testShapesFromPoints
-  testMeshFromPoints
+  testMesh
   testBall3DSurface
+  testEuclideanShapesDecorator
+  testDigitalShapesDecorator
   )
 
 FOREACH(FILE ${DGTAL_TESTS_SRC})

@@ -43,7 +43,8 @@
 #include <iostream>
 #include "DGtal/base/Common.h"
 #include "DGtal/kernel/NumberTraits.h"
-#include "DGtal/kernel/CUnsignedInteger.h"
+#include "DGtal/kernel/CUnsignedNumber.h"
+#include "DGtal/kernel/CIntegralNumber.h"
 #include "DGtal/kernel/CInteger.h"
 #include "DGtal/kernel/SpaceND.h"
 //////////////////////////////////////////////////////////////////////////////
@@ -96,7 +97,8 @@ href="https://gforge.liris.cnrs.fr/projects/imagene">ImaGene</a>.
     typedef typename SpaceND<3,Integer>::Vector Vector3I;
 
     BOOST_CONCEPT_ASSERT((CInteger<Integer>));
-    BOOST_CONCEPT_ASSERT((CUnsignedInteger<UnsignedInteger>));    
+    BOOST_CONCEPT_ASSERT((CUnsignedNumber<UnsignedInteger>));
+    BOOST_CONCEPT_ASSERT((CIntegralNumber<UnsignedInteger>));
 
     // ----------------------- Standard services ------------------------------
   public:
@@ -193,9 +195,25 @@ href="https://gforge.liris.cnrs.fr/projects/imagene">ImaGene</a>.
     /**
        @param a any integer.
        @param b any integer.
+       @param c any integer.
+       @return the maximum value of \a a, \a b and \a c.
+     */
+    static Integer max( IntegerParamType a, IntegerParamType b, IntegerParamType c );
+
+    /**
+       @param a any integer.
+       @param b any integer.
        @return the minimum value of \a a and \a b.
      */
     static Integer min( IntegerParamType a, IntegerParamType b );
+
+    /**
+       @param a any integer.
+       @param b any integer.
+       @param c any integer.
+       @return the minimum value of \a a, \a b and \a c.
+     */
+    static Integer min( IntegerParamType a, IntegerParamType b, IntegerParamType c );
 
     /**
        Computes the euclidean division of a/b, returning quotient and
@@ -239,6 +257,16 @@ href="https://gforge.liris.cnrs.fr/projects/imagene">ImaGene</a>.
      */
     void getFloorCeilDiv( Integer & fl, Integer & ce,
                           IntegerParamType na, IntegerParamType nb ) const;
+
+    /**
+       Returns the greatest common divisor of \a a and \a b (\a a and \a b may be
+       either positive or negative).
+
+       @param a any integer.
+       @param b any integer.
+       @return the gcd of \a a and \a b.
+     */
+    static Integer staticGcd( IntegerParamType a, IntegerParamType b );
 
     /**
        Returns the greatest common divisor of \a a and \a b (\a a and \a b may be
@@ -358,10 +386,20 @@ href="https://gforge.liris.cnrs.fr/projects/imagene">ImaGene</a>.
        \a b. Uses the extended Euclid algorithm to do it, whose
        complexity is bounded by max(log(a),log(b)).
 
-       @param a any integer.
-       @param b any integer.
-       @param c any integer (see above).
-       @return the vector (x,y) solution to a x + b y = c.
+       The solution is chosen such that:
+       - when \a c > 0, 
+         - \a a > 0 implies \a x >= 0, thus sgn(\a y)=-sgn(\a b)
+         - \a a < 0 implies \a x <= 0, thus sgn(\a y)=-sgn(\a b)
+       - when \a c < 0, 
+         - \a a > 0 implies \a x <= 0, thus sgn(\a y)=sgn(\a b)
+         - \a a < 0 implies \a x >= 0, thus sgn(\a y)=sgn(\a b)
+       - abs(\a x) <= abs(\a b * \a c )
+       - abs(\a y) < abs(\a a * \a c )
+
+       @param a any non-null integer.
+       @param b any non-null integer.
+       @param c any integer multiple of gcd(|a|,|b|).
+       @return a vector (x,y) solution to a x + b y = c.
      */
     Vector2I extendedEuclid( IntegerParamType a, IntegerParamType b, 
                              IntegerParamType c ) const;

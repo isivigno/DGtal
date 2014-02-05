@@ -30,6 +30,7 @@
 #include <cstdlib>
 //////////////////////////////////////////////////////////////////////////////
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // IMPLEMENTATION of inline methods.
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,6 +45,7 @@ DGtal::Projector<S>::Projector(const Integer& aDefaultInteger)
     myDims[k] = k; 
   } 
 }
+
 
 template <typename S>
 template <typename TIterator>
@@ -65,6 +67,51 @@ DGtal::Projector<S>::init( const TIterator& itb, const TIterator& ite )
     myDims[k] = dimension; 
   } 
 }
+
+
+template <typename S>
+inline
+void
+DGtal::Projector<S>::initRemoveOneDim(const Dimension &dimRemoved)
+{ 
+  std::vector<Dimension> vectDims;
+  Dimension aCurrentPos = 0;
+  Dimension k=0;
+  for ( ; k < dimension; ++k)
+  {
+    if(k!=dimRemoved){
+      vectDims.push_back(aCurrentPos);
+    }
+    aCurrentPos++;
+  }  
+  init(vectDims.begin(), vectDims.end());
+}
+
+
+
+
+template <typename S>
+inline
+void
+DGtal::Projector<S>::initAddOneDim( const Dimension &newDim)
+{ 
+  std::vector<Dimension> vectDims;
+  Dimension maxIndex = dimension; 
+  Dimension aCurrentPos = 0;
+  Dimension k=0;
+  for ( ; k < dimension; ++k)
+  {
+    if(k==newDim){
+      vectDims.push_back(maxIndex);
+    }else{
+      vectDims.push_back(aCurrentPos);
+      aCurrentPos++;
+    }
+  }  
+  init(vectDims.begin(), vectDims.end());  
+}
+
+
 
 template <typename S>
 template <typename TInputPoint>
@@ -90,7 +137,7 @@ DGtal::Projector<S>::operator()( const TInputPoint& aPoint ) const
   {
     Dimension l = *it; 
     if (l < TInputPoint::dimension) 
-      res[k] = aPoint.at(l); 
+      res[k] = aPoint[l]; 
     else 
       res[k] = myDefaultInteger; 
   } 
@@ -99,6 +146,56 @@ DGtal::Projector<S>::operator()( const TInputPoint& aPoint ) const
 }
 //------------------------------------------------------------------------------
 
+template< typename TP, typename TD, typename TV >
+inline
+DGtal::PointFunctorFromPointPredicateAndDomain< TP, TD, TV >::PointFunctorFromPointPredicateAndDomain
+( ConstAlias< PointPredicate > aPtrPredicate,
+  ConstAlias< Domain > aDomain,
+  const Value aTrueValue,
+  const Value aFalseValue )
+    : myPtrPredicate( &aPtrPredicate ), myDomain( &aDomain), myTrueValue( aTrueValue ), myFalseValue( aFalseValue )
+{
+
+}
+
+template< typename TP, typename TD, typename TV >
+inline
+DGtal::PointFunctorFromPointPredicateAndDomain< TP, TD, TV >::PointFunctorFromPointPredicateAndDomain( const PointFunctorFromPointPredicateAndDomain & other )
+    : myPtrPredicate( other.myPtrPredicate ), myDomain( other.myDomain), myTrueValue( other.myTrueValue ), myFalseValue( other.myFalseValue )
+{
+}
+
+template< typename TP, typename TD, typename TV >
+inline
+typename DGtal::PointFunctorFromPointPredicateAndDomain< TP, TD, TV >::Value
+DGtal::PointFunctorFromPointPredicateAndDomain< TP, TD, TV >::operator()( const Point& aPoint ) const
+{
+    if( myDomain->isInside( aPoint ))
+    {
+        if( myPtrPredicate->operator()( aPoint ) )
+            return myTrueValue;
+        else
+            return myFalseValue;
+    }
+    return myFalseValue;
+}
+
+template <typename TP, typename TD, typename TV>
+inline
+DGtal::PointFunctorFromPointPredicateAndDomain<TP,TD, TV> &
+DGtal::PointFunctorFromPointPredicateAndDomain<TP,TD, TV>::operator=( const PointFunctorFromPointPredicateAndDomain<TP,TD,TV> &other)
+{
+  ASSERT( ( myDomain->lowerBound() <= other.myDomain->lowerBound() )
+    && ( myDomain->upperBound() >= other.myDomain->upperBound() )
+    && "This domain should include the domain of the other set in case of assignment." );
+
+  myPtrPredicate = other.myPtrPredicate;
+  myDomain = other.myDomain;
+  myTrueValue = other.myTrueValue;
+  myFalseValue = other.myFalseValue;
+
+  return *this;
+}
 
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////

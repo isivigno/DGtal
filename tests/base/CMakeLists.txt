@@ -9,7 +9,6 @@ SET(DGTAL_TESTS_SRC
    testOutputIteratorAdapter
    testClock
    testTrace
-   testStatistics
    testcpp11
    testCountedPtr
    testBits
@@ -18,6 +17,12 @@ SET(DGTAL_TESTS_SRC
    testLabelledMap
    testLabelledMap-benchmark
    testMultiMap-benchmark
+   testOpenMP
+   testIteratorFunctions
+   testIteratorCirculatorTraits
+   testCloneAndAliases
+   testClone2
+   testOwningOrAliasingPtr
    )
 
 FOREACH(FILE ${DGTAL_TESTS_SRC})
@@ -25,4 +30,5 @@ FOREACH(FILE ${DGTAL_TESTS_SRC})
   target_link_libraries (${FILE} DGtal DGtalIO)
   add_test(${FILE} ${FILE})
 ENDFOREACH(FILE)
+
 

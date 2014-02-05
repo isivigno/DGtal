@@ -89,7 +89,8 @@ namespace DGtal
     /** 
      * Main method to import a vector containing a list of points
      * defined in a file where each line defines a point. 
-     * 
+     * Blank line or line beginning with
+     * "#" are skipped.
      * 
      * @param in the input stream.
      * @param aVectPosition used to specify the position of indices of
@@ -103,10 +104,10 @@ namespace DGtal
 
     /** 
      * Main method to import a vector containing a list of points
-     * defined in a file where each line defines a point. 
-     * 
-     * 
-     * @param filename  
+     * defined in a file where each line defines a point.  Blank line
+     * or line beginning with "#" are skipped.
+     *
+     * @param filename a filename 
      * @param aVectPosition used to specify the position of indices of
      * value points  (optional: default set to 0,..,dimension) 
      * @return a vector containing the set of points.
@@ -124,7 +125,7 @@ namespace DGtal
      * a given file.
      * 
      * 
-     * @param filename  
+     * @param [in] filename input filename 
      * @return a vector containing the vector of polygons.
      **/
   
@@ -150,7 +151,7 @@ namespace DGtal
      * Main method to FreemanChain contours.  Each line of the file
      * should represent a FreemanChain
      * 
-     * @param filename  
+     * @param [in] filename  the input filename
    
      * @return the vector containing the set of FreemanChain.
      **/

@@ -37,8 +37,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define dim ImageContainerByHashTree<Domain , T, DGtal::uint64_t >::dim
-#define defHashKey typename ImageContainerByHashTree<Domain , int,  DGtal::uint64_t >::HashKey
+#define dim experimental::ImageContainerByHashTree<Domain , T, DGtal::uint64_t >::dim
+#define defHashKey typename experimental::ImageContainerByHashTree<Domain , int,  DGtal::uint64_t >::HashKey
 
 using namespace DGtal;
 
@@ -49,16 +49,16 @@ int iRand ( int iMin, int iMax )
 }
 
 template<typename Domain, typename T >
-bool test_setVal (ImageContainerByHashTree<Domain , T, DGtal::uint64_t >& container, bool checkAfterEachSet )
+bool test_setVal (experimental::ImageContainerByHashTree<Domain , T, DGtal::uint64_t >& container, bool checkAfterEachSet )
 {
   srand ( (unsigned int)time ( NULL ) );
 
   //phase 1
-  cerr << "Test: set" <<endl;
-  cerr << "phase 1..." <<endl;
+  trace.info() << "Test: set" <<std::endl;
+  trace.info() << "phase 1..." <<std::endl;
   //unsigned DepthMask = container.ROOT_KEY << container.getDepth()*dim;
   unsigned DepthMask = 100000;
-  //cerr << "DepthMask = " << DepthMask << endl;
+  //cerr << "DepthMask = " << DepthMask << std::endl;
   for ( int key = DepthMask; key > 1; --key )
     {
       if ( !container.isKeyValid ( key ) )
@@ -71,24 +71,24 @@ bool test_setVal (ImageContainerByHashTree<Domain , T, DGtal::uint64_t >& contai
   { 
     if ( !container.checkIntegrity() )
       {
-        cerr << "test_set: failure in phase 1" << endl
-       << "at key " << Bits::bitString ( key ) << endl;
+        trace.info() << "test_set: failure in phase 1" << std::endl
+       << "at key " << Bits::bitString ( key ) << std::endl;
         return false;
       }
     else
-      cerr << "ok"<<endl;
+      trace.info() << "ok"<<std::endl;
   }
     }
-  cerr << "checking the container's validity..." << endl;
+  trace.info() << "checking the container's validity..." << std::endl;
   if ( !container.checkIntegrity() )
     {
 
-      cerr << "test_set: failure in phase 1" << endl;
+      trace.info() << "test_set: failure in phase 1" << std::endl;
       return false;
     }
 
   //phase 2
-  cerr << "phase 2..." <<endl;
+  trace.info() << "phase 2..." <<std::endl;
   for ( unsigned key = container.ROOT_KEY; key < DepthMask; ++key )
     {
       if ( !container.isKeyValid ( key ) )
@@ -99,61 +99,61 @@ bool test_setVal (ImageContainerByHashTree<Domain , T, DGtal::uint64_t >& contai
       if ( checkAfterEachSet )
         if ( !container.checkIntegrity() )
           {
-            cerr << "test_set: failure in phase 2" << endl
-                 << "at key " << Bits::bitString ( key ) << endl;
+            trace.info() << "test_set: failure in phase 2" << std::endl
+                 << "at key " << Bits::bitString ( key ) << std::endl;
             return false;
           }
     }
 
   if ( !container.checkIntegrity() )
     {
-      cerr << "test_set: failure in phase 2" << endl;
+      trace.info() << "test_set: failure in phase 2" << std::endl;
       return false;
     }
 
-  cerr << "test_set: success !" << endl;
+  trace.info() << "test_set: success !" << std::endl;
   return true;
 }
 
 
 template<typename Domain, typename T >
-bool test_get ( ImageContainerByHashTree<Domain, T, DGtal::uint64_t >& container, bool  )
+bool test_get ( experimental::ImageContainerByHashTree<Domain, T, DGtal::uint64_t >& container, bool  )
 {
   srand ( (unsigned int)time ( NULL ) );
   unsigned count = 0;
   //unsigned DepthMask = container.ROOT_KEY << container.getDepth()*dim;
   unsigned DepthMask = 100000;
-  //cerr << "DepthMask "<< DepthMask << endl;
+  //trace.info() << "DepthMask "<< DepthMask << std::endl;
   for ( unsigned key = DepthMask; key > container.ROOT_KEY; --key )
     {
       if ( !container.isKeyValid ( key ) )
         {
-          //cerr << "invalid key "<< Bits::bitString(key) << endl;
+          //trace.info() << "invalid key "<< Bits::bitString(key) << std::endl;
           continue;
         }
       ++count;
       T val = iRand ( 0, 100 );
-      //cerr << "plop1" << endl;
-      //cerr << "___________________________ set: " << Bits::bitString(key, 16) << endl;
+      //trace.info() << "plop1" << std::endl;
+      //trace.info() << "___________________________ set: " << Bits::bitString(key, 16) << std::endl;
       container.setValue ( key, val );
 
 
-      typename ImageContainerByHashTree<Domain , T, DGtal::uint64_t >::HashKey key2 = key;
+      typename experimental::ImageContainerByHashTree<Domain , T, DGtal::uint64_t >::HashKey key2 = key;
       while ( container.isKeyValid ( key2 ) )
         {
           key2 = key2 << dim;
           if ( val != container.get ( key2 ) )
             {
-              cerr << "test_get: failure" << endl
-                   << "at key " << Bits::bitString ( key2 ) << endl;
+              trace.info() << "test_get: failure" << std::endl
+                   << "at key " << Bits::bitString ( key2 ) << std::endl;
               return false;
             }
-          //cerr << "check " << Bits::bitString(key2) << " ok." << endl;
+          //trace.info() << "check " << Bits::bitString(key2) << " ok." << std::endl;
         }
-      key2 <<=dim;
+      //key2 <<=dim;
     }
-  cerr << "test_get: success !" << endl
-       << "tested with " << count << " keys" << endl;
+  trace.info() << "test_get: success !" << std::endl
+       << "tested with " << count << " keys" << std::endl;
   return true;
 }
 
@@ -165,19 +165,18 @@ int main ( int argc, char** argv )
   trace.info() << "Args:";
   for ( int i = 0; i < argc; ++i )
     trace.info() << " " << argv[ i ];
-  trace.info() << endl;
+  trace.info() << std::endl;
 
   typedef SpaceND<5> Space;
-  typedef Space::Point Point;
   typedef HyperRectDomain<Space> Dom;
-  typedef DGtal::ImageContainerByHashTree<Dom, int, DGtal::uint64_t> Tree;
+  typedef DGtal::experimental::ImageContainerByHashTree<Dom, int, DGtal::uint64_t> Tree;
   Tree tree ( 12,5,1 );
   // Do not pass concept.
   //BOOST_CONCEPT_ASSERT((CDrawableWithBoard2D<Tree>));
 
   //tree.printInternalState(cerr, 12);
   Dom::Point p1, p2, p3;
-  cerr << "azertyuiop" << endl;
+  trace.info() << "azertyuiop" << std::endl;
   p1[0] = -32;
   p1[1] = -10;
   p1[2] = -30;
@@ -195,19 +194,19 @@ int main ( int argc, char** argv )
   p3[2] = 1;
   p3[3] = 1;
   p3[4] = 1;
-  cerr << "azertyuiop" << endl;
-  DGtal::ImageContainerByHashTree<Dom, int, DGtal::uint64_t> tree2 ( 12,p1, p2,1 );
-  cerr << "azertyuiop" << endl;
-  cerr << "coord get " << tree2.get ( p1 ) << endl;
-  cerr << "_-_-_-_-_-_-_-_-_-_-_-_-" << endl;
-  cerr << "coord get " << tree2.get ( p3 ) << endl;
-  cerr << "coord get " << tree2.get ( p1+=p3 ) << endl;
-  cerr << "coord get " << tree2.get ( p1+=p3 ) << endl;
-  cerr << "coord get " << tree2.get ( p1+=p3 ) << endl;
-  cerr << "coord get " << tree2.get ( p1+=p3 ) << endl;
+  trace.info() << "azertyuiop" << std::endl;
+  DGtal::experimental::ImageContainerByHashTree<Dom, int, DGtal::uint64_t> tree2 ( 12,p1, p2,1 );
+  trace.info() << "azertyuiop" << std::endl;
+  trace.info() << "coord get " << tree2.get ( p1 ) << std::endl;
+  trace.info() << "_-_-_-_-_-_-_-_-_-_-_-_-" << std::endl;
+  trace.info() << "coord get " << tree2.get ( p3 ) << std::endl;
+  trace.info() << "coord get " << tree2.get ( p1+=p3 ) << std::endl;
+  trace.info() << "coord get " << tree2.get ( p1+=p3 ) << std::endl;
+  trace.info() << "coord get " << tree2.get ( p1+=p3 ) << std::endl;
+  trace.info() << "coord get " << tree2.get ( p1+=p3 ) << std::endl;
 
   // check that the iterator stuff compiles as it should
-  typedef DGtal::ImageContainerByHashTree<Dom, int, DGtal::uint64_t>::Iterator HashTreeIterator;
+  typedef DGtal::experimental::ImageContainerByHashTree<Dom, int, DGtal::uint64_t>::Iterator HashTreeIterator;
   HashTreeIterator it = tree.begin();
   for ( it = tree.begin(); it != tree.end(); ++it )
     tree ( *it );
@@ -222,7 +221,7 @@ int main ( int argc, char** argv )
 
 
 
-  trace.emphase() << ( res ? "Passed." : "Error." ) << endl;
+  trace.emphase() << ( res ? "Passed." : "Error." ) << std::endl;
   trace.endBlock();
   return res ? 0 : 1;
 }

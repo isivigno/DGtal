@@ -67,44 +67,19 @@ Description of \b concept '\b CBidirectionalSegmentComputer' <p>
  ### Definitions
     
  ### Valid expressions and 
-     <table> 
-      <tr> 
-        <td class=CName> \b Name </td> 
-        <td class=CExpression> \b Expression </td>
-        <td class=CRequirements> \b Type requirements </td> 
-        <td class=CReturnType> \b Return type </td>
-        <td class=CPrecondition> \b Precondition </td> 
-        <td class=CSemantics> \b Semantics </td> 
-        <td class=CPostCondition> \b Postcondition </td> 
-        <td class=CComplexity> \b Complexity </td>
-      </tr>
-      <tr> 
-        <td class=CName> extension test  </td> 
-        <td class=CExpression> x.isExtendableBackward()     </td>
-        <td class=CRequirements>    </td> 
-        <td class=CReturnType> bool     </td>
-        <td class=CPrecondition>    </td> 
-        <td class=CSemantics> check wether x can be extended to --x.begin() or not </td> 
-        <td class=CPostCondition>       </td> 
-        <td class=CComplexity>      </td>
-      </tr>
-      <tr> 
-        <td class=CName> extension </td> 
-        <td class=CExpression> x.extendBackward()     </td>
-        <td class=CRequirements>    </td> 
-        <td class=CReturnType> bool     </td>
-        <td class=CPrecondition>    </td> 
-        <td class=CSemantics> check wether x can be extended to --x.begin() or not, extend if true </td> 
-        <td class=CPostCondition>       </td> 
-        <td class=CComplexity>     </td>
-      </tr>
-     </table>
+
+
+| Name          | Expression | Type requirements   | Return type | Precondition     | Semantics | Post condition | Complexity |
+|---------------|------------|---------------------|-------------|------------------|-----------|----------------|------------|
+| Extension test | x.isExtendableBack() |      |bool         |                  | check whether x can be extended to - -x.begin() or not | | |
+| Extension      | x.extendBack()       |      |bool         |                  | check whether x can be extended to - -x.begin() or not, extend if true | | |
+     
     
  ### Invariants###
     
  ### Models###
 
-   ArithmeticalDSS3d, GeometricalDSS, GeometricalDCA    
+   StandardDSS6Computer, StabbingLineComputer, StabbingCircleComputer    
 
  ### Notes###
 
@@ -118,8 +93,8 @@ Description of \b concept '\b CBidirectionalSegmentComputer' <p>
     // Methods
     BOOST_CONCEPT_USAGE( CBidirectionalSegmentComputer )
     {
-      ConceptUtils::sameType( myB, myX.isExtendableBackward() );
-      ConceptUtils::sameType( myB, myX.extendBackward() );
+      ConceptUtils::sameType( myB, myX.isExtendableBack() );
+      ConceptUtils::sameType( myB, myX.extendBack() );
     }
     // ------------------------- Private Datas --------------------------------
   private:

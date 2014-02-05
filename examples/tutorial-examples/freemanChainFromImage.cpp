@@ -34,7 +34,7 @@
 //! [freemanChainFromImage-basicIncludes]
 
 //! [freemanChainFromImage-ImageSetIncludes]
-#include "DGtal/io/readers/PNMReader.h"
+#include "DGtal/io/readers/PGMReader.h"
 #include "DGtal/images/imagesSetsUtils/SetFromImage.h"
 //! [freemanChainFromImage-ImageSetIncludes]
 
@@ -47,15 +47,17 @@
 #include "DGtal/io/boards/Board2D.h"
 #include "DGtal/io/colormaps/GradientColorMap.h"
 #include "DGtal/io/Color.h"
+
+using namespace DGtal;
 //! [freemanChainFromImage-displayIncludes]
 
 int main()
 {
 
   //! [freemanChainFromImage-imageImport]
-  typedef DGtal::ImageContainerBySTLVector< Z2i::Domain, unsigned char> Image;
+  typedef DGtal::ImageContainerBySTLVector< DGtal::Z2i::Domain, unsigned char> Image;
   std::string filename =  examplesPath + "samples/circleR10modif.pgm";
-  Image image = DGtal::PNMReader<Image>::importPGM(filename); 
+  Image image = DGtal::PGMReader<Image>::importPGM(filename); 
   //! [freemanChainFromImage-imageImport]
   
   //![freemanChainFromImage-ksspace]
@@ -65,7 +67,6 @@ int main()
 
   //! [freemanChainFromImage-setAppend]
   Z2i::DigitalSet set2d (image.domain());
-  SetPredicate<Z2i::DigitalSet> set2dPredicate( set2d );
   SetFromImage<Z2i::DigitalSet>::append<Image>(set2d, image, 1, 255);
   //! [freemanChainFromImage-setAppend]
 
@@ -83,7 +84,7 @@ int main()
   //! [freemanChainFromImage-extraction]
   std::vector< std::vector< Z2i::Point >  >  vectContoursBdryPointels;
   Surfaces<Z2i::KSpace>::extractAllPointContours4C( vectContoursBdryPointels,
-                ks, set2dPredicate, sAdj );  
+                ks, set2d, sAdj );  
   //! [freemanChainFromImage-extraction]
   
 

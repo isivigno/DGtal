@@ -43,7 +43,7 @@
 #include <iostream>
 #include "DGtal/base/Common.h"
 #include "DGtal/images/CImage.h"
-#include "DGtal/base/CountedPtr.h"
+#include "DGtal/base/ConstAlias.h"
 //////////////////////////////////////////////////////////////////////////////
 
 namespace DGtal
@@ -52,9 +52,12 @@ namespace DGtal
   /**
    * Description of template class 'IntervalForegroundPredicate' <p>
    * \brief Aim: Define a simple Foreground predicate thresholding
-   * image values  between two constant values.
+   * image values  between two constant values (the first one being
+   * excluded).
    *
-   * @tparam TImage an model of CImageContainer concept. 
+   * This class is a model of CPointPredicate.
+   *
+   * @tparam Image an model of CImageContainer concept. 
    */
   template <typename Image>
   class IntervalForegroundPredicate
@@ -72,10 +75,10 @@ namespace DGtal
      * @param minVal the minimum value (first value excluded).
      * @param maxVal the maximum value (last value considered).
      */
-    IntervalForegroundPredicate(const Image & aImage,
-			      const Value minVal, 
-			      const Value maxVal): 
-      myImage(new Image(aImage)), myMaxVal(maxVal), myMinVal(minVal) {};
+    IntervalForegroundPredicate(ConstAlias<Image> aImage,
+                                const Value minVal, 
+                                const Value maxVal): 
+      myImage(&aImage), myMaxVal(maxVal), myMinVal(minVal) {};
     
     /** 
      * @return True if the point belongs to the value interval.
@@ -88,29 +91,21 @@ namespace DGtal
     /** 
      * @return True if the point belongs to the value interval.
      */
-    bool operator()(const typename Image::Iterator &it) const
+    bool operator()(const typename Image::ConstRange::ConstIterator &it) const
     {
-      return ((*myImage)(it) > myMinVal) && ((*myImage)(it) <= myMaxVal);
+      return ((*it) > myMinVal) && ((*it) <= myMaxVal);
     }
-    
-    /** 
+
+    /**
      * @return True if the point belongs to the value interval.
      */
-    bool operator()(const typename Image::ConstIterator &it) const
+    bool operator()(const typename Image::Range::Iterator &it) const
     {
-      return ((*myImage)(it) > myMinVal) && ((*myImage)(it) <= myMaxVal);
+      return ((*it) > myMinVal) && ((*it) <= myMaxVal);
     }
-    
-    /** 
-     * @return True if the point belongs to the value interval.
-     */
-    bool operator()(const typename Image::SpanIterator &it) const
-    {
-      return ((*myImage)(it) > myMinVal) && ((*myImage)(it) <= myMaxVal);
-    }
-    
+
   private:
-    CountedPtr<Image> myImage;
+    const Image* myImage;
     Value myMaxVal;
     Value myMinVal;
     

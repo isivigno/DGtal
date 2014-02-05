@@ -42,7 +42,9 @@
 // Inclusions
 #include <iostream>
 #include "DGtal/base/Common.h"
-#include "DGtal/base/CUnaryFunctor.h"
+
+#include "DGtal/base/CPredicate.h"
+
 //////////////////////////////////////////////////////////////////////////////
 
 namespace DGtal
@@ -53,29 +55,28 @@ namespace DGtal
   /**
 Description of \b concept '\b CPointPredicate' <p>
      @ingroup Concepts
-     \brief Aim: Defines a predicate on a point. 
-     
-     Associates booleans to points.
-    
- ### Refinement of CUnaryFunctor
-    
- ### Associated types :
+     \brief Aim: Defines a predicate on a point.
 
+ Associates booleans to points.
+
+ ### Refinement of
+    CPredicate
+
+
+ ### Associated types :
      - Point : specifies the type for an element of the domain (inner
        type).
 
-     @see CPredicate
+ ### Models
+    - basic models: ConstantPointPredicate, TruePointPredicate, FalsePointPredicate, IsUpperPointPredicate, IsLowerPointPredicate, IsWithinPointPredicate
+    - complex predicate constructor: BinaryPointPredicate
+    - others: DomainPredicate, SetPredicate, IntervalForegroundPredicate, SimpleThresholdForegroundPredicate
+    - all models of CDigitalSet are models of CPointPredicate: DigitalSetBySTLVector, DigitalSetBySTLMap, DigitalSetFromMap
 
- ### Models###
-    
-     - basic models: ConstantPointPredicate, TruePointPredicate, FalsePointPredicate, IsUpperPointPredicate, IsLowerPointPredicate, IsWithinPointPredicate
-     - complex predicate constructor: BinaryPointPredicate
-     - others: DomainPredicate,SetPredicate
-    
- ### Notes###
+ ### Notes
    */
-  template <typename T>
-  struct CPointPredicate
+template <typename T>
+struct CPointPredicate: CPredicate<T, typename T::Point>
   {
     // ----------------------- Concept checks ------------------------------
   public:
@@ -87,9 +88,10 @@ Description of \b concept '\b CPointPredicate' <p>
   private:
     // ------------------------- Internals ------------------------------------
   private:
-    
+
+
   }; // end of concept CPointPredicate
-  
+
 } // namespace DGtal
 
 //                                                                           //

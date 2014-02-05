@@ -139,7 +139,7 @@ namespace DGtal
      * Constructor.
      * @param firstPoint  the end point of the first straight segment expected to lie in the interior of the separating shapes
      * @param secondPoint  the end point of the first straight segment expected to lie in the exterior of the separating shapes
-     * @param sShape  any shape
+     * @param aShape  any shape
      */
     Preimage2D(const Point & firstPoint, const Point & secondPoint, const Shape & aShape );
 
@@ -308,22 +308,22 @@ namespace DGtal
     /**
      * @return first upper leaning point.
      */
-    Point getUf() const;
+    Point Uf() const;
 
     /**
      * @return last upper leaning point.
      */
-    Point getUl() const;
+    Point Ul() const;
 
     /**
      * @return first lower leaning point.
      */
-    Point getLf() const;
+    Point Lf() const;
 
     /**
      * @return last lower leaning point.
      */
-    Point getLl() const;
+    Point Ll() const;
     
     /**
      * Get the parameters of one separating straight line

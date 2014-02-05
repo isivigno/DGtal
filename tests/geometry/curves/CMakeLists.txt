@@ -1,33 +1,33 @@
 #add_subdirectory(estimation)
 
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -qstrict")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -g")
 
 SET(DGTAL_TESTS_SRC
-  # testArithDSS	
-  # testArithDSS3d
-  # testFreemanChain
-  # testDecomposition  
-  # testSegmentation
-  # testMaximalSegments
-  # testFP
-  # testGridCurve
-  # testCombinDSS
-  # testGeometricalDSS
-  # testGeometricalDCA
-  # testBinomialConvolver
-  # testDSLSubsegment
-  # testLrSBreversedSmartDSS
-  # testSBreversedSmartDSS	
-  # testArithDSSIterator
-   testFareyFan
-   testUnionOfDSS
-  
-	)
+  testArithDSS3d
+  testFreemanChain
+  testSegmentation
+  testFP
+  testGridCurve
+  testCombinDSS
+  testStabbingLineComputer
+  testStabbingCircleComputer
+  testBinomialConvolver
+  testFrechetShortcut	
+  testArithmeticalDSS
+  testArithmeticalDSLKernel
+  testArithmeticalDSSComputer
+  testArithmeticalDSL
+  testDSLSubsegment
+  testArithDSSIterator
+  testFareyFan
+  testUnionOfDSS
+  )
+
 
 FOREACH(FILE ${DGTAL_TESTS_SRC})
   add_executable(${FILE} ${FILE})
-  target_link_libraries (${FILE} DGtal DGtalIO)
+  target_link_libraries (${FILE} DGtal DGtalIO ${DGtalLibDependencies})
   add_test(${FILE} ${FILE})
 ENDFOREACH(FILE)
 

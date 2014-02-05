@@ -74,7 +74,6 @@ int main( int argc, char** argv )
   typedef ImageSelector < Domain, int>::Type Image;
   Image image = VolReader<Image>::importVol(inputFilename);
   DigitalSet set3d (image.domain());
-  SetPredicate<DigitalSet> set3dPredicate( set3d );
   SetFromImage<DigitalSet>::append<Image>(set3d, image,
                                           minThreshold, maxThreshold);
   trace.endBlock();
@@ -99,14 +98,13 @@ int main( int argc, char** argv )
 
   //! [volToOff-ExtractingSurface]
   trace.beginBlock( "Extracting boundary by scanning the space. " );
-  typedef KSpace::Surfel Surfel;
   typedef KSpace::SurfelSet SurfelSet;
   typedef SetOfSurfels< KSpace, SurfelSet > MySetOfSurfels;
   typedef DigitalSurface< MySetOfSurfels > MyDigitalSurface;
 
   MySetOfSurfels theSetOfSurfels( K, surfAdj );
   Surfaces<KSpace>::sMakeBoundary( theSetOfSurfels.surfelSet(),
-                                   K, set3dPredicate,
+                                   K, set3d,
                                    image.domain().lowerBound(),
                                    image.domain().upperBound() );
   MyDigitalSurface digSurf( theSetOfSurfels );

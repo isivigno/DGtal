@@ -42,9 +42,9 @@
 #include "DGtal/topology/DigitalSurface2DSlice.h"
 #include "DGtal/topology/helpers/Surfaces.h"
 
-#include "DGtal/io/viewers/Viewer3D.h"
 #include "DGtal/io/readers/VolReader.h"
 #include "DGtal/io/DrawWithDisplay3DModifier.h"
+#include "DGtal/io/viewers/Viewer3D.h"
 #include "DGtal/images/ImageSelector.h"
 #include "DGtal/images/imagesSetsUtils/SetFromImage.h"
 #include "DGtal/io/Color.h"
@@ -69,10 +69,9 @@ int main( int argc, char** argv )
   std::string inputFilename = examplesPath + "samples/Al.100.vol"; 
   Image image = VolReader<Image>::importVol(inputFilename);
   DigitalSet set3d (image.domain());
-  SetPredicate<DigitalSet> set3dPredicate( set3d );
   SetFromImage<DigitalSet>::append<Image>(set3d, image, 
                                           0, 1 );
-  Viewer3D viewer;  
+  Viewer3D<> viewer;
   viewer.show(); 
   trace.endBlock();
   //! [digitalSurfaceSlice-readVol]
@@ -103,7 +102,7 @@ int main( int argc, char** argv )
   typedef DigitalSurface< MySetOfSurfels > MyDigitalSurface;
   MySetOfSurfels theSetOfSurfels( ks, surfAdj );
   Surfaces<KSpace>::sMakeBoundary( theSetOfSurfels.surfelSet(),
-                                   ks, set3dPredicate,
+                                   ks, set3d,
                                    image.domain().lowerBound(), 
                                    image.domain().upperBound() );
   MyDigitalSurface digSurf( theSetOfSurfels );
@@ -158,7 +157,7 @@ int main( int argc, char** argv )
   cmap_grad.addColor( Color( 255, 255, 10 ) );
   
   // Need to avoid surfel superposition (the surfel size in increased)
-  viewer << Viewer3D::shiftSurfelVisu; 
+  viewer << Viewer3D<>::shiftSurfelVisu;
   viewer << SetMode3D( surf.className(), "");
   viewer.setFillColor(Color(180, 200, 25, 255));
   
@@ -188,10 +187,10 @@ int main( int argc, char** argv )
     }
   
   // One need once again to avoid superposition.
-  viewer << Viewer3D::shiftSurfelVisu; 
+  viewer << Viewer3D<>::shiftSurfelVisu;
   viewer.setFillColor(Color(18, 200, 25, 255));
   viewer << surf ;
-  viewer << Viewer3D::updateDisplay;
+  viewer << Viewer3D<>::updateDisplay;
   trace.endBlock();
     
   return application.exec();

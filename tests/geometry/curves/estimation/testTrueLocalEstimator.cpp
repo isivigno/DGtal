@@ -43,7 +43,7 @@
 #include "DGtal/geometry/curves/estimation/ParametricShapeTangentFunctor.h"
 #include "DGtal/geometry/curves/estimation/ParametricShapeArcLengthFunctor.h"
 #include "DGtal/geometry/curves/estimation/MostCenteredMaximalSegmentEstimator.h"
-#include "DGtal/geometry/curves/ArithmeticalDSS.h"
+#include "DGtal/geometry/curves/ArithmeticalDSSComputer.h"
 
 #include "DGtal/kernel/SpaceND.h"
 #include "DGtal/kernel/domains/HyperRectDomain.h"
@@ -174,7 +174,7 @@ testTrueLocalEstimatorOnShapeDigitization( const string & name,
   {
     RealPoint x = *it;
     double kappa = curvatureEstimator.eval( it );
-    std::cout << i << " " << x.at( 0 ) << " " << x.at( 1 ) 
+    std::cout << i << " " << x[ 0 ] << " " << x[1] 
         << " " << kappa << std::endl;
   }
     }    

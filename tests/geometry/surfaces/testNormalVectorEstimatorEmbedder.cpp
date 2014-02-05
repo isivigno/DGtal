@@ -34,18 +34,18 @@
 #include <iterator>
 #include "DGtal/base/Common.h"
 #include "ConfigTest.h"
-#include "DGtal/kernel/CanonicDigitalSurfaceEmbedder.h"
+#include "DGtal/topology/CanonicDigitalSurfaceEmbedder.h"
 #include "DGtal/topology/DigitalSurface.h"
 #include "DGtal/topology/DigitalSetBoundary.h"
 #include "DGtal/topology/ImplicitDigitalSurface.h"
 #include "DGtal/topology/LightImplicitDigitalSurface.h"
 #include "DGtal/topology/ExplicitDigitalSurface.h"
 #include "DGtal/topology/LightExplicitDigitalSurface.h"
-#include "DGtal/topology/BreadthFirstVisitor.h"
+#include "DGtal/graph/BreadthFirstVisitor.h"
 #include "DGtal/topology/helpers/FrontierPredicate.h"
 #include "DGtal/topology/helpers/BoundaryPredicate.h"
-#include "DGtal/topology/CUndirectedSimpleLocalGraph.h"
-#include "DGtal/topology/CUndirectedSimpleGraph.h"
+#include "DGtal/graph/CUndirectedSimpleLocalGraph.h"
+#include "DGtal/graph/CUndirectedSimpleGraph.h"
 
 #include "DGtal/io/readers/VolReader.h"
 #include "DGtal/images/imagesSetsUtils/SetFromImage.h"
@@ -85,7 +85,6 @@ bool testLocalConvolutionNormalVectorEstimator ( int /*argc*/, char**/*argv*/ )
     Image image = VolReader<Image>::importVol ( filename );
     trace.info() <<image<<std::endl;
     DigitalSet set3d ( image.domain() );
-    SetPredicate<DigitalSet> set3dPredicate ( set3d );
     SetFromImage<DigitalSet>::append<Image> ( set3d, image,
             0,256 );
 
@@ -102,24 +101,24 @@ bool testLocalConvolutionNormalVectorEstimator ( int /*argc*/, char**/*argv*/ )
     MySurfelAdjacency surfAdj ( true ); // interior in all directions.
 
     trace.beginBlock ( "Set up digital surface." );
-    typedef LightImplicitDigitalSurface<KSpace, SetPredicate<DigitalSet> >
-    MyDigitalSurfaceContainer;
+    typedef LightImplicitDigitalSurface<KSpace, DigitalSet >
+      MyDigitalSurfaceContainer;
     typedef DigitalSurface<MyDigitalSurfaceContainer> MyDigitalSurface;
-    SCell bel = Surfaces<KSpace>::findABel ( ks, set3dPredicate, 100000 );
+    SCell bel = Surfaces<KSpace>::findABel ( ks, set3d, 100000 );
     MyDigitalSurfaceContainer* ptrSurfContainer =
-        new MyDigitalSurfaceContainer ( ks, set3dPredicate, surfAdj, bel );
+        new MyDigitalSurfaceContainer ( ks, set3d, surfAdj, bel );
     MyDigitalSurface digSurf ( ptrSurfContainer ); // acquired
     MyDigitalSurface::ConstIterator it = digSurf.begin();
     trace.endBlock();
 
     trace.beginBlock ( "Compute and output surface <cat10-constant.off> with trivial normals." );
     //Convolution kernel
-    ConstantConvolutionWeights<MyDigitalSurface::Size> kernel;
+    deprecated::ConstantConvolutionWeights<MyDigitalSurface::Size> kernel;
 
     //Estimator definition
-    typedef LocalConvolutionNormalVectorEstimator
-    < MyDigitalSurface,
-    ConstantConvolutionWeights<MyDigitalSurface::Size> > MyConstantEstimator;
+    typedef deprecated::LocalConvolutionNormalVectorEstimator
+      < MyDigitalSurface,
+        deprecated::ConstantConvolutionWeights<MyDigitalSurface::Size> > MyConstantEstimator;
     BOOST_CONCEPT_ASSERT ( ( CNormalVectorEstimator< MyConstantEstimator > ) );
     MyConstantEstimator myNormalEstimator ( digSurf, kernel );
 
@@ -146,11 +145,11 @@ bool testLocalConvolutionNormalVectorEstimator ( int /*argc*/, char**/*argv*/ )
     trace.beginBlock ( "Compute and output surface <cat10-gaussian.off> with gaussian convoluted normals." );
 
     //Convolution kernel
-    GaussianConvolutionWeights < MyDigitalSurface::Size > Gkernel ( 4.0 );
+    deprecated::GaussianConvolutionWeights < MyDigitalSurface::Size > Gkernel ( 4.0 );
 
     //Estimator definition
-    typedef LocalConvolutionNormalVectorEstimator  < MyDigitalSurface,
-            GaussianConvolutionWeights< MyDigitalSurface::Size>  > MyGaussianEstimator;
+    typedef deprecated::LocalConvolutionNormalVectorEstimator  < MyDigitalSurface,
+                                                                 deprecated::GaussianConvolutionWeights< MyDigitalSurface::Size>  > MyGaussianEstimator;
     BOOST_CONCEPT_ASSERT ( ( CNormalVectorEstimator< MyGaussianEstimator > ) );
     MyGaussianEstimator myNormalEstimatorG ( digSurf, Gkernel );
 
@@ -195,7 +194,9 @@ int main ( int argc, char** argv )
     bool res = testLocalConvolutionNormalVectorEstimator ( argc,argv ); // && ... other tests
     trace.emphase() << ( res ? "Passed." : "Error." ) << endl;
     trace.endBlock();
-    return true;
+
+    return res ? 0 : 1;
+
 }
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////

@@ -37,7 +37,7 @@
 #include "DGtal/helpers/StdDefs.h"
 #include "DGtal/topology/helpers/Surfaces.h"
 
-#include "DGtal/io/readers/PNMReader.h"
+#include "DGtal/io/readers/PGMReader.h"
 #include "DGtal/io/colormaps/GradientColorMap.h"
 #include "DGtal/io/boards/Board2D.h"
 #include "DGtal/io/Color.h"
@@ -58,7 +58,7 @@ int main( int /*argc*/, char** /*argv*/ )
 {
   typedef ImageSelector < Z2i::Domain, int>::Type Image;
   std::string inputFilename = examplesPath + "samples/circleR10modif.pgm"; 
-  Image image = PNMReader<Image>::importPGM( inputFilename ); 
+  Image image = PGMReader<Image>::importPGM( inputFilename ); 
   
   Z2i::DigitalSet set2d (image.domain());
   SetFromImage<Z2i::DigitalSet>::append<Image>(set2d, image, 0, 255);
@@ -79,14 +79,13 @@ int main( int /*argc*/, char** /*argv*/ )
 
 
   //Extract a boundary cell
-  SetPredicate<Z2i::DigitalSet> set2dPredicate( set2d );
-  Z2i::SCell aCell = Surfaces<Z2i::KSpace>::findABel(ks, set2dPredicate );
+  Z2i::SCell aCell = Surfaces<Z2i::KSpace>::findABel(ks, set2d );
 
   // Getting the consecutive surfels of the 2D boundary
   std::vector<Z2i::SCell> vectBdrySCell;
   SurfelAdjacency<2> SAdj( true );
   Surfaces<Z2i::KSpace>::track2DBoundary( vectBdrySCell,
-            ks, SAdj, set2dPredicate, aCell );
+            ks, SAdj, set2d, aCell );
   
   board << CustomStyle( (*(vectBdrySCell.begin())).className(), 
       new CustomColors(  Color( 255, 255, 0 ),
@@ -113,7 +112,7 @@ int main( int /*argc*/, char** /*argv*/ )
   // Z2i::Cell upp = ks.uLast(ks.uSpel(ks.upperBound()));
   Surfaces<Z2i::KSpace>::sMakeBoundary
     ( bdry,
-      ks, set2dPredicate, ks.lowerBound(), ks.upperBound() );
+      ks, set2d, ks.lowerBound(), ks.upperBound() );
 
   
   std::set<Z2i::SCell>::iterator itB;
@@ -126,7 +125,7 @@ int main( int /*argc*/, char** /*argv*/ )
   
   std::vector< std::vector<Z2i::SCell> > vectContoursBdrySCell;
   Surfaces<Z2i::KSpace>::extractAll2DSCellContours( vectContoursBdrySCell,
-                ks, SAdj, set2dPredicate );
+                ks, SAdj, set2d );
   GradientColorMap<int> cmap_grad3( 0, (const int)vectContoursBdrySCell.size() );
   cmap_grad3.addColor( Color( 50, 50, 255 ) );
   cmap_grad3.addColor( Color( 255, 0, 0 ) );

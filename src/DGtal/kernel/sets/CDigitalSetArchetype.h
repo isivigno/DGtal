@@ -49,6 +49,7 @@
 #include <set>
 #include <string>
 #include "DGtal/base/Common.h"
+#include "DGtal/base/CountedPtr.h"
 #include "DGtal/kernel/sets/CDigitalSet.h"
 //////////////////////////////////////////////////////////////////////////////
 
@@ -111,6 +112,11 @@ namespace DGtal
      * @return the embedding domain.
      */
     const Domain & domain() const { return DummyObject<Domain>::get(); }
+
+    /**
+     * @return the embedding domain.
+     */
+    CowPtr<Domain> domainPointer() const { return DummyObject< CowPtr<Domain> >::get(); }
 
     // ----------------------- Standard Set services --------------------------
   public:
@@ -243,6 +249,16 @@ namespace DGtal
     CDigitalSetArchetype<Domain> & operator+=
     ( const CDigitalSetArchetype<Domain> & aSet )
     { return *this; }
+
+    // ----------------------- Model of CPointPredicate -----------------------------
+  public:
+
+    /**
+       @param p any point.
+       @return 'true' if and only if \a p belongs to this set.
+    */
+    bool operator()( const Point & p ) const
+    { return p == p; }
 
     // ----------------------- Other Set services -----------------------------
   public:

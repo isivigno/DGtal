@@ -74,7 +74,7 @@ namespace DGtal
   public:
     typedef TSpace Space;
     typedef typename Space::RealPoint RealPoint;
-    typedef pair<double,double> AngularCoordinates;
+    typedef std::pair<double,double> AngularCoordinates;
      
     /**
      * Constructor.
@@ -195,16 +195,6 @@ namespace DGtal
 
     // ------------------------- star-shaped services -------------------------
   public:
-
-
-    /**
-     * @param p any point in the plane.
-     *
-     * @return 'true' if the point is inside the shape, 'false' if it
-     * is strictly outside.
-     */
-    virtual bool isInside( const RealPoint & p ) const;
-
 
     /**
      * Return the orienatation of a point with respect to a shape.

@@ -1,18 +1,14 @@
 SET(DGTAL_TESTS_SRC
    testAdjacency
-   testBreadthFirstPropagation
-   testDepthFirstPropagation
    testCellularGridSpaceND
    testDigitalSurface
    testDigitalTopology
-   testExpander
    testObject
    testObjectBorder
    testSimpleExpander
    testSCellsFunctor
-   testSTLMapToVertexMapAdapter
    testUmbrellaComputer
-   )
+ )
 
 FOREACH(FILE ${DGTAL_TESTS_SRC})
   add_executable(${FILE} ${FILE})
@@ -22,7 +18,6 @@ ENDFOREACH(FILE)
 
 
 SET(DGTAL_BENCH_SRC
-   testExpander-benchmark
    testObject-benchmark
    testImplicitDigitalSurface-benchmark
    testLightImplicitDigitalSurface-benchmark

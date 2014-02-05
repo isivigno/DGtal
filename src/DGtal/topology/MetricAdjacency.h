@@ -75,7 +75,7 @@ namespace DGtal
    * @see testAdjacency.cpp
    */
   template <typename TSpace, Dimension maxNorm1, 
-      Dimension dimension = TSpace::dimension >
+	    Dimension dimension = TSpace::dimension >
   class MetricAdjacency
   {
     BOOST_CONCEPT_ASSERT(( CSpace<TSpace> ));
@@ -155,7 +155,7 @@ namespace DGtal
      * Writes the neighbors of a vertex using an output iterator
      * 
      * 
-     * @tparam OutputObjectIterator the type of an output iterator writing
+     * @tparam OutputIterator the type of an output iterator writing
      * in a container of vertices.
      * 
      * @param it the output iterator
@@ -173,7 +173,7 @@ namespace DGtal
      * output iterator
      * 
      * 
-     * @tparam OutputObjectIterator the type of an output iterator writing
+     * @tparam OutputIterator the type of an output iterator writing
      * in a container of vertices.
      * 
      * @tparam VertexPredicate the type of the predicate

@@ -45,11 +45,13 @@
 #include "DGtal/base/Common.h"
 #include "DGtal/base/CLabel.h"
 #include "DGtal/base/ConstRangeAdapter.h"
+#include "DGtal/images/DefaultConstImageRange.h"
+#include "DGtal/images/DefaultImageRange.h"
+
 #include "DGtal/kernel/domains/CDomain.h"
 #include "DGtal/kernel/domains/HyperRectDomain.h"
 #include "DGtal/kernel/SpaceND.h"
 #include "DGtal/base/Bits.h"
-//#include "DGtal/io/boards/Board2D.h"
 #include "DGtal/images/Morton.h"
 #include "DGtal/images/SetValueIterator.h"
 #include "DGtal/io/Color.h"
@@ -58,6 +60,8 @@
 
 namespace DGtal
 {
+  namespace experimental
+  {
   /////////////////////////////////////////////////////////////////////////////
   // template class ImageContainerByHashTree
   /**
@@ -114,11 +118,11 @@ namespace DGtal
    *
    * @tparam TDomain type of domains
    * @tparam TValue type for image values
-   * @taparam THashKey  type to store Morton keys
+   * @tparam THashKey  type to store Morton keys
    * (default: DGtal::uint64_t)
-   * 
+   *
    * @see testImageContainerByHashTree.cpp
-   *       
+   *
    * */
   template < typename TDomain, typename TValue, typename THashKey = typename DGtal::uint64_t >
   class ImageContainerByHashTree
@@ -126,12 +130,12 @@ namespace DGtal
 
   protected:
     class Node;
-  
- 
+
+
   public:
 
-    typedef ImageContainerByHashTree<TDomain, TValue, THashKey> Self; 
-        
+    typedef ImageContainerByHashTree<TDomain, TValue, THashKey> Self;
+
     typedef THashKey HashKey;
 
     /// domain
@@ -145,28 +149,31 @@ namespace DGtal
     typedef Point Vertex;
 
     /// static constants
-    static const typename Domain::Dimension dimension = Domain::dimension;
-    static const typename Domain::Dimension dim = Domain::dimension;
-    static const unsigned int NbChildrenPerNode = POW<2, dimension>::VALUE;
-    static const HashKey ROOT_KEY = static_cast<HashKey>(1);
+    BOOST_STATIC_CONSTANT( Dimension, dimension = Domain::dimension); 
+    BOOST_STATIC_CONSTANT( Dimension, dim = Domain::dimension);
+    typedef POW<2, dimension> PowHelper;  
+    BOOST_STATIC_CONSTANT( unsigned int, NbChildrenPerNode = PowHelper::VALUE); 
+    BOOST_STATIC_CONSTANT( HashKey, ROOT_KEY = static_cast<THashKey>(1)); 
 
-    /// domain should be rectangular 
+    /// domain should be rectangular
     //(since constructed from two points as a bounding box)
-    BOOST_STATIC_ASSERT ((boost::is_same< Domain, 
-                                          HyperRectDomain<SpaceND<dimension, Integer> > >::value));
+    BOOST_STATIC_ASSERT ((boost::is_same< Domain,
+                                          HyperRectDomain<typename Domain::Space > >::value));
 
     /// values range
     BOOST_CONCEPT_ASSERT(( CLabel<TValue> ));
     typedef TValue Value;
-    typedef ConstRangeAdapter<typename Domain::ConstIterator, Self, Value > ConstRange; 
+    //typedef ConstRangeAdapter<typename Domain::ConstIterator, Self, Value > ConstRange;
+    typedef DefaultConstImageRange<Self> ConstRange;
+    typedef DefaultImageRange<Self> Range;
 
     /// output iterator
-    typedef SetValueIterator<Self> OutputIterator; 
+    typedef SetValueIterator<Self> OutputIterator;
 
 
 
     /**
-     * The constructor from a \a hashKeySize, a @a depth and a 
+     * The constructor from a \a hashKeySize, a @a depth and a
      * @a defaultValue.
      *
      * @param hashKeySize Number of bit of the hash key. This
@@ -187,10 +194,10 @@ namespace DGtal
                              const Value defaultValue);
 
     /**
-     * The constructor from  a \a hashKeySize,  a 
+     * The constructor from  a \a hashKeySize,  a
      * @a defaultValue and a pair of points. In this case, the depth
      * of the tree is given by the logarithm of the domain size
-     * defined by the two points. 
+     * defined by the two points.
      *
      * @param hashKeySize Number of bit of the hash key. This
      * parameter is important as it influences the amount of
@@ -199,8 +206,8 @@ namespace DGtal
      * speed and memory usage is to be done here.
      *
      * @param p1 First point of the image bounding box.
-     * @param p1 Second point of the image bounding box.
-     * 
+     * @param p2 Second point of the image bounding box.
+     *
      * @param defaultValue In order for the tree to be valid it needs
      * a default value at the root (key = 1)
      */
@@ -210,10 +217,10 @@ namespace DGtal
                              const Value defaultValue);
 
     /**
-     * The constructor from  a \a domain,  a 
+     * The constructor from  a \a domain,  a
      * @a defaultValue (default value: 0) and a \a hashKeySize (default value: 3). In this case, the depth
      * of the tree is given by the logarithm of the domain size
-     * defined by the two points. 
+     * defined by the two points.
      *
      * @param aDomain the image domain
      * @param hashKeySize Number of bit of the hash key. This
@@ -231,42 +238,43 @@ namespace DGtal
 
 
     // TODO
-    // /** 
+    // /**
     //  * Copy contructor.
-    //  * 
+    //  *
     //  * @param other object to copy.
-    //  */      
+    //  */
     // ImageContainerByHashTree(const ImageContainerByHashTree<Domain, Value>& other);
 
-    // /** 
+    // /**
     //  * Assignment.
-    //  * 
+    //  *
     //  * @param other object to copy.
-    //  */      
+    //  */
     // ImageContainerByHashTree(const ImageContainerByHashTree<Domain, Value>& other);
 
-    // /** 
+    // /**
     //  * Destructor
     //  * Free the memory allocated by @a myData
-    //  */      
+    //  */
     // ~ImageContainerByHashTree();
 
 
     /**
      * @return the domain associated to the image.
      */
-    const Domain &domain() const; 
+    const Domain &domain() const;
 
-    /** 
-     * @return an instance of ConstRange 
+    /**
+     * @return an instance of ConstRange
      * used to iterate over the values.
-     */      
-    ConstRange range() const;
+     */
+    ConstRange constRange() const;
 
-    /** 
-     * @return an output iterator used to write values.
-     */      
-    OutputIterator outputIterator();
+    /**
+     * @return an instance of ConstRange
+     * used to iterate over the values.
+     */
+    Range range() ;
 
 
     /**
@@ -298,7 +306,7 @@ namespace DGtal
      * Returns the value at a given point.
      *
      * @param aPoint The point
-     * @return the value 
+     * @return the value
      */
     Value operator()(const Point &aPoint) const;
 
@@ -323,7 +331,7 @@ namespace DGtal
      * A attempt to do the same thing as get(HashKey) but looking for
      * deeper leafs in the first place instead of doing this in the
      * second place. It hasn't show better results so far.
-     * @param key The key. 
+     * @param key The key.
      * @return the value
      */
     Value reverseGet(const HashKey key) const;
@@ -337,7 +345,7 @@ namespace DGtal
      * tree's structure needs to be modified.  For efficiency no check
      * is performed on the key
      * @param key The key
-     * @param object The associated object 
+     * @param object The associated object
      */
     void setValue(const HashKey key, const Value object);
 
@@ -348,7 +356,7 @@ namespace DGtal
      * performances strongly depend on wether or not and how much the
      * tree's structure needs to be modified.  For efficiency no check
      * is performed on the coordinates
-     * @param key The point
+     * @param aPoint The point
      * @param object the associated object
      */
     void setValue(const Point& aPoint, const Value object);
@@ -363,7 +371,7 @@ namespace DGtal
     {
       return mySpanSize;
     }
-      
+
     /**
      *  Returns the tree's depth.
      * @return the depth
@@ -372,7 +380,7 @@ namespace DGtal
     {
       return myTreeDepth;
     }
-      
+
     /**
      *  Returns true if the key is valid.  A key is valid if the the
      * most important bit that is equal to 1 is at a position of the
@@ -382,30 +390,30 @@ namespace DGtal
      * @return the boolean result
      */
     bool isKeyValid(HashKey key) const;
-      
+
     /**
      * Checks recursively that the sub-tree starting with key is
      * valid.  A tree is valid if there's one (and only one) leaf for
      * each position at maximal depth.
      * @param key the key
-     * @param leafAbove  
+     * @param leafAbove  leafAbove (@TODO)
      */
     bool checkIntegrity(HashKey key = ROOT_KEY, bool leafAbove = false) const;
 
     int myDebugCounter; //debug
-      
+
     //stuff that might be moved out of the class for reusability
     HashKey getKey(const Point & aPoint) const;
-      
+
     unsigned int getKeyDepth(HashKey key) const;
-      
+
     int* getCoordinatesFromKey(HashKey key) const;
-      
+
     /*
      * Prints in the state of the container as a tree. (Calls
      * printTree)
-     * 
-     * @param out output stream.  
+     *
+     * @param out output stream.
      * @param displayKeys  boolean to decide if keys are displayed .
      */
     void printState(std::ostream& out, bool displayKeys = false) const;
@@ -415,7 +423,7 @@ namespace DGtal
      * key.
      *
      * @param key root of the subtree to display
-     * @param out output stream.  
+     * @param out output stream.
      * @param displayKeys  boolean to decide if keys are displayed .
      */
     void printTree(HashKey key, std::ostream& out, bool displayKeys) const;
@@ -426,7 +434,7 @@ namespace DGtal
      * the usual tree representation.
      *
      * @param out output stream.
-     * @param nbBits 
+     * @param nbBits  number of bits
      **/
     void printInternalState(std::ostream& out, unsigned int nbBits = 0) const;
 
@@ -574,7 +582,7 @@ namespace DGtal
      * @return the style name used for drawing this object.
      */
     std::string className() const;
-        
+
   protected:
 
     template <typename C>
@@ -593,11 +601,11 @@ namespace DGtal
     {
     public:
 
-      /** 
+      /**
        * Construtctor: create pair (@a aValue, @a key)
-       * 
+       *
        * @param aValue  First value
-       * @param key     key in the hashtree 
+       * @param key     key in the hashtree
        */
       Node(Value aValue, HashKey key)
       {
@@ -605,7 +613,7 @@ namespace DGtal
         myKey = key;
       }
 
-      /** 
+      /**
        * @return the next pair (aValue, key) in the list.
        */
       inline Node* getNext()
@@ -614,27 +622,27 @@ namespace DGtal
       }
 
 
-      /** 
-       * Insert the pair (value,key)  @a next in the node list 
-       * 
+      /**
+       * Insert the pair (value,key)  @a next in the node list
+       *
        * @param next a pointer to a pair (value,key) (Node).
-       */	
+       */
       inline void setNext(Node* next)
       {
         myNext = next;
       }
 
-      /** 
-       * 
-       * @return the key associated to a Node. 
+      /**
+       *
+       * @return the key associated to a Node.
        */
       inline HashKey getKey()
       {
         return myKey;
       }
-	
-      /** 
-       * 
+
+      /**
+       *
        * @return the object (aValue) associated to a Node.
        */
       inline Value& getObject()
@@ -714,7 +722,7 @@ namespace DGtal
 
     /**
      * Recusrively calls RemoveNode on the key and its children.
-     * @param key The key. 
+     * @param key The key.
      * @param nbRecursions the number of recursions performed.
      */
     void recursiveRemoveNode(HashKey key, unsigned int nbRecursions);
@@ -738,7 +746,7 @@ namespace DGtal
 
 
     //----------------------- internal data --------------------------------
-  protected: 
+  protected:
 
     /**
      * The image domain
@@ -768,7 +776,7 @@ namespace DGtal
 
 
     // myN is number of children per node.
-    static const unsigned int myN=POW<2,dim>::VALUE;
+    BOOST_STATIC_CONSTANT( unsigned int, myN = NbChildrenPerNode );
 
 
   public:
@@ -802,8 +810,8 @@ namespace DGtal
     return out;
   }
 
- 
 
+}
 } // namespace DGtal
 
 ///////////////////////////////////////////////////////////////////////////////

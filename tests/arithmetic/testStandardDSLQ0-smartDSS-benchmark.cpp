@@ -50,14 +50,6 @@ bool checkSubStandardDSLQ0( const DSL & D,
                             const typename DSL::Point & A, 
                             const typename DSL::Point & B ) 
 {
-  // typedef typename DSL::Fraction Fraction;
-  // typedef typename DSL::Integer Integer;
-  // typedef typename DSL::Quotient Quotient;
-  // typedef typename DSL::Point Point;
-  // typedef typename DSL::ConstIterator ConstIterator;
-  // typedef typename DSL::Point2I Point2I;
-  // typedef typename DSL::Vector2I Vector2I;
-
   
   
   DSL S = D.smartDSS( A, B );
@@ -76,11 +68,7 @@ bool testSubStandardDSLQ0( unsigned int nbtries,
 {
   typedef StandardDSLQ0<Fraction> DSL;
   typedef typename Fraction::Integer Integer;
-  typedef typename Fraction::Quotient Quotient;
   typedef typename DSL::Point Point;
-  typedef typename DSL::ConstIterator ConstIterator;
-  typedef typename DSL::Point2I Point2I;
-  typedef typename DSL::Vector2I Vector2I;
   IntegerComputer<Integer> ic;
 
   //std::cout << "# a b mu a1 b1 mu1 Ax Ay Bx By" << std::endl;
@@ -124,31 +112,31 @@ return true;
 ///////////////////////////////////////////////////////////////////////////////
 // Standard services - public :
 
-// int main( int argc, char** argv)
-// {
-//   typedef SternBrocot<DGtal::int64_t,DGtal::int32_t> SB;
-//   typedef SB::Fraction Fraction;
-//   typedef Fraction::Integer Integer;
-//   unsigned int nbtries = ( argc > 1 ) ? atoi( argv[ 1 ] ) : 10000;
-//   // Integer moda = ( argc > 2 ) ? atoll( argv[ 2 ] ) : 100000000000;
-//   // Integer modb = ( argc > 3 ) ? atoll( argv[ 3 ] ) : 100000000000;
-//   // Integer modx = ( argc > 4 ) ? atoll( argv[ 4 ] ) : 1000;
-//   // testSubStandardDSLQ0<Fraction>( nbtries, moda, modb, modx );
+int main( int argc, char** argv)
+{
+  typedef SternBrocot<DGtal::int64_t,DGtal::int32_t> SB;
+  typedef SB::Fraction Fraction;
+  typedef Fraction::Integer Integer;
+  unsigned int nbtries = ( argc > 1 ) ? atoi( argv[ 1 ] ) : 10000;
+  // Integer moda = ( argc > 2 ) ? atoll( argv[ 2 ] ) : 100000000000;
+  // Integer modb = ( argc > 3 ) ? atoll( argv[ 3 ] ) : 100000000000;
+  // Integer modx = ( argc > 4 ) ? atoll( argv[ 4 ] ) : 1000;
+  // testSubStandardDSLQ0<Fraction>( nbtries, moda, modb, modx );
  
   
 
-//   Integer modb = 1000000000000;
-//   Integer moda = modb;
+  Integer modb = 1000000000000;
+  Integer moda = modb;
   
-//   for(Integer modx = 10; modx < modb/2;modx*=2)
-//     {
-//       testSubStandardDSLQ0<Fraction>( nbtries, moda, modb, modx );
-//     }
+  for(Integer modx = 10; modx < modb/2;modx*=2)
+    {
+      testSubStandardDSLQ0<Fraction>( nbtries, moda, modb, modx );
+    }
 
 
 
 
-//  return true;
-// }
+ return true;
+}
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////

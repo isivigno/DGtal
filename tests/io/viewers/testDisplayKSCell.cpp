@@ -40,10 +40,10 @@ using namespace DGtal;
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream>
 #include <QtGui/qapplication.h>
-#include "DGtal/io/viewers/Viewer3D.h"
 #include "DGtal/base/Common.h"
 #include "DGtal/helpers/StdDefs.h"
 #include "DGtal/shapes/Shapes.h"
+#include "DGtal/io/viewers/Viewer3D.h"
 ///////////////////////////////////////////////////////////////////////////////
 
 using namespace std;
@@ -79,23 +79,25 @@ int main( int argc, char** argv )
 {
 
  QApplication application(argc,argv);
- Viewer3D viewer;
- viewer.show();
+
 
  KSpace K;
  Point plow(0,0,0);  
  Point pup(3,3,2);
  Domain domain( plow, pup );
  K.init( plow, pup, true );
-  
-  
+
+ Viewer3D<Space, KSpace> viewer(K);
+ viewer.show();
+ trace.beginBlock ( "Testing display KSCell in Viewer 3D" );  
  //viewer << SetMode3D( domain.className(), "Paving" );
+ // if the domain is visible can't see the cubes inside
  // viewer << domain; 
 
 
  // Drawing cell of dimension 3
- Cell voxelA = K.uCell(Point(1,1,1));
- SCell voxelB = K.sCell(Point(1,1,3));
+ Cell voxelA = K.uCell(Point(1, 1, 1));
+ SCell voxelB = K.sCell(Point(1, 1, 3));
  viewer << voxelB<< voxelA;//
  
  // drawing cells of dimension 2
@@ -106,9 +108,9 @@ int main( int argc, char** argv )
  Cell surfelE = K.uCell( Point( 1, 1, 2 ) ); 
  viewer << surfelA << surfelB << surfelC << surfelD << surfelE;
  
- Cell linelA = K.uCell(Point(2,1 ,2));
- SCell linelB = K.sCell(Point(2,2 ,1));
- SCell linelC = K.sCell(Point(1,2 ,2), false);
+ Cell linelA = K.uCell(Point(2, 1 ,2));
+ SCell linelB = K.sCell(Point(2, 2 ,1));
+ SCell linelC = K.sCell(Point(1, 2 ,2), false);
  viewer << linelA << linelB << linelC;
 
  
@@ -133,12 +135,12 @@ int main( int argc, char** argv )
  SCell linelAC = K.sCell(Point(5, 4, 4), false);
  viewer << pointelA << pointelB << pointelC << linelAC;
  
- viewer <<  Viewer3D::updateDisplay;
- application.exec();
-
+ viewer <<  Viewer3D<>::updateDisplay;
  
+ bool res =  application.exec();
+ trace.emphase() << ( res ? "Passed." : "Error." ) << endl;
  trace.endBlock();
- return true;
+ return res ? 0 : 1;
 }
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////

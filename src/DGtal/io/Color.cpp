@@ -50,7 +50,18 @@ DGtal::Color::Color( const unsigned int rgb, unsigned char aAlphaValue )
 }
 
 
-Color &
+DGtal::Color &
+DGtal::Color::setRGBA( const DGtal::uint32_t aRGBA )
+{
+  myRed = ( aRGBA & 0xFF000000u ) >> 24; 
+  myGreen = ( aRGBA & 0xFF0000u ) >> 16;
+  myBlue = ( aRGBA & 0xFF00u ) >> 8;
+  myAlpha = aRGBA & 0xFF;
+  return *this;
+}
+
+
+DGtal::Color &
 DGtal::Color::setRGBf( float aRedValue,
            float aGreenValue,
            float aBlueValue,
@@ -181,21 +192,21 @@ DGtal::Color::~Color()
 ///////////////////////////////////////////////////////////////////////////////
 // Interface - public :
 
-const Color DGtal::Color::None(false);
-const Color DGtal::Color::Black((unsigned char)0,(unsigned char)0,(unsigned char)0);
-const Color DGtal::Color::Gray((unsigned char)128,(unsigned char)128,(unsigned char)128);
-const Color DGtal::Color::White((unsigned char)255,(unsigned char)255,(unsigned char)255);
-const Color DGtal::Color::Red((unsigned char)255,(unsigned char)0,(unsigned char)0);
-const Color DGtal::Color::Green((unsigned char)0,(unsigned char)128,(unsigned char)0);
-const Color DGtal::Color::Lime((unsigned char)0,(unsigned char)255,(unsigned char)0);
-const Color DGtal::Color::Blue((unsigned char)0,(unsigned char)0,(unsigned char)255);
-const Color DGtal::Color::Cyan((unsigned char)0,(unsigned char)255,(unsigned char)255);
-const Color DGtal::Color::Magenta((unsigned char)255,(unsigned char)0,(unsigned char)255);
-const Color DGtal::Color::Yellow((unsigned char)255,(unsigned char)255,(unsigned char)0);
-const Color DGtal::Color::Silver((unsigned char)190,(unsigned char)190,(unsigned char)190);
-const Color DGtal::Color::Purple((unsigned char)128,(unsigned char)128,(unsigned char)128);
-const Color DGtal::Color::Navy((unsigned char)0,(unsigned char)0,(unsigned char)128);
-const Color DGtal::Color::Aqua((unsigned char)0,(unsigned char)255,(unsigned char)255);
+const DGtal::Color DGtal::Color::None(false);
+const DGtal::Color DGtal::Color::Black((unsigned char)0,(unsigned char)0,(unsigned char)0);
+const DGtal::Color DGtal::Color::Gray((unsigned char)128,(unsigned char)128,(unsigned char)128);
+const DGtal::Color DGtal::Color::White((unsigned char)255,(unsigned char)255,(unsigned char)255);
+const DGtal::Color DGtal::Color::Red((unsigned char)255,(unsigned char)0,(unsigned char)0);
+const DGtal::Color DGtal::Color::Green((unsigned char)0,(unsigned char)128,(unsigned char)0);
+const DGtal::Color DGtal::Color::Lime((unsigned char)0,(unsigned char)255,(unsigned char)0);
+const DGtal::Color DGtal::Color::Blue((unsigned char)0,(unsigned char)0,(unsigned char)255);
+const DGtal::Color DGtal::Color::Cyan((unsigned char)0,(unsigned char)255,(unsigned char)255);
+const DGtal::Color DGtal::Color::Magenta((unsigned char)255,(unsigned char)0,(unsigned char)255);
+const DGtal::Color DGtal::Color::Yellow((unsigned char)255,(unsigned char)255,(unsigned char)0);
+const DGtal::Color DGtal::Color::Silver((unsigned char)190,(unsigned char)190,(unsigned char)190);
+const DGtal::Color DGtal::Color::Purple((unsigned char)128,(unsigned char)128,(unsigned char)128);
+const DGtal::Color DGtal::Color::Navy((unsigned char)0,(unsigned char)0,(unsigned char)128);
+const DGtal::Color DGtal::Color::Aqua((unsigned char)0,(unsigned char)255,(unsigned char)255);
 
 
 /**

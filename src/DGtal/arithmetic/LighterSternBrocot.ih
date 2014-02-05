@@ -256,6 +256,9 @@ k() const
   return mySup1
     ? myNode->k
     : myNode->k + NumberTraits<Quotient>::ONE;
+  // JOL: 2012/11/21: I left these lines in comments because I am not
+  // sure yet if my correction above has no other side effects.
+  //
   // return ( mySup1 || ( myNode == instance().myOneOverOne ) )
   //   ? myNode->k
   //   : myNode->k + NumberTraits<Quotient>::ONE;
@@ -339,7 +342,6 @@ DGtal::LighterSternBrocot<TInteger, TQuotient, TMap>::Fraction::
 next( Quotient v ) const
 {
   ASSERT( ! this->null() );
-  typedef typename MapQuotientToNode::iterator Iterator;
   if ( v == NumberTraits<Quotient>::ZERO )
     return *this;
   Node* node = myNode->origin()->child( u() + NumberTraits<Quotient>::ONE );

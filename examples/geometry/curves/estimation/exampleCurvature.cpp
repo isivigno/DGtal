@@ -43,38 +43,33 @@
 #include "DGtal/geometry/curves/GridCurve.h"
 
 #include "DGtal/geometry/curves/estimation/MostCenteredMaximalSegmentEstimator.h"
-#include "DGtal/geometry/curves/GeometricalDCA.h"
+#include "DGtal/geometry/curves/StabbingCircleComputer.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
 using namespace std;
 using namespace DGtal;
 
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/variables_map.hpp>
-
-namespace po = boost::program_options;
 
 ///////////////////////////////////////////////////////////////////////////////
 template <typename Shape, typename RealPoint>
-bool 
+bool
 estimatorOnShapeDigitization( const string& name,
-			      Shape & aShape, 
-			      const RealPoint& low, const RealPoint& up, 
+			      Shape & aShape,
+			      const RealPoint& low, const RealPoint& up,
 			      double h )
 {
   using namespace Z2i;
 
   trace.beginBlock ( ( "Curvature estimation on digitization of "
 		       + name ). c_str() );
-  
+
   // Creates a digitizer on the window (low, up).
-  GaussDigitizer<Space,Shape> dig;  
+  GaussDigitizer<Space,Shape> dig;
   dig.attach( aShape ); // attaches the shape.
-  dig.init( low, up, h ); 
-  
-  // The domain size is given by the digitizer 
+  dig.init( low, up, h );
+
+  // The domain size is given by the digitizer
   // according to the window and the step.
   Domain domain = dig.getDomain();
 
@@ -103,22 +98,22 @@ estimatorOnShapeDigitization( const string& name,
       typedef Range::ConstCirculator CircularIterator;
       Range r = gridcurve.getIncidentPointsRange();//building range
       // Estimation
-      std::vector<double> estimations; 
+      std::vector<double> estimations;
       if (gridcurve.isOpen())
-        { 
-	  typedef GeometricalDCA<ClassicIterator> SegmentComputer;
+        {
+	  typedef StabbingCircleComputer<ClassicIterator> SegmentComputer;
 	  typedef CurvatureFromDCAEstimator<SegmentComputer> SCEstimator;
 	  typedef MostCenteredMaximalSegmentEstimator<SegmentComputer,SCEstimator> CurvatureEstimator;
 	  SegmentComputer sc;
-	  SCEstimator sce; 
+	  SCEstimator sce;
 	  CurvatureEstimator estimator(sc, sce);
 	  std::cout << "# open grid curve" << endl;
           estimator.init( h, r.begin(), r.end() );
-          estimator.eval( r.begin(), r.end(), std::back_inserter(estimations) ); 
+          estimator.eval( r.begin(), r.end(), std::back_inserter(estimations) );
         }
       else
-        { 
-	  typedef GeometricalDCA<CircularIterator> SegmentComputer;
+        {
+	  typedef StabbingCircleComputer<CircularIterator> SegmentComputer;
 	  typedef CurvatureFromDCAEstimator<SegmentComputer> SCEstimator;
 	  typedef MostCenteredMaximalSegmentEstimator<SegmentComputer,SCEstimator> CurvatureEstimator;
 	  SegmentComputer sc;
@@ -126,7 +121,7 @@ estimatorOnShapeDigitization( const string& name,
 	  CurvatureEstimator estimator(sc, sce);
 	  std::cout << "# closed grid curve" << endl;
           estimator.init( h, r.c(), r.c() );
-          estimator.eval( r.c(), r.c(), std::back_inserter(estimations) ); 
+          estimator.eval( r.c(), r.c(), std::back_inserter(estimations) );
         }
       // Print (standard output)
       std::cout << "# idx kappa" << endl;
@@ -136,7 +131,7 @@ estimatorOnShapeDigitization( const string& name,
 	{
 	  std::cout << i << " " << estimations.at(i) << std::endl;
 	}
-    }    
+    }
     catch ( InputException e )
       {
 	std::cerr << "[estimatorOnShapeDigitization]"
@@ -149,64 +144,47 @@ estimatorOnShapeDigitization( const string& name,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-int main( int argc, char** argv )
+int main( )
 {
   trace.beginBlock ( "Example exampleCurvature" );
+  trace.info()<<" Curvature estimation using shape to digitize: flower" << std::endl
+	      <<" with Grid step: 0.01" << std::endl;
 
-  // parse command line 
-  po::options_description general_opt("Allowed options are");
-  general_opt.add_options()
-    ("help,h", "display this message")
-    ("shape,s",  po::value<string>()->default_value("flower"), "Shape to digitize: flower, ellipse, ball" )
-    ("gridStep,g",  po::value<double>()->default_value(0.01), "Grid step" ); 
-  
-  po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, general_opt), vm);  
-  po::notify(vm);    
-  trace.info()<< "curvature estimation" << std::endl
-	      << "Basic usage: "<<std::endl
-	      << argv[0] << " [other options] -i <vol file> -t <threshold> " << std::endl
-	      << general_opt << "\n";
-  
   // grid step
-  double h = vm["gridStep"].as<double>(); 
+  double h = 0.01;
   // shape
-  string shapeName = vm["shape"].as<string>(); 
+  string shapeName = "flower";
 
-  
+
   // parse shape
-  bool res = true; 
-  typedef Z2i::Space Space; 
-  typedef Space::RealPoint RealPoint; 
+  bool res = true;
+  typedef Z2i::Space Space;
+  typedef Space::RealPoint RealPoint;
   if (shapeName == "flower")
     {
       Flower2D<Space> flower( 0.5, 0.5, 5.0, 3.0, 5, 0.3 );
-      res = estimatorOnShapeDigitization("flower", flower, 
-					 RealPoint::diagonal(-10), 
-					 RealPoint::diagonal(10), 
-					 h); 
+      res = estimatorOnShapeDigitization("flower", flower,
+					 RealPoint::diagonal(-10),
+					 RealPoint::diagonal(10),
+					 h);
     }
   else if (shapeName == "ellipse")
     {
       Ellipse2D<Space> ellipse( 0.5, 0.5, 5.0, 3.0, 0.3 );
-      res = estimatorOnShapeDigitization("ellipse", ellipse, 
-					 RealPoint::diagonal(-10), 
-					 RealPoint::diagonal(10), 
-					 h); 
+      res = estimatorOnShapeDigitization("ellipse", ellipse,
+					 RealPoint::diagonal(-10),
+					 RealPoint::diagonal(10),
+					 h);
     }
   else if (shapeName == "ball")
     {
       Ball2D<Space> ball( 0.5, 0.5, 5.0 );
-      res = estimatorOnShapeDigitization("ball", ball, 
-					 RealPoint::diagonal(-10), 
-					 RealPoint::diagonal(10), 
-					 h); 
+      res = estimatorOnShapeDigitization("ball", ball,
+					 RealPoint::diagonal(-10),
+					 RealPoint::diagonal(10),
+					 h);
     }
-  else 
-    {
-      trace.error() << "Unknown shape. Use option -h" << std::endl;
-      res = false; 
-    }
+
 
   trace.endBlock();
 

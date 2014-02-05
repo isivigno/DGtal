@@ -133,9 +133,9 @@ namespace DGtal
 
       /**
        * Initialisation.
-       * @param h grid size (unused)
-       * @param itb, begin iterator
-       * @param ite, end iterator
+       * (h grid size unused)
+       * @param itb begin iterator
+       * @param ite end iterator
        */
       void init(const double /*h*/, const ConstIterator& itb, const ConstIterator& ite)
       {
@@ -154,7 +154,6 @@ namespace DGtal
 
       /**
        * Unique estimation 
-       * @param it any iterator (unused) 
        * @return the estimated quantity
        */
       Quantity eval(const ConstIterator& /*it*/) const
@@ -306,8 +305,8 @@ namespace DGtal
       /**
        * Initialisation.
        * @param h grid size
-       * @param itb, begin iterator
-       * @param ite, end iterator
+       * @param itb begin iterator
+       * @param ite end iterator
        */
       void init(const double h, const ConstIterator& itb, const ConstIterator& ite)
       {
@@ -329,7 +328,6 @@ namespace DGtal
 
       /**
        * Estimation depending on @e myH 
-       * @param it any iterator (unused) 
        * @return the estimated quantity
        */
       Quantity eval(const ConstIterator& /*it*/) const
@@ -440,9 +438,8 @@ namespace DGtal
 
       /**
        * Initialisation.
-       * @param h grid size (unused)
-       * @param itb, begin iterator
-       * @param ite, end iterator
+       * @param itb begin iterator
+       * @param ite end iterator
        */
       void init(const double /*h*/, const ConstIterator& itb, const ConstIterator& ite)
       {
@@ -612,8 +609,8 @@ namespace DGtal
       /**
        * Initialisation.
        * @param h grid size
-       * @param itb, begin iterator
-       * @param ite, end iterator
+       * @param itb begin iterator
+       * @param ite end iterator
        */
       void init(const double h, const ConstIterator& itb, const ConstIterator& ite)
       {
@@ -698,16 +695,16 @@ namespace DGtal
        * devoted to the DSS recognition.
        *
        * @tparam DSS a model of segment computer,
-       * which must have methods getA() and getB()
+       * which must have methods a() and b()
        * returning the y- and x-component of the tangent vector.
        */
       template<typename DSS>
       Value operator() (const DSS& aDSS) const 
       {
 	Value a = (Value) NumberTraits<typename DSS::Integer>
-	  ::castToInt64_t(aDSS.getA());      
+	  ::castToDouble(aDSS.a());      
 	Value b = (Value) NumberTraits<typename DSS::Integer>
-	  ::castToInt64_t(aDSS.getB());      
+	  ::castToDouble(aDSS.b());      
 
 	return std::atan2(a,b);
       }
@@ -731,16 +728,16 @@ namespace DGtal
        * devoted to the DSS recognition.
 
        * @tparam DSS a model of segment computer,
-       * which must have methods getA() and getB()
+       * which must have methods a() and b()
        * returning the y- and x-component of the tangent vector.
        */
       template<typename DSS>
       Value operator() (const DSS& aDSS) const 
       {
 	double x = NumberTraits<typename DSS::Integer>
-	  ::castToDouble( aDSS.getB() ); 
+	  ::castToDouble( aDSS.b() ); 
 	double y = NumberTraits<typename DSS::Integer>
-	  ::castToDouble( aDSS.getA() );
+	  ::castToDouble( aDSS.a() );
 	RealVector v(x,y); 
 	double norm = v.norm(RealVector::L_2);
 	v /= norm; 
@@ -765,13 +762,10 @@ namespace DGtal
        * @param aDSS an instance of segment computer
        * devoted to the DSS recognition.
 
-       * @tparam DSS a model of segment computer,
-       * which must have methods getA() and getB()
-       * returning the y- and x-component of the tangent vector.
        */
       Value operator() (const DSS& aDSS) const 
       {
-	return Value(aDSS.getB(), aDSS.getA());
+	return Value(aDSS.b(), aDSS.a());
       }
     }; 
     /**
@@ -856,7 +850,6 @@ namespace DGtal
       Value operator() (const typename DCA::ConstIterator& it, 
 			const DCA& aDCA) const 
       {
-	typedef typename DCA::ConstIterator ConstIterator; 
 	typedef typename DCA::Pair Pair; 
 	typedef typename DCA::Point Point;
 	typedef typename Point::Coordinate Coordinate; 
@@ -883,7 +876,7 @@ namespace DGtal
   	  {
 	    //separating straight line and normal vector
 	    double a, b, c; 
-	    aDCA.getGeometricalDSSPtr()->getParameters(a, b, c);
+	    aDCA.getStabbingLineComputerPtr()->getParameters(a, b, c);
 	    //norm
 	    double n = std::sqrt(a*a + b*b); 
   	    return Value( a/n, b/n ); 
@@ -955,7 +948,6 @@ namespace DGtal
       Value operator() (const typename DCA::ConstIterator& it, 
 			const DCA& aDCA, const double& aH) const 
       {
-	typedef typename DCA::ConstIterator ConstIterator; 
 	typedef typename DCA::Pair Pair; 
 	typedef typename DCA::Point Point;
 	typedef typename Point::Coordinate Coordinate; 
@@ -982,7 +974,7 @@ namespace DGtal
   	  {
 	    //separating straight line
 	    double a, b, c; 
-	    aDCA.getGeometricalDSSPtr()->getParameters(a, b, c); 
+	    aDCA.getStabbingLineComputerPtr()->getParameters(a, b, c); 
 	    //norm
 	    double n = std::sqrt(a*a + b*b); 
   	    //points
@@ -1280,7 +1272,7 @@ namespace DGtal
 	Vector v = ( *aDSS.begin() - *boost::prior(aDSS.end()) ); 
 	Value l = v.norm(Vector::L_2);
 	//width
-	Vector t( aDSS.getB(), aDSS.getA() );
+	Vector t( aDSS.b(), aDSS.a() );
 	Value w = 1.0 / v.norm(Vector::L_2); 
 	//result
 	return 1.0/( (l*l)/(8*w) + w/2 ); 
@@ -1397,8 +1389,8 @@ namespace DGtal
       /**
        * Initialisation.
        * @param h grid size
-       * @param itb, begin iterator
-       * @param ite, end iterator
+       * @param itb begin iterator
+       * @param ite end iterator
        */
       void init(const double h, const ConstIterator& itb, const ConstIterator& ite)
       {
@@ -1431,9 +1423,9 @@ namespace DGtal
 	ConstIterator back = mySCPtr->begin();  
 	ConstIterator front = mySCPtr->end();
 	bool isConnectedAtBack = isNotEmpty(myBegin, back)
-	  &&((*boost::prior(back)-*back).norm(Vector::L1) <= NumberTraits<Integer>::ONE);  
+	  &&((*boost::prior(back)-*back).norm(Vector::L_1) <= NumberTraits<Integer>::ONE);  
 	bool isConnectedAtFront = isNotEmpty(front, myEnd)
-	  &&((*boost::prior(front)-*front).norm(Vector::L1) <= NumberTraits<Integer>::ONE);  
+	  &&((*boost::prior(front)-*front).norm(Vector::L_1) <= NumberTraits<Integer>::ONE);  
   
 
 	if (isConnectedAtBack) {
@@ -1442,15 +1434,15 @@ namespace DGtal
 	    --back;
 
 	    //parameters
-	    Integer mu = mySCPtr->getMu();
-	    Integer omega = mySCPtr->getOmega();
+	    Integer mu = mySCPtr->mu();
+	    Integer omega = mySCPtr->omega();
 
 	    //cases
-	    if ( (mySCPtr->getRemainder(*back)<=mu-1)&&
-		 (mySCPtr->getRemainder(*front)<=mu-1) ) {                //convex
+	    if ( (mySCPtr->remainder(*back)<=mu-1)&&
+		 (mySCPtr->remainder(*front)<=mu-1) ) {                //convex
 	      k = myFunctor(*mySCPtr) / myH; 
-	    } else if ( (mySCPtr->getRemainder(*back)>=mu+omega)&&
-			(mySCPtr->getRemainder(*front)>=mu+omega) ) {           //concave
+	    } else if ( (mySCPtr->remainder(*back)>=mu+omega)&&
+			(mySCPtr->remainder(*front)>=mu+omega) ) {           //concave
 	      k = -myFunctor(*mySCPtr) / myH; 
 	    } //else                                                  //inflection
 
@@ -1459,13 +1451,13 @@ namespace DGtal
 	    --back;
 
 	    //parameters
-	    Integer mu = mySCPtr->getMu();
-	    Integer omega = mySCPtr->getOmega();
+	    Integer mu = mySCPtr->mu();
+	    Integer omega = mySCPtr->omega();
 
 	    //cases
-	    if ( (mySCPtr->getRemainder(*back)<=mu-1) ) {                //convex
+	    if ( (mySCPtr->remainder(*back)<=mu-1) ) {                //convex
 	      k = myFunctor(*mySCPtr) / myH; 
-	    } else if ( (mySCPtr->getRemainder(*back)>=mu+omega) ) {     //concave
+	    } else if ( (mySCPtr->remainder(*back)>=mu+omega) ) {     //concave
 	      k = -myFunctor(*mySCPtr) / myH; 
 	    } //else                                                 //inflection
 
@@ -1473,13 +1465,13 @@ namespace DGtal
 	} else if (isConnectedAtFront) {
 
           //parameters
-          Integer mu = mySCPtr->getMu();
-          Integer omega = mySCPtr->getOmega();
+          Integer mu = mySCPtr->mu();
+          Integer omega = mySCPtr->omega();
 
           //cases
-          if ( (mySCPtr->getRemainder(*front)<=mu-1) ) {                //convex
+          if ( (mySCPtr->remainder(*front)<=mu-1) ) {                //convex
             k = myFunctor(*mySCPtr) / myH; 
-          } else if ( (mySCPtr->getRemainder(*front)>=mu+omega) ) {     //concave
+          } else if ( (mySCPtr->remainder(*front)>=mu+omega) ) {     //concave
             k = -myFunctor(*mySCPtr) / myH; 
           } //else                                                  //inflection
 

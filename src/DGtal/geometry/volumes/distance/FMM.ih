@@ -36,6 +36,10 @@
 
 #include "DGtal/topology/SCellsFunctors.h"
 
+template <typename TImage, typename TSet, typename TPointPredicate, typename TPointFunctor >
+const typename DGtal::FMM<TImage, TSet, TPointPredicate, TPointFunctor>::Dimension DGtal::FMM<TImage, TSet, TPointPredicate, TPointFunctor>::dimension = Point::dimension;
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // IMPLEMENTATION of inline methods.
 ///////////////////////////////////////////////////////////////////////////////
@@ -165,8 +169,8 @@ DGtal::FMM<TImage, TSet, TPointPredicate, TPointFunctor>
       SCellToIncidentPoints<KSpace> func( aK ); 
       typename SCellToIncidentPoints<KSpace>::Output points = func( *it ); 
       //assignement
-      insertAndAlwaysSetValue( aImg, aSet, points.first, k*aValue ); 
-      insertAndAlwaysSetValue( aImg, aSet, points.second, -k*aValue ); 
+      insertAndAlwaysSetValue( aImg, aSet, points.first, -k*aValue ); 
+      insertAndAlwaysSetValue( aImg, aSet, points.second, k*aValue ); 
     }
 }
 
@@ -229,8 +233,8 @@ DGtal::FMM<TImage, TSet, TPointPredicate, TPointFunctor>
       Value vout = computerOut( it->second );
 
       //assignement
-      insertAndAlwaysSetValue( aImg, aSet, it->first, k*vin ); 
-      insertAndAlwaysSetValue( aImg, aSet, it->second, -k*vout );  
+      insertAndAlwaysSetValue( aImg, aSet, it->first, -k*vin ); 
+      insertAndAlwaysSetValue( aImg, aSet, it->second, k*vout );  
     }
 }
 
@@ -249,8 +253,8 @@ DGtal::FMM<TImage, TSet, TPointPredicate, TPointFunctor>
   aSet.clear(); 
   for (TIteratorOnPairs it = itb; it != ite; ++it) 
     {
-      insertAndAlwaysSetValue( aImg, aSet, it->first, k*aValue ); 
-      insertAndAlwaysSetValue( aImg, aSet, it->second, -k*aValue ); 
+      insertAndAlwaysSetValue( aImg, aSet, it->first, -k*aValue ); 
+      insertAndAlwaysSetValue( aImg, aSet, it->second, k*aValue ); 
     }
 }
 
@@ -461,12 +465,12 @@ DGtal::FMM<TImage, TSet, TPointPredicate, TPointFunctor>::update(const Point& aP
   Point neighbor = aPoint; 
   for (Dimension k = 0; k < dimension; ++k)
     {
-      typename Point::Coordinate c = neighbor.at(k); 
-      neighbor.at(k) = (c+1); 
+      typename Point::Coordinate c = neighbor[k]; 
+      neighbor[k] = (c+1); 
       addNewCandidate(neighbor); 
-      neighbor.at(k) = (c-1); 
+      neighbor[k] = (c-1); 
       addNewCandidate(neighbor); 
-      neighbor.at(k) = c; 
+      neighbor[k] = c; 
     }
 }
 

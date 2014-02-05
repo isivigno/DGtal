@@ -39,40 +39,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // ----------------------- Standard services ------------------------------
 
-typedef pair<double,double> AngularCoordinates;
+typedef std::pair<double,double> AngularCoordinates;
 /////////////////////////////////////////////////////////////////////////////
 // ------------------------- star-shaped services -------------------------
-
-
-
-
-/**
- * @param p any point in the plane.
- *
- * @return 'true' if the point is inside or on the shape, 'false' if it
- * is strictly outside.
- */
-template<typename TSpace>
-inline
-bool
-DGtal::StarShaped3D<TSpace>::isInside( const RealPoint & p ) const
-{
-  AngularCoordinates t = parameter( p );
-  RealPoint x_rel = x( t );
-  x_rel -= center();
-  double d_x = x_rel[0]*x_rel[0] + x_rel[1]*x_rel[1] + x_rel[2]*x_rel[2];
-  RealPoint p_rel( p );
-  p_rel -= center();
-  double d_p = p_rel[0]*p_rel[0] + p_rel[1]*p_rel[1]+ p_rel[2]*p_rel[2];
-  
-  return d_p <= d_x;
-}
-
-
-
-
-
-
 
 
 /**
@@ -86,24 +55,21 @@ inline
 DGtal::Orientation
 DGtal::StarShaped3D<TSpace>::orientation( const RealPoint & p ) const
 {
+    RealPoint x_rel = x( parameter( p ));
+    x_rel -= center();
+    RealPoint p_rel( p );
+    p_rel -= center();
 
+    double d_x = x_rel.norm();
+    double d_p = p_rel.norm();
+    double diff = d_p - d_x;
 
-  AngularCoordinates t = parameter( p );
-  RealPoint x_rel = x( t );
-  x_rel -= center();
-  double d_x = x_rel[0]*x_rel[0] + x_rel[1]*x_rel[1] + x_rel[2]*x_rel[2];
-  RealPoint p_rel( p );
-  p_rel -= center();
-  double d_p = p_rel[0]*p_rel[0] + p_rel[1]*p_rel[1] + p_rel[2]*p_rel[2];
-  
-  
-  if ((d_p - d_x) > 0.0)
-    return OUTSIDE;
-  else
-    if ((d_p - d_x )< 0.0)
-      return INSIDE;
+    if ( diff > 0.0 )
+        return OUTSIDE;
+    else if ( diff < 0.0 )
+        return INSIDE;
     else
-      return ON;
+        return ON;
 }
 
 
@@ -255,7 +221,7 @@ DGtal::StarShaped3D<TSpace>::surfacelength( AngularCoordinates t1, AngularCoordi
 
   double step1 = ( t2.first - t1.first )  / nb;
   double step2 = ( t2.second - t1.second )  / nb;
-  AngularCoordinates t( make_pair(0.0,0.0));
+  AngularCoordinates t( std::make_pair(0.0,0.0));
   double l = 0.0;
   for ( unsigned int i = 0; i < nb; ++i )
     {
@@ -264,9 +230,9 @@ DGtal::StarShaped3D<TSpace>::surfacelength( AngularCoordinates t1, AngularCoordi
         {
 
           t.second = step2 * j;
-          RealPoint xtp (x( make_pair( t1.first + t.first - step1 ,t1.second + t.second - step2 ) ));
-          RealPoint xt1p1( x( make_pair(t1.first + t.first,t1.second + t.second) ) ); 
-          RealPoint xt1p( x( make_pair(t1.first + t.first,t1.second + t.second- step2 ) ) ); 
+          RealPoint xtp (x( std::make_pair( t1.first + t.first - step1 ,t1.second + t.second - step2 ) ));
+          RealPoint xt1p1( x( std::make_pair(t1.first + t.first,t1.second + t.second) ) ); 
+          RealPoint xt1p( x( std::make_pair(t1.first + t.first,t1.second + t.second- step2 ) ) ); 
           double D = sqrt( ( xt1p[0] - xtp[0] )*( xt1p[0] - xtp[0] ) + 
 			   ( xt1p[1] - xtp[1] )*( xt1p[1] - xtp[1] ) + 
 			   ( xt1p[2] - xtp[2] )*( xt1p[2] - xtp[2] ));

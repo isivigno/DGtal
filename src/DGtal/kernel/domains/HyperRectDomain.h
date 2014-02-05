@@ -102,9 +102,6 @@ namespace DGtal
     // typedef TSpace Space;
     typedef TSpace Space;
 
-    // static constants
-    static const typename Space::Dimension dimension = Space::dimension;
-
     typedef HyperRectDomain<Space> Domain;
     typedef typename Space::Point Point;
     typedef typename Space::Integer Integer;
@@ -112,6 +109,8 @@ namespace DGtal
     typedef typename Space::Dimension Dimension;
     typedef typename Space::Size Size;
     typedef typename Point::Coordinate Coordinate; // TODO REVOIR LES NOMS.... RECUPERER DANS SPACE
+
+    BOOST_STATIC_CONSTANT(Dimension, dimension = Space::dimension); 
 
     ///Typedef of domain iterators
     typedef HyperRectDomain_Iterator<Point> Iterator;
@@ -481,15 +480,6 @@ namespace DGtal
     
     // ----------------------- Interface --------------------------------------
   public:
-    /**
-     * @return  the extent of the HyperRectDomain
-     *
-     **/
-    Vector extent() const
-    {
-      Point p = Point::diagonal(1);
-      return (myUpperBound - myLowerBound) + p;
-    }
 
     /**
      * @return  the size (number of points) of the HyperRectDomain
@@ -498,7 +488,8 @@ namespace DGtal
     Size size() const
     {
       Size res = 1;
-      Vector e = this->extent();
+      Point p = Point::diagonal(1);
+      Vector e =  (myUpperBound - myLowerBound) + p;
       typename Vector::ConstIterator it, itEnd; 
       for ( it = e.begin(), itEnd = e.end(); 
 	    it != itEnd; ++it)

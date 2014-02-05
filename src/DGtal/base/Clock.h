@@ -16,7 +16,7 @@
 
 #pragma once
 
-/** 
+/**
  * @file Clock.h
  * @author Jacques-Olivier Lachaud (\c jacques-olivier.lachaud@univ-savoie.fr )
  * Laboratory of Mathematics (CNRS, UMR 5807), University of Savoie, France
@@ -24,19 +24,19 @@
  * Laboratoire d'InfoRmatique en Image et Systèmes d'information - LIRIS (CNRS, UMR 5205), CNRS, France
  *
  * @date 2009/12/11
- * 
+ *
  * Header file for module Clock.cpp
  *
  * This file is part of the DGtal library (backported from Imagene)
  */
 
-#if defined(Clock_RECURSES)
+#ifdef Clock_RECURSES
 #error Recursive header files inclusion detected in Clock.h
 #else // defined(Clock_RECURSES)
 /** Prevents recursive inclusion of headers. */
 #define Clock_RECURSES
 
-#if !defined Clock_h
+#ifndef Clock_h
 /** Prevents repeated inclusion of headers. */
 #define Clock_h
 
@@ -44,24 +44,31 @@
 // Inclusions
 #include <iostream>
 #include <cstdlib>
+
 #if ( (defined(UNIX)||defined(unix)||defined(linux)) )
 #include <sys/time.h>
-#elif ( (defined(WIN32)) )
 #include <time.h>
-#else
-#include <sys/time.h>
+#endif
+
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
+#ifdef WIN32
+#include <time.h>
 #endif
 
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-namespace DGtal 
+namespace DGtal
 {
 
   /////////////////////////////////////////////////////////////////////////////
   // class Clock
-  /** 
+  /**
    * Description of class 'Clock' <p>
    * Aim: To provide functions to start and stop a timer. Is useful to get
    * performance of algorithms.
@@ -97,10 +104,16 @@ namespace DGtal
 
     /**
      * Stops the clock.
-     * @return the time (in ms) since the last 'startClock()'.
+     * @return the time (in ms) since the last 'startClock()' or 'restartClock()'.
      */
-    long stopClock();
-    
+    double stopClock() const;
+
+    /**
+     * Restart the clock.
+     * @return the time (in ms) since the last 'startClock()' or 'restartClock()'.
+     */
+    double restartClock();
+
     /**
      * Constructor.
      *
@@ -108,7 +121,7 @@ namespace DGtal
     Clock();
 
     /**
-     * Destructor. 
+     * Destructor.
      */
     ~Clock();
 
@@ -131,38 +144,12 @@ namespace DGtal
   private:
 
     ///internal timer object;
-#if ( (defined(UNIX)||defined(unix)||defined(linux)) )
-    struct itimerval myTimerInit;
-#elif ( (defined(WIN32)) )
+#ifdef WIN32
     clock_t myFirstTick;
 #else
-    struct itimerval myTimerInit;
+    struct timespec myTimerStart;
 #endif
 
-    // ------------------------- Hidden services ------------------------------
-  protected:
-
-  private:
-
-    /**
-     * Copy constructor.
-     * @param other the object to clone.
-     * Forbidden by default.
-     */
-    Clock( const Clock & other );
-
-    /**
-     * Assignment.
-     * @param other the object to copy.
-     * @return a reference on 'this'.
-     * Forbidden by default.
-     */
-    Clock & operator=( const Clock & other );
-  
-    // ------------------------- Internals ------------------------------------
-  private:
-
-  
   }; // end of class Clock
 
 
@@ -179,8 +166,8 @@ namespace DGtal
       object.selfDisplay( out );
       return out;
     }
-  
-  
+
+
 } // namespace DGtal
 
 ///////////////////////////////////////////////////////////////////////////////

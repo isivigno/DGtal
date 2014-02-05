@@ -38,16 +38,18 @@
 
 //////////////////////////////////////////////////////////////////////////////
 #include <cstdlib>
-#include "DGtal/images/ImageContainerBySTLVector.h"
 //////////////////////////////////////////////////////////////////////////////
 
 //------------------------------------------------------------------------------
 template <typename Domain, typename T>
 inline
-ImageContainerBySTLVector<Domain, T>::
+DGtal::ImageContainerBySTLVector<Domain, T>::
 ImageContainerBySTLVector(const Domain &aDomain ) :
-  myDomain(aDomain), myExtent(aDomain.extent())
+  myDomain(aDomain)
 {
+  Point p = Point::diagonal(1);
+  Vector e =  (aDomain.upperBound() - aDomain.lowerBound()) + p;
+  myExtent=e;
   this->resize( myDomain.size() );
 }
 
@@ -56,7 +58,7 @@ template <typename Domain, typename T>
 inline
 DGtal::ImageContainerBySTLVector<Domain,T>
 ::ImageContainerBySTLVector(const ImageContainerBySTLVector& other)
-  : vector<T>(other),
+  : std::vector<T>(other),
     myDomain(other.myDomain), myExtent(other.myExtent)
 {
 }
@@ -94,18 +96,6 @@ DGtal::ImageContainerBySTLVector<Domain, T>::operator()(const Point &aPoint) con
   ASSERT(this->domain().isInside(aPoint));
   return this->operator[](linearized( aPoint ) );
 }
-
-//------------------------------------------------------------------------------
-// template <typename Domain, typename T>
-// inline
-// typename ImageContainerBySTLVector<Domain, T>::ConstIterator
-// ImageContainerBySTLVector<Domain, T>::begin(const Point &aPoint) const
-// {
-//   ASSERT(this->domain().isInside(aPoint));
-//   return this->begin() + linearized( aPoint );
-// }
-
-
 //------------------------------------------------------------------------------
 template <typename Domain, typename T>
 inline
@@ -137,7 +127,7 @@ DGtal::ImageContainerBySTLVector<Domain, T>::constRange() const
 //------------------------------------------------------------------------------
 template <typename Domain, typename T>
 inline
-typename ImageContainerBySTLVector<Domain, T>::Range
+typename DGtal::ImageContainerBySTLVector<Domain, T>::Range
 DGtal::ImageContainerBySTLVector<Domain, T>::range()
 {
   return Range ( this->begin(), this->end(), DistanceFunctorFromPoint<Self>(this) );
@@ -300,8 +290,8 @@ namespace
 // Internals - private :
 template<typename Domain, typename T>
 inline
-typename ImageContainerBySTLVector<Domain, T>::Size
-ImageContainerBySTLVector<Domain, T>::linearized(const Point &aPoint) const
+typename DGtal::ImageContainerBySTLVector<Domain, T>::Size
+DGtal::ImageContainerBySTLVector<Domain, T>::linearized(const Point &aPoint) const
 {
   return linearizer<Domain, Domain::dimension >::apply( aPoint,
 							myDomain.lowerBound(),
