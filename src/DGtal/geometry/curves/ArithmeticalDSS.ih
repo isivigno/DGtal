@@ -773,7 +773,7 @@ void DGtal::ArithmeticalDSS<TCoordinate,TInteger,adjacency>::computeDualPolygon(
   PointR A(p,q,myUl[1]*q-myUl[0]*p);
   
   // Lower middle vertex
-  PointR B(myDSL.myA,myDSL.myB,-myDSL.myMu);
+  PointR B(myDSL.myA,myDSL.myB,-myDSL.myLowerBound);
   
   // Rightmost vertex
   p = myLl[1]+1-myUf[1];
@@ -782,7 +782,7 @@ void DGtal::ArithmeticalDSS<TCoordinate,TInteger,adjacency>::computeDualPolygon(
   PointR C(p,q,myUf[1]*q-myUf[0]*p);
     
   // Upper middle vertex
-  PointR D(myDSL.myA,myDSL.myB,-myDSL.myMu+1);
+  PointR D(myDSL.myA,myDSL.myB,-myDSL.myLowerBound+1);
   
   typedef typename DGtal::FareyFan<TInteger>::Ray myRay;
 
