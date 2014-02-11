@@ -46,21 +46,28 @@ using namespace std;
 using namespace DGtal;
 using namespace Z2i;
 
-//#define TRACE
+//#define DEBUG
 
-/**
- * @brief Function that illustrates the basic usage of
- * a naive DSS. 
- */
 
-Integer determinant(Point u, Point v)
+// Integer determinant(Point u, Point v)
+// {
+//   return (u[0]*v[1]-u[1]*v[0]);
+// }
+
+
+NaiveDSS8<Integer> fastUnionOfDSSs(NaiveDSS8<Integer> S1, NaiveDSS8<Integer> S2)
 {
-  return (u[0]*v[1]-u[1]*v[0]);
-}
 
+  Point Uf, Ul, Lf, Ll;
+  bool inDSL = true;
+  
+  vector<Point> LPoints;
+  
 
-NaiveDSS8<Integer> computeUnionOfDSSs(NaiveDSS8<Integer> S1, NaiveDSS8<Integer> S2)
-{
+  /*************************************************/
+  /*************************************************/
+  /***** Simple tests ******************************/
+  
   //! [ArithmeticalDSSNaiveCtor]
   // Construct a naive DSS
   // NaiveDSS8<Integer> S1( 3, 7,                   //slope
@@ -82,189 +89,485 @@ NaiveDSS8<Integer> computeUnionOfDSSs(NaiveDSS8<Integer> S1, NaiveDSS8<Integer> 
   // 			 Point(2,0), Point(7,2)  //lower points
   // 			 );
   // //! [ArithmeticalDSSNaiveCtor]
-  // NaiveDSS8<Integer> S2( 3, 7,                   //slope
-  // 			 Point(9,3), Point(17,6), //ending points 
-  // 			 Point(15,6), Point(15,6), //upper points
-  // 			 Point(10,3), Point(17,6)  //lower points
+  // NaiveDSS8<Integer> S2( 2, 5,                   //slope
+  // 			 Point(9,3), Point(17,7), //ending points 
+  // 			 Point(12,5), Point(17,7), //upper points
+  // 			 Point(9,3), Point(14,5)  //lower points
   // 			 );
  
-  // NaiveDSS8<Integer> S1( 1, 2,                   //slope
-  // 			 Point(0,0), Point(4,2), //ending points 
-  // 			 Point(1,1), Point(3,2), //upper points
-  // 			 Point(0,0), Point(4,2)  //lower points
-  // 			 );
-  // //! [ArithmeticalDSSNaiveCtor]
-  // NaiveDSS8<Integer> S2( 3, 8,                   //slope
-  // 			 Point(5,2), Point(16,7), //ending points 
-  // 			 Point(5,2), Point(8,4), //upper points
-  // 			 Point(13,5), Point(16,7)  //lower points
-  // 			 );
- 
- 
-  // S1 = NaiveDSS8<Integer>( 1, 1,                   //slope
+  // NaiveDSS8<Integer> S1( 1, 1,                   //slope
   // 			 Point(5,6), Point(10,11), //ending points 
   // 			 Point(5,6), Point(10,11), //upper points
   // 			 Point(5,6), Point(10,11)  //lower points
   // 			 );
-  // S2 = NaiveDSS8<Integer>( 1, 1,                   //slope
-  // 			 Point(11,11), Point(25,25), //ending points 
-  // 			 Point(11,11), Point(25,25), //upper points
-  // 			 Point(11,11), Point(25,25)  //lower points
+  // NaiveDSS8<Integer> S2( 1, 1,                   //slope
+  // 			 Point(11,11), Point(18,18), //ending points 
+  // 			 Point(11,11), Point(18,18), //upper points
+  // 			 Point(11,11), Point(18,18)  //lower points
   // 			 );
- 
- 
-
+  ///5 6 16 [PointVector] {10, 11} [PointVector] {18, 18} [PointVector] {11, 11} [PointVector] {11, 11}
   
-  // Trace to the standard output
-  //trace.info() << S1 << "\n" << S2 << std::endl << std::endl; 
+  
+  // NaiveDSS8<Integer> S1( 2, 5,                   //slope
+  // 			 Point(0,0), Point(9,3), //ending points 
+  // 			 Point(0,0), Point(5,2), //upper points
+  // 			 Point(2,0), Point(7,2)  //lower points
+  // 			 );
+  // NaiveDSS8<Integer> S2( 1, 2,                   //slope
+  // 			 Point(9,3), Point(14,5), //ending points 
+  // 			 Point(11,4), Point(13,5), //upper points
+  // 			 Point(10,3), Point(12,4)  //lower points
+  // 			 );
+  /// res = (3,8,1); [PointVector] {5, 2} [PointVector] {13, 5} [PointVector] {2, 0} [PointVector] {10, 3}
+  /**************************************************/
+  /**************************************************/
+
+  bool easyUnion = false;
+  Point Uff, Ull, Lff, Lll;
 
   NaiveDSS8<Integer> DSSres(S1);
-  // Check if one DSS can be directly added to the other one
-  bool easyUnion = false;
-  if(S1.b() < S2.b())
-    { 
-      if(S2.isInDSL(S1.Uf()) && S2.isInDSL(S1.Ul()) && S2.isInDSL(S1.Lf()) && S2.isInDSL(S1.Ll()))
+
+
+  if((S2.Uf())[0]< (S2.Lf())[0])
+    {
+      LPoints.push_back(S2.Uf());
+      LPoints.push_back(S2.Lf());
+      LPoints.push_back(S2.Ul());
+      LPoints.push_back(S2.Ll());
+    }
+  else
+    {
+      LPoints.push_back(S2.Lf());
+      LPoints.push_back(S2.Uf());
+      LPoints.push_back(S2.Ll());
+      LPoints.push_back(S2.Ul());
+    }
+  vector<Point>::const_iterator it;
+  Integer r;
+  it = LPoints.begin();
+  Ull = S1.Ul();
+  Lll = S1.Ll();
+  while(it != LPoints.end() && inDSL)
+    {
+      
+      r = S1.remainder(*it)-S1.mu();
+      if(r>= S1.b() || r< 0)
+	inDSL = false;
+      else
 	{
-	  easyUnion = true;
-	  DSSres = S2;
+	  if(r==0)
+	    Ull = *it;
+	  
+	  if(r==(S1.b()-1))
+	    Lll = *it;
+	  ++it;
+	}
+    }
+  //std::cout << *it << std::endl;
+  if(!inDSL)
+    {
+      //Integer r = S1.remainder(*it);
+      //std::cout << r << std::endl;
+      assert(r<0 || r>=S1.b());
+      if(r>=S1.b()) // lower exterior point -> the slope decreases
+	{
+	  Uf = S1.Ul();
+	  Lf = S1.Lf();
+	}
+      else // upper exterior point -> the slope increases
+	{
+	  Uf = S1.Uf();
+	  Lf = S1.Ll();
 	}
     }
   else
     {
-      if(S1.isInDSL(S2.Uf()) && S1.isInDSL(S2.Ul()) && S1.isInDSL(S2.Lf()) && S1.isInDSL(S2.Ll()))
-	{
-	  easyUnion = true;
-	  DSSres = S1;
-	}
+      easyUnion = true;
+      //std::cout << "easy" << std::endl;
+      //DSSres = S1; // !!!! amend with the computation of the new leaning points: the characteristics do not change, but the leaning points may change. 
+      DSSres = NaiveDSS8<Integer>(S1.a(),S1.b(),S1.back(),S2.front(),S1.Uf(),Ull,S1.Lf(),Lll);
     }
   
-  Point Uf, Ul, Lf, Ll;
-  Integer a, b, mu;
+  /****************************/
   
-  bool notADSS = false;
   if(!easyUnion)
     {
-      // if slope of S1 is greater than slope of S2
-      // then the slope of the result will be less than the slope of S1
-      Integer d = determinant(Point(S1.b(), S1.a()),Point(S2.b(),S2.a())); 
-      if(d<0 )
+      LPoints.clear();
+      if((S1.Ul())[0]< (S1.Ll())[0])
 	{
-	  // Lower leaning points
-	  // S1.Lf may be lower leaning point, S1.Ll is definitely not
-	  
-	  // First potential lower leaning point
-	  Lf = S1.Lf();
-	  
-	  // S2.Ll may be lower leaning point, S2.Lf is not
-	  // Second potential lower leaning point
-	  Ll = S2.Ll();
-	  
-	  // Upper leaning points
-	  // S1.Ul may be an upper leaning point, S1.Uf is not
-	  Uf = S1.Ul();
-	  
-	  // S2.Uf may be an upper leaning point, S2.Ul is not
-	  Ul = S2.Uf();
-	  
-	}
-      else // the slope of S1 is lower than the slope of S2
-	if(d>0)
-	  {
-	    // then the slope of the result will be greater than the slope of S1
-	    
-	    
-	    // Lower leaning points
-	    // S1.Ll may be lower leaning point, S1.Lf is definitely not
-	    
-	    // First potential lower leaning point
-	    Lf = S1.Ll();
-	    
-	    // S2.Lf may be lower leaning point, S2.Ll is not
-	    // Second potential lower leaning point
-	    Ll = S2.Lf();
-	    
-	    // Upper leaning points
-	    // S1.Uf may be an upper leaning point, S1.Ul is not
-	    Uf = S1.Uf();
-	    
-	    // S2.Ul may be an upper leaning point, S2.Uf is not
-	    Ul = S2.Ul();
-	  
-	  }
-	else
-	  if(d==0 && S1.mu() < S2.mu())
-	    {
-	      Lf = S1.Lf();
-	      
-	      Ll = S2.Lf();
-	  
-	      Uf = S1.Ul();
-	      
-	      Ul = S2.Ul();
-	    }
-	  else // d==0 && S1.mu() > S2.mu()
-	    {
-	      Lf = S1.Ll();
-	      Ll = S2.Ll();
-	      Uf = S1.Uf();
-	      Ul = S2.Uf();
-	    }
-      
-      // Test whether Lf and Lf are both lower leaning points. Then
-      // Uf and Ul must belong to the DSS defined by these lower
-      // leaning points, and at least one of them if an upper
-      // leaning point.  
-      b = Ll[0]-Lf[0];
-      a = Ll[1]-Lf[1];
-      mu = b-1-a*Lf[0]+b*Lf[1];
-      
-      Integer r1 = a*Uf[0]-b*Uf[1]+mu;
-      Integer r2 = a*Ul[0]-b*Ul[1]+mu;
-      if(r1 >= 0 && r1<b && r2>=0 && r2<b)
-	{
-	  assert(r1==0 || r2==0);
-	  if(r1!=0)
-	    Uf = Ul;
-	  if(r2!=0)
-	    Ul = Uf;
+	  LPoints.push_back(S1.Ll());
+	  LPoints.push_back(S1.Ul());
+	  LPoints.push_back(S1.Lf());
+	  LPoints.push_back(S1.Uf());
 	}
       else
 	{
-	  // Test whether Uf and Uf are both lower leaning points. Then
-	  // Lf and Ll must belong to the DSS defined by these upper
-	  // leaning points, and at least one of them is a lower
-	  // leaning point.  
-	  b = Ul[0]-Uf[0];
-	  a = Ul[1]-Uf[1];
-	  mu = -a*Uf[0]+b*Uf[1];
-	  
-	  r1 = a*Lf[0]-b*Lf[1]+mu;
-	  r2 = a*Ll[0]-b*Ll[1]+mu;
-	  
-	  if(r1 >= 0 && r1<b && r2>=0 && r2<b)
-	    {
-	      assert(r1==b-1 || r2==b-1);
-	      if(r1!=b-1)
-		Lf = Ll;
-	      if(r2!=b-1)
-		Ll = Lf;
-	    }
+	  LPoints.push_back(S1.Ul());
+	  LPoints.push_back(S1.Ll());
+	  LPoints.push_back(S1.Uf());
+	  LPoints.push_back(S1.Lf());
+	}
+      
+      inDSL = true;
+      Uff = S2.Uf();
+      Lff = S2.Lf();
+      it = LPoints.begin();
+      while(inDSL && it != LPoints.end())
+	{
+	  r = S2.remainder(*it) - S2.mu();
+	  if(r<0 || r>=S2.b())
+	    inDSL = false;
 	  else
 	    {
-	      notADSS = true;
-	      std::cout << "union is not possible\n-------------\n\n";
+	 
+	      if(r==0)
+		Uff = *it;
+	      
+	      if(r==S2.b()-1)
+		Lff = *it;
+	      ++it;
 	    }
+	}
+      
+      if(!inDSL)
+	{
+	  // Integer r = S2.remainder(*it);
+	  // std::cout << r << std::endl;
+	  //assert(r<0 || r>=S2.b());
+	  if(r>=S2.b()) // lower exterior point -> the slope is greater than DSS2
+	    {
+	      Ul = S2.Uf();
+	      Ll = S2.Ll();
+	    }
+	  else // upper exterior point -> the slope is lower than DSS2
+	    {
+	      Ul = S2.Ul();
+	      Ll = S2.Lf();
+	    }
+	}
+      else
+	{
+	  easyUnion = true;
+#ifdef DEBUG
+	  std::cout << "easy" << std::endl;
+#endif
+	  //DSSres = S2; // !!!! amend with the computation of the new leaning points: the characteristics do not change, but the leaning points may change.
+	  DSSres = NaiveDSS8<Integer>(S2.a(),S2.b(),S1.back(),S2.front(),Uff,S2.Ul(),Lff,S2.Ll());
 	}
     }
   
-  //std::cout << Uf << " " << Ul << " " << Lf << " " << Ll << std::endl;
-  if(!notADSS && !easyUnion)
-    DSSres = NaiveDSS8<Integer>(a,b,S1.back(),S2.front(),Uf,Ul,Lf,Ll);
-  
+  bool notADSS;
+  Integer a,b,mu;
+  Integer aa,bb,muu;
+  if(!easyUnion)
+    {
+#ifdef DEBUG
+      std::cout << "debug " << Uf << " " << Ul << " " << Lf << " " << Ll << std::endl;
+#endif 
+      
+      b = Ll[0]-Lf[0];
+      a = Ll[1]-Lf[1];
+
+      bb = Ul[0]-Uf[0];
+      aa = Ul[1]-Uf[1];
+	      
+      
+      
+      if(b == bb && a == aa)
+	DSSres = NaiveDSS8<Integer>(a,b,S1.back(),S2.front(),Uf,Ul,Lf,Ll);
+      
+      // if(a == aa && b == bb) // then it's done, Uf, Ul, Lf, Ll are all leaning points
+      // 	{
+      // 	  DSSres = NaiveDSS8<Integer>(a,b,S1.back(),S2.front(),Uf,Ul,Lf,Ll);
+      // 	}
+      else
+	{
+	  
+	  // Test whether Lf and Lf are both lower leaning points. Then
+	  // Uf and Ul must belong to the DSS defined by these lower
+	  // leaning points, and at least one of them if an upper
+	  // leaning point.  
+	  
+	  mu = b-1-a*Lf[0]+b*Lf[1];
+	  Integer r1 = a*Uf[0]-b*Uf[1]+mu;
+	  Integer r2 = a*Ul[0]-b*Ul[1]+mu;
+	  
+	  notADSS = false;
+	  if(r1 >= 0 && r1<b && r2>=0 && r2<b) // Uf and Ul belong to the DSS defined by Lf and LL
+	    {
+	      assert(r1==0 || r2==0);
+	      if(r1!=0 && r2 !=0)
+		std::cout << "ni r1 ni r2 !! " << a << " " << b << " " << Uf << " " << r1 << " " << Ul << " " << r2 << std::endl;
+	      if(r1!=0)
+		Uf = Ul;
+	      if(r2!=0)
+		Ul = Uf;
+	    }
+	  else
+	    {
+	      // Test whether Uf and Uf are both lower leaning points. Then
+	      // Lf and Ll must belong to the DSS defined by these upper
+	      // leaning points, and at least one of them is a lower
+	      // leaning point.  
+	      b = Ul[0]-Uf[0];
+	      a = Ul[1]-Uf[1];
+	      
+	      mu = -a*Uf[0]+b*Uf[1];
+	      
+	      r1 = a*Lf[0]-b*Lf[1]+mu;
+	      r2 = a*Ll[0]-b*Ll[1]+mu;
+	      
+	      if(r1 >= 0 && r1<b && r2>=0 && r2<b)
+		{
+		  assert(r1==b-1 || r2==b-1);
+		  if(r1!=b-1)
+		    Lf = Ll;
+		  if(r2!=b-1)
+		    Ll = Lf;
+		}
+	      else
+		{
+		  notADSS = true;
+		  
+		  std::cout << S1 << "\n" << S2 << std::endl;
+		  std::cout << "union is not possible\n-------------\n\n";
+		}
+	    }
+	  
+	  
+      // std::cout << a << " " << b << " " << mu << " " << r1 << " " << r2 << std::endl;
+      // std::cout << Uf << " " << Ul << " " << Lf << " " << Ll << std::endl;
+	  if(!notADSS && !easyUnion)
+	    DSSres = NaiveDSS8<Integer>(a,b,S1.back(),S2.front(),Uf,Ul,Lf,Ll);
+	}
+    }
   
   return DSSres;
   
-}	
+  
+
+}
+
+
+// NaiveDSS8<Integer> computeUnionOfDSSs(NaiveDSS8<Integer> S1, NaiveDSS8<Integer> S2)
+// {
+//   //! [ArithmeticalDSSNaiveCtor]
+//   // Construct a naive DSS
+//   // NaiveDSS8<Integer> S1( 3, 7,                   //slope
+//   // 			      Point(0,0), Point(14,6), //ending points 
+//   // 			      Point(0,0), Point(14,6), //upper points
+//   // 			      Point(2,0), Point(9,3)  //lower points
+//   // 			      );
+//   // //! [ArithmeticalDSSNaiveCtor]
+//   // NaiveDSS8<Integer> S2( 2, 5,                   //slope
+//   // 			      Point(15,6), Point(23,9), //ending points 
+//   // 			      Point(19,8), Point(19,8), //upper points
+//   // 			      Point(16,6), Point(21,8)  //lower points
+//   // 			      );
+ 
+  
+//   // NaiveDSS8<Integer> S1( 2, 5,                   //slope
+//   // 			 Point(0,0), Point(8,3), //ending points 
+//   // 			 Point(0,0), Point(5,2), //upper points
+//   // 			 Point(2,0), Point(7,2)  //lower points
+//   // 			 );
+//   // //! [ArithmeticalDSSNaiveCtor]
+//   // NaiveDSS8<Integer> S2( 3, 7,                   //slope
+//   // 			 Point(9,3), Point(17,6), //ending points 
+//   // 			 Point(15,6), Point(15,6), //upper points
+//   // 			 Point(10,3), Point(17,6)  //lower points
+//   // 			 );
+ 
+//   // NaiveDSS8<Integer> S1( 1, 2,                   //slope
+//   // 			 Point(0,0), Point(4,2), //ending points 
+//   // 			 Point(1,1), Point(3,2), //upper points
+//   // 			 Point(0,0), Point(4,2)  //lower points
+//   // 			 );
+//   // //! [ArithmeticalDSSNaiveCtor]
+//   // NaiveDSS8<Integer> S2( 3, 8,                   //slope
+//   // 			 Point(5,2), Point(16,7), //ending points 
+//   // 			 Point(5,2), Point(8,4), //upper points
+//   // 			 Point(13,5), Point(16,7)  //lower points
+//   // 			 );
+ 
+ 
+//   // S1 = NaiveDSS8<Integer>( 1, 1,                   //slope
+//   // 			 Point(5,6), Point(10,11), //ending points 
+//   // 			 Point(5,6), Point(10,11), //upper points
+//   // 			 Point(5,6), Point(10,11)  //lower points
+//   // 			 );
+//   // S2 = NaiveDSS8<Integer>( 1, 1,                   //slope
+//   // 			 Point(11,11), Point(25,25), //ending points 
+//   // 			 Point(11,11), Point(25,25), //upper points
+//   // 			 Point(11,11), Point(25,25)  //lower points
+//   // 			 );
+ 
+  
+//   S1 = NaiveDSS8<Integer>( 2, 5,                   //slope
+//   			 Point(0,0), Point(9,3), //ending points 
+//   			 Point(0,0), Point(5,2), //upper points
+//   			 Point(2,0), Point(7,2)  //lower points
+//   			 );
+//   S2 = NaiveDSS8<Integer>( 1, 2,                   //slope
+//   			 Point(9,3), Point(14,5), //ending points 
+//   			 Point(11,4), Point(13,5), //upper points
+//   			 Point(10,3), Point(12,4)  //lower points
+//   			 );
+  
+  
+
+
+  
+//   // Trace to the standard output
+//   //trace.info() << S1 << "\n" << S2 << std::endl << std::endl; 
+
+//   NaiveDSS8<Integer> DSSres(S1);
+//   // Check if one DSS can be directly added to the other one
+//   bool easyUnion = false;
+//   if(S1.b() < S2.b())
+//     { 
+//       if(S2.isInDSL(S1.Uf()) && S2.isInDSL(S1.Ul()) && S2.isInDSL(S1.Lf()) && S2.isInDSL(S1.Ll()))
+// 	{
+// 	  easyUnion = true;
+// 	  DSSres = S2;
+// 	}
+//     }
+//   else
+//     {
+//       if(S1.isInDSL(S2.Uf()) && S1.isInDSL(S2.Ul()) && S1.isInDSL(S2.Lf()) && S1.isInDSL(S2.Ll()))
+// 	{
+// 	  easyUnion = true;
+// 	  DSSres = S1;
+// 	}
+//     }
+  
+//   Point Uf, Ul, Lf, Ll;
+//   Integer a, b, mu;
+  
+//   bool notADSS = false;
+//   if(!easyUnion)
+//     {
+//       // if slope of S1 is greater than slope of S2
+//       // then the slope of the result will be less than the slope of S1
+//       Integer d = determinant(Point(S1.b(), S1.a()),Point(S2.b(),S2.a())); 
+//       if(d<0 )
+// 	{
+// 	  // Lower leaning points
+// 	  // S1.Lf may be lower leaning point, S1.Ll is definitely not
+	  
+// 	  // First potential lower leaning point
+// 	  Lf = S1.Lf();
+	  
+// 	  // S2.Ll may be lower leaning point, S2.Lf is not
+// 	  // Second potential lower leaning point
+// 	  Ll = S2.Ll();
+	  
+// 	  // Upper leaning points
+// 	  // S1.Ul may be an upper leaning point, S1.Uf is not
+// 	  Uf = S1.Ul();
+	  
+// 	  // S2.Uf may be an upper leaning point, S2.Ul is not
+// 	  Ul = S2.Uf();
+	  
+// 	}
+//       else // the slope of S1 is lower than the slope of S2
+// 	if(d>0)
+// 	  {
+// 	    // then the slope of the result will be greater than the slope of S1
+	    
+	    
+// 	    // Lower leaning points
+// 	    // S1.Ll may be lower leaning point, S1.Lf is definitely not
+	    
+// 	    // First potential lower leaning point
+// 	    Lf = S1.Ll();
+	    
+// 	    // S2.Lf may be lower leaning point, S2.Ll is not
+// 	    // Second potential lower leaning point
+// 	    Ll = S2.Lf();
+	    
+// 	    // Upper leaning points
+// 	    // S1.Uf may be an upper leaning point, S1.Ul is not
+// 	    Uf = S1.Uf();
+	    
+// 	    // S2.Ul may be an upper leaning point, S2.Uf is not
+// 	    Ul = S2.Ul();
+	  
+// 	  }
+// 	else
+// 	  if(d==0 && S1.mu() < S2.mu())
+// 	    {
+// 	      Lf = S1.Lf();
+	      
+// 	      Ll = S2.Lf();
+	  
+// 	      Uf = S1.Ul();
+	      
+// 	      Ul = S2.Ul();
+// 	    }
+// 	  else // d==0 && S1.mu() > S2.mu()
+// 	    {
+// 	      Lf = S1.Ll();
+// 	      Ll = S2.Ll();
+// 	      Uf = S1.Uf();
+// 	      Ul = S2.Uf();
+// 	    }
+      
+//       // Test whether Lf and Lf are both lower leaning points. Then
+//       // Uf and Ul must belong to the DSS defined by these lower
+//       // leaning points, and at least one of them if an upper
+//       // leaning point.  
+//       b = Ll[0]-Lf[0];
+//       a = Ll[1]-Lf[1];
+//       mu = b-1-a*Lf[0]+b*Lf[1];
+      
+//       Integer r1 = a*Uf[0]-b*Uf[1]+mu;
+//       Integer r2 = a*Ul[0]-b*Ul[1]+mu;
+//       if(r1 >= 0 && r1<b && r2>=0 && r2<b)
+// 	{
+// 	  assert(r1==0 || r2==0);
+// 	  if(r1!=0)
+// 	    Uf = Ul;
+// 	  if(r2!=0)
+// 	    Ul = Uf;
+// 	}
+//       else
+// 	{
+// 	  // Test whether Uf and Uf are both lower leaning points. Then
+// 	  // Lf and Ll must belong to the DSS defined by these upper
+// 	  // leaning points, and at least one of them is a lower
+// 	  // leaning point.  
+// 	  b = Ul[0]-Uf[0];
+// 	  a = Ul[1]-Uf[1];
+// 	  mu = -a*Uf[0]+b*Uf[1];
+	  
+// 	  r1 = a*Lf[0]-b*Lf[1]+mu;
+// 	  r2 = a*Ll[0]-b*Ll[1]+mu;
+	  
+// 	  if(r1 >= 0 && r1<b && r2>=0 && r2<b)
+// 	    {
+// 	      assert(r1==b-1 || r2==b-1);
+// 	      if(r1!=b-1)
+// 		Lf = Ll;
+// 	      if(r2!=b-1)
+// 		Ll = Lf;
+// 	    }
+// 	  else
+// 	    {
+// 	      notADSS = true;
+// 	      std::cout << "union is not possible\n-------------\n\n";
+// 	    }
+// 	}
+//     }
+  
+//   std::cout << Uf << " " << Ul << " " << Lf << " " << Ll << std::endl;
+//   if(!notADSS && !easyUnion)
+//     DSSres = NaiveDSS8<Integer>(a,b,S1.back(),S2.front(),Uf,Ul,Lf,Ll);
+  
+  
+//   return DSSres;
+  
+// }	
 
 void testUnionOfConnectedDSSs(int modb, int modx, int nbtries)
 {
@@ -361,7 +664,7 @@ void testUnionOfConnectedDSSs(int modb, int modx, int nbtries)
 		  NaiveDSS8<Integer> DSS2(contour2.begin(),contour2.end());
 		  		 
 		  
-#ifdef TRACE	  
+#ifdef DEBUG	  
 		  std::cout << "DSS1: " << A << " " << B << " a =" << DSS1.a() << " b =" << DSS1.b() << " mu =" << DSS1.mu() << std::endl << std::endl;
 		  std::cout << "DSS2: " << C << " " << D << " a =" << DSS2.a() << " b =" << DSS2.b() << " mu =" << DSS2.mu() << std::endl << std::endl;
 #endif		  
@@ -369,11 +672,11 @@ void testUnionOfConnectedDSSs(int modb, int modx, int nbtries)
 		  // Computation of the union of the two segments
 		  
 		  timeBegin = clock();
-		  NaiveDSS8<Integer> DSS = computeUnionOfDSSs(DSS1,DSS2);
+		  NaiveDSS8<Integer> DSS = fastUnionOfDSSs(DSS1,DSS2);
 		  timeEnd = clock();
 		  CPUTimeUnion += ((double)timeEnd-(double)timeBegin)/((double)CLOCKS_PER_SEC);
 		  
-#ifdef TRACE
+#ifdef DEBUG
 		  std::cout << "DSS Union " << DSS << std::endl << std::endl;
 		  //std::cout << "---------------------------" << std::endl << std::endl;
 #endif
@@ -390,11 +693,21 @@ void testUnionOfConnectedDSSs(int modb, int modx, int nbtries)
 		    }
 		  timeEnd = clock();
 		  
-		  assert(DSS == DSSGroundTruth);
+		  //assert(DSS == DSSGroundTruth);
+		  if(DSS != DSSGroundTruth)
+		    {
+		      std::cout << DSS1 << "\n" << DSS2 << std::endl; 
+		      std::cout << DSS << std::endl;
+		      std::cout << DSSGroundTruth << std::endl;
+		      std::cout << "error\n-------------" << std::endl;
+		  
+		    }
+		  //std::cout << "------------\n";
 		  //std::cout << "ArithDSS " << DSSGroundTruth << std::endl << std::endl;
 		  CPUTimeReco += ((double)timeEnd-(double)timeBegin)/((double)CLOCKS_PER_SEC);
-		  
-		  // Comparison with stabbingLineComputer adding only
+
+		  /****************************************************************/
+		  // Comparison with stabbingLineComputer adding only 
 		  // DSS2 leaning points
 		  
 		  typedef pair<Z2::Point,Z2::Point> Pair;
@@ -474,11 +787,13 @@ int main( int argc, char** argv )
   trace.beginBlock ( "Example exampleUnionOfConnectedDSSs" );
   
   // computeUnionOfDSSs();
-  int x;
-  for(x = 10;x<10000;x=x*2)
-    testUnionOfConnectedDSSs(200,x,1000);
+  // int x;
+  // for(x = 10;x<10000;x=x*2)
+  //   testUnionOfConnectedDSSs(200,x,1000);
   
-  //testUnionOfConnectedDSSs(20,10,1);
+  testUnionOfConnectedDSSs(1000,50,10);
+
+  //fastUnionOfDSSs();
 
   trace.info() << "Args:";
   for ( int i = 0; i < argc; ++i )
