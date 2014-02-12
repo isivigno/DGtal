@@ -204,6 +204,14 @@ namespace DGtal
      * @return last lower leaning point.
      */
     Point Ll() const;
+    
+    
+    /**
+     * @return preimage.
+     */
+    PreimagePtr getPreimage() const;
+
+    
 
     /**
      * @return 'true' if CW, 'false' if CCW

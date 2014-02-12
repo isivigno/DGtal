@@ -59,7 +59,8 @@ int main( int argc, char** argv )
   
   Curve c; //grid curve
   c.initFromVectorStream(instream);
-
+  
+  std::cout << c << std::endl;
 
   trace.beginBlock("Simple example");
 
@@ -75,7 +76,7 @@ int main( int argc, char** argv )
   //! [StabbingLineComputerUsage]
 
   trace.info() << s << endl;  
-
+  trace.info() << s.Uf() << " " << s.Ul() << " " << s.Lf() << " " << s.Ll() << std::endl;
   trace.endBlock();
 
 

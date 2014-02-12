@@ -48,11 +48,10 @@ using namespace Z2i;
 
 //#define DEBUG
 
-
-// Integer determinant(Point u, Point v)
-// {
-//   return (u[0]*v[1]-u[1]*v[0]);
-// }
+Integer determinant(Point u, Point v)
+{
+  return (u[0]*v[1]-u[1]*v[0]);
+}
 
 
 NaiveDSS8<Integer> fastUnionOfDSSs(NaiveDSS8<Integer> S1, NaiveDSS8<Integer> S2)
@@ -293,11 +292,11 @@ NaiveDSS8<Integer> fastUnionOfDSSs(NaiveDSS8<Integer> S1, NaiveDSS8<Integer> S2)
 	  Integer r2 = a*Ul[0]-b*Ul[1]+mu;
 	  
 	  notADSS = false;
-	  if(r1 >= 0 && r1<b && r2>=0 && r2<b) // Uf and Ul belong to the DSS defined by Lf and LL
+	  if(r1 >= 0 && r1<b && r2>=0 && r2<b) // Uf and Ul belong to the DSS defined by Lf and Ll
 	    {
 	      assert(r1==0 || r2==0);
-	      if(r1!=0 && r2 !=0)
-		std::cout << "ni r1 ni r2 !! " << a << " " << b << " " << Uf << " " << r1 << " " << Ul << " " << r2 << std::endl;
+	      // if(r1!=0 && r2 !=0)
+	      //std::cout << "ni r1 ni r2 !! " << a << " " << b << " " << Uf << " " << r1 << " " << Ul << " " << r2 << std::endl;
 	      if(r1!=0)
 		Uf = Ul;
 	      if(r2!=0)
@@ -348,226 +347,145 @@ NaiveDSS8<Integer> fastUnionOfDSSs(NaiveDSS8<Integer> S1, NaiveDSS8<Integer> S2)
 
 }
 
+template <typename ConstPairIterator>
+NaiveDSS8<Integer> computeMinDSSFromPreimage(typename StabbingLineComputer<ConstPairIterator>::PreimagePtr P, Point first, Point last)
+{
+  typedef typename StabbingLineComputer<ConstPairIterator>::Preimage::Container Hull; 
+  Hull pH, qH;
+  
+  pH = P->pHull();
+  qH = P->qHull();
+  
+  
+  Point Uf = P->Uf(); // = pH.rbegin()
+  Point Ul = P->Ul(); // = pH.begin()
+  Point Lf = P->Lf(); // = qH.rbegin()
+  Point Ll = P->Ll(); // = qH.begin()
+  
+  Point rUf,rUl,rLf,rLl;
+  
+  // std::cout << Uf << " " << Ul << " " << Lf <<  " " << Ll << std::endl;
+  
+  Vector Vlow = Lf - Ul;
+  Vector Vup = Uf - Ll;
+  
+  typename Hull::iterator it;
+  typename Hull::reverse_iterator rit;
+  
+  /***********************/
+  /// Ul
+  
+  Point cur, next;
+  bool ok = true;
+  it = pH.begin();
+  cur = *it;
+  //std::cout << "first = " << cur;
+  while(it != pH.end() && ok)
+    {
+      if(++it !=pH.end())
+	{
+	  next = *(it);
+	  //std::cout << "next = " << next;
+	  if(determinant(next-cur,Vlow)!=0)
+	    ok = false;
+	  else
+	    cur = next;
+	}
+      else
+	ok = false;
+    }
+  rUl = cur;
+  //std::cout << rUl;
+  /*************************/
+  /// Uf
 
-// NaiveDSS8<Integer> computeUnionOfDSSs(NaiveDSS8<Integer> S1, NaiveDSS8<Integer> S2)
-// {
-//   //! [ArithmeticalDSSNaiveCtor]
-//   // Construct a naive DSS
-//   // NaiveDSS8<Integer> S1( 3, 7,                   //slope
-//   // 			      Point(0,0), Point(14,6), //ending points 
-//   // 			      Point(0,0), Point(14,6), //upper points
-//   // 			      Point(2,0), Point(9,3)  //lower points
-//   // 			      );
-//   // //! [ArithmeticalDSSNaiveCtor]
-//   // NaiveDSS8<Integer> S2( 2, 5,                   //slope
-//   // 			      Point(15,6), Point(23,9), //ending points 
-//   // 			      Point(19,8), Point(19,8), //upper points
-//   // 			      Point(16,6), Point(21,8)  //lower points
-//   // 			      );
- 
+  ok = true;
+  rit = pH.rbegin();
+  //  std::cout << "first = " << *rit;
+  cur = *rit;
+  while(rit != pH.rend() && ok)
+    {
+      if(++rit !=pH.rend())
+	{
+	  next = *(rit);
+	  //std::cout << "next =" << next;
+	  if(determinant(cur-next,Vup)!=0)
+	    ok = false;
+	  else
+	    cur = next;
+	}
+      else
+	ok = false;
+    }
+  rUf = cur;
+  //std::cout << rUf;
+  /***********************/
+  /// Ll
   
-//   // NaiveDSS8<Integer> S1( 2, 5,                   //slope
-//   // 			 Point(0,0), Point(8,3), //ending points 
-//   // 			 Point(0,0), Point(5,2), //upper points
-//   // 			 Point(2,0), Point(7,2)  //lower points
-//   // 			 );
-//   // //! [ArithmeticalDSSNaiveCtor]
-//   // NaiveDSS8<Integer> S2( 3, 7,                   //slope
-//   // 			 Point(9,3), Point(17,6), //ending points 
-//   // 			 Point(15,6), Point(15,6), //upper points
-//   // 			 Point(10,3), Point(17,6)  //lower points
-//   // 			 );
- 
-//   // NaiveDSS8<Integer> S1( 1, 2,                   //slope
-//   // 			 Point(0,0), Point(4,2), //ending points 
-//   // 			 Point(1,1), Point(3,2), //upper points
-//   // 			 Point(0,0), Point(4,2)  //lower points
-//   // 			 );
-//   // //! [ArithmeticalDSSNaiveCtor]
-//   // NaiveDSS8<Integer> S2( 3, 8,                   //slope
-//   // 			 Point(5,2), Point(16,7), //ending points 
-//   // 			 Point(5,2), Point(8,4), //upper points
-//   // 			 Point(13,5), Point(16,7)  //lower points
-//   // 			 );
- 
- 
-//   // S1 = NaiveDSS8<Integer>( 1, 1,                   //slope
-//   // 			 Point(5,6), Point(10,11), //ending points 
-//   // 			 Point(5,6), Point(10,11), //upper points
-//   // 			 Point(5,6), Point(10,11)  //lower points
-//   // 			 );
-//   // S2 = NaiveDSS8<Integer>( 1, 1,                   //slope
-//   // 			 Point(11,11), Point(25,25), //ending points 
-//   // 			 Point(11,11), Point(25,25), //upper points
-//   // 			 Point(11,11), Point(25,25)  //lower points
-//   // 			 );
- 
+  it = qH.begin();
+  cur = *it;
+  ok = true;
+  while(it != qH.end() && ok)
+    {
+      if(++it != qH.end())
+	{
+	  next = *(it);
+	  if(determinant(next-cur,Vup)!=0)
+	    ok = false;
+	  else
+	    cur = next;
+	}
+      else
+	ok = false;
+    }
+  rLl = cur;
+
+  /*************************/
+  /// Lf
+
+  ok = true;
+  rit = qH.rbegin();
+  cur = *rit;
+  while(rit != pH.rend() && ok)
+    {
+      if(++rit != pH.rend())
+	{
+	  next = *rit;
+	  if(determinant(cur-next,Vlow)!=0)
+	    ok = false;
+	  else
+	    cur = next;
+	}
+      else
+	ok = false;
+    }
+  rLf = cur;
+
+  /****************************/
   
-//   S1 = NaiveDSS8<Integer>( 2, 5,                   //slope
-//   			 Point(0,0), Point(9,3), //ending points 
-//   			 Point(0,0), Point(5,2), //upper points
-//   			 Point(2,0), Point(7,2)  //lower points
-//   			 );
-//   S2 = NaiveDSS8<Integer>( 1, 2,                   //slope
-//   			 Point(9,3), Point(14,5), //ending points 
-//   			 Point(11,4), Point(13,5), //upper points
-//   			 Point(10,3), Point(12,4)  //lower points
-//   			 );
+  Integer a, b;
+  if(rUl != rUf)
+    {
+      a = rUf[1]-rUl[1];
+      b = rUf[0]-rUl[0];
+    }
+  else
+    {
+      a = rLf[1]-rLl[1];
+      b = rLf[0]-rLl[0];
+    }
   
-  
+  IntegerComputer<Integer> ic;
+  Integer g = ic.gcd(a,b);
+  a = a/g;
+  b = b/g;
+		 
+  NaiveDSS8<Integer> DSS(a,b,first, last, rLl, rLf, rUl+Point(0,-1), rUf+Point(0,-1));
+  return DSS;
+
+}
 
 
-  
-//   // Trace to the standard output
-//   //trace.info() << S1 << "\n" << S2 << std::endl << std::endl; 
-
-//   NaiveDSS8<Integer> DSSres(S1);
-//   // Check if one DSS can be directly added to the other one
-//   bool easyUnion = false;
-//   if(S1.b() < S2.b())
-//     { 
-//       if(S2.isInDSL(S1.Uf()) && S2.isInDSL(S1.Ul()) && S2.isInDSL(S1.Lf()) && S2.isInDSL(S1.Ll()))
-// 	{
-// 	  easyUnion = true;
-// 	  DSSres = S2;
-// 	}
-//     }
-//   else
-//     {
-//       if(S1.isInDSL(S2.Uf()) && S1.isInDSL(S2.Ul()) && S1.isInDSL(S2.Lf()) && S1.isInDSL(S2.Ll()))
-// 	{
-// 	  easyUnion = true;
-// 	  DSSres = S1;
-// 	}
-//     }
-  
-//   Point Uf, Ul, Lf, Ll;
-//   Integer a, b, mu;
-  
-//   bool notADSS = false;
-//   if(!easyUnion)
-//     {
-//       // if slope of S1 is greater than slope of S2
-//       // then the slope of the result will be less than the slope of S1
-//       Integer d = determinant(Point(S1.b(), S1.a()),Point(S2.b(),S2.a())); 
-//       if(d<0 )
-// 	{
-// 	  // Lower leaning points
-// 	  // S1.Lf may be lower leaning point, S1.Ll is definitely not
-	  
-// 	  // First potential lower leaning point
-// 	  Lf = S1.Lf();
-	  
-// 	  // S2.Ll may be lower leaning point, S2.Lf is not
-// 	  // Second potential lower leaning point
-// 	  Ll = S2.Ll();
-	  
-// 	  // Upper leaning points
-// 	  // S1.Ul may be an upper leaning point, S1.Uf is not
-// 	  Uf = S1.Ul();
-	  
-// 	  // S2.Uf may be an upper leaning point, S2.Ul is not
-// 	  Ul = S2.Uf();
-	  
-// 	}
-//       else // the slope of S1 is lower than the slope of S2
-// 	if(d>0)
-// 	  {
-// 	    // then the slope of the result will be greater than the slope of S1
-	    
-	    
-// 	    // Lower leaning points
-// 	    // S1.Ll may be lower leaning point, S1.Lf is definitely not
-	    
-// 	    // First potential lower leaning point
-// 	    Lf = S1.Ll();
-	    
-// 	    // S2.Lf may be lower leaning point, S2.Ll is not
-// 	    // Second potential lower leaning point
-// 	    Ll = S2.Lf();
-	    
-// 	    // Upper leaning points
-// 	    // S1.Uf may be an upper leaning point, S1.Ul is not
-// 	    Uf = S1.Uf();
-	    
-// 	    // S2.Ul may be an upper leaning point, S2.Uf is not
-// 	    Ul = S2.Ul();
-	  
-// 	  }
-// 	else
-// 	  if(d==0 && S1.mu() < S2.mu())
-// 	    {
-// 	      Lf = S1.Lf();
-	      
-// 	      Ll = S2.Lf();
-	  
-// 	      Uf = S1.Ul();
-	      
-// 	      Ul = S2.Ul();
-// 	    }
-// 	  else // d==0 && S1.mu() > S2.mu()
-// 	    {
-// 	      Lf = S1.Ll();
-// 	      Ll = S2.Ll();
-// 	      Uf = S1.Uf();
-// 	      Ul = S2.Uf();
-// 	    }
-      
-//       // Test whether Lf and Lf are both lower leaning points. Then
-//       // Uf and Ul must belong to the DSS defined by these lower
-//       // leaning points, and at least one of them if an upper
-//       // leaning point.  
-//       b = Ll[0]-Lf[0];
-//       a = Ll[1]-Lf[1];
-//       mu = b-1-a*Lf[0]+b*Lf[1];
-      
-//       Integer r1 = a*Uf[0]-b*Uf[1]+mu;
-//       Integer r2 = a*Ul[0]-b*Ul[1]+mu;
-//       if(r1 >= 0 && r1<b && r2>=0 && r2<b)
-// 	{
-// 	  assert(r1==0 || r2==0);
-// 	  if(r1!=0)
-// 	    Uf = Ul;
-// 	  if(r2!=0)
-// 	    Ul = Uf;
-// 	}
-//       else
-// 	{
-// 	  // Test whether Uf and Uf are both lower leaning points. Then
-// 	  // Lf and Ll must belong to the DSS defined by these upper
-// 	  // leaning points, and at least one of them is a lower
-// 	  // leaning point.  
-// 	  b = Ul[0]-Uf[0];
-// 	  a = Ul[1]-Uf[1];
-// 	  mu = -a*Uf[0]+b*Uf[1];
-	  
-// 	  r1 = a*Lf[0]-b*Lf[1]+mu;
-// 	  r2 = a*Ll[0]-b*Ll[1]+mu;
-	  
-// 	  if(r1 >= 0 && r1<b && r2>=0 && r2<b)
-// 	    {
-// 	      assert(r1==b-1 || r2==b-1);
-// 	      if(r1!=b-1)
-// 		Lf = Ll;
-// 	      if(r2!=b-1)
-// 		Ll = Lf;
-// 	    }
-// 	  else
-// 	    {
-// 	      notADSS = true;
-// 	      std::cout << "union is not possible\n-------------\n\n";
-// 	    }
-// 	}
-//     }
-  
-//   std::cout << Uf << " " << Ul << " " << Lf << " " << Ll << std::endl;
-//   if(!notADSS && !easyUnion)
-//     DSSres = NaiveDSS8<Integer>(a,b,S1.back(),S2.front(),Uf,Ul,Lf,Ll);
-  
-  
-//   return DSSres;
-  
-// }	
 
 void testUnionOfConnectedDSSs(int modb, int modx, int nbtries)
 {
@@ -752,25 +670,71 @@ void testUnionOfConnectedDSSs(int modb, int modx, int nbtries)
 		  StabbingLineComputer<ConstPairIterator> s; 
 		  // //extension
 		  s.init( contour.begin() );
-		  bool ok=true; bool noClock =true;
+		  bool ok=true; bool Clock =false;
 		  while ( s.end() != contour.end() && ok)
 		    {
-		      if(((s.end())->first)[0] > x2 && noClock )
+		      if(((s.end())->first)[0] > x2 && !Clock )
 			{
-			  noClock = false;
+			  Clock = true;
 			  timeBegin=clock();
 			}
 		      ok = s.extendFront();
-		    }		  
+		    }
+
 		  
+		  NaiveDSS8<Integer> DSSStab(DSS1);
+		  
+		  typedef StabbingLineComputer<ConstPairIterator>::PreimagePtr myPreimagePtr; 
+		  
+		  DSSStab = computeMinDSSFromPreimage<ConstPairIterator>(s.getPreimage(),DSS1.back(),DSS2.front());
 		  timeEnd = clock();
+		  
+		  if(DSSStab != DSSGroundTruth)
+		    {
+		      std::cout << "error DSSStab" << std::endl;
+		      std::cout << DSS1 << std::endl;
+		      std::cout << DSS2 << std::endl;
+		      std::cout << DSSStab << std::endl;
+		      std::cout << s << std::endl;
+		      std::cout << DSSGroundTruth << std::endl;
+		      std::cout << "----------------\n";
+		    }
 		  // std::cout << s.Uf() << " " << s.Ul() << " " << s.Lf() << " " << s.Ll() << std::endl;
 		  //std::cout << "----------------\n";
 		  CPUTimeStabbing += ((double)timeEnd-(double)timeBegin)/((double)CLOCKS_PER_SEC);
 		  
 		  
+		  /*****************************************************/
+		  /**** Computation with stabbing line computer with all the points ***/
 		  
-	
+		  // contour.clear();
+		  // myIt = contour1.begin();
+
+		  // while(myIt!=contour1.end())
+		  //   {
+		  //     Pair p = make_pair(*myIt+Point(0,1),*myIt);
+		  //     contour.push_back(p);
+		  //     ++myIt;
+		  //   }
+		  // myIt = contour2.begin();
+		  // while(myIt!= contour2.end())
+		  //   {
+		  //     Pair p = make_pair(*myIt+Point(0,1),*myIt);
+		  //     contour.push_back(p);
+		  //     ++myIt;
+		  //   }
+		 
+		  // StabbingLineComputer<ConstPairIterator> sTot; 
+		  // // //extension
+		  // sTot.init( contour.begin() );
+		  // ok=true; 
+		  // while ( sTot.end() != contour.end() && ok)
+		  //   {
+		  //     ok = sTot.extendFront();
+		  //   }
+		  
+		  // std::cout << sTot << std::endl;
+		  
 		 
 
 		}
@@ -786,12 +750,11 @@ int main( int argc, char** argv )
 {
   trace.beginBlock ( "Example exampleUnionOfConnectedDSSs" );
   
-  // computeUnionOfDSSs();
   // int x;
   // for(x = 10;x<10000;x=x*2)
   //   testUnionOfConnectedDSSs(200,x,1000);
   
-  testUnionOfConnectedDSSs(1000,50,10);
+  testUnionOfConnectedDSSs(1000,100,100);
 
   //fastUnionOfDSSs();
 
