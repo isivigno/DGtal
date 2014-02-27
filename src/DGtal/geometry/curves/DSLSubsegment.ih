@@ -367,7 +367,7 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::convexHullApproxTwoPoints(Vector &l
 
 	  if(alpha >= 1 || first)
 	    {
-	      Aold = A;
+	      Aold = A; // Aold = A + vv*(alpha-1) ? to avoid gcd computation afterwards
 	      vv  = v;
 	      vv *= alpha;
 	      A += vv;
@@ -393,7 +393,7 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::convexHullApproxTwoPoints(Vector &l
 		alpha = ic.min(intersection(B,v,l,r),intersectionVertical(B,v,n));
 		if(alpha >= 1)
 		  {
-		    Bold = B;
+		    Bold = B; // Bold = B + vv*(alpha-1) ?? to avoid gcd computation afterwards
 		    vv = v;
 		    vv *= alpha;
 		    B += vv;
