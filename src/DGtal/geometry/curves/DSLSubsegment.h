@@ -121,7 +121,7 @@ namespace DGtal
       // Given the parameters of a DSL 0 <= ax -by + mu < b, and two points A and B of this DSL,
       // compute the parameters of the DSS [AB].
       //DSLSubsegment(Integer a, Integer b, Integer mu, Point A, Point B);
-      DSLSubsegment(Number a, Number b, Number mu, Point A, Point B, bool *locRay);
+      DSLSubsegment(Number a, Number b, Number mu, Point A, Point B/*, int *ndiff, long double *timeTot*/);
 
       // Constructor
       // Given a straight line of equation y = alpha x + beta, and two
@@ -198,7 +198,7 @@ namespace DGtal
       
       
       Point nextTermInFareySeriesEuclid(Integer fp, Integer fq, Integer n);
-      
+      Point nextTermInFareySeries(Integer fp, Integer fq, Integer gp, Integer gq, Integer m, Integer n);
 
 
       // Compute the ray of highest slope in O(1) knowing the ray of smallest
@@ -251,7 +251,7 @@ namespace DGtal
       // FareyFan. This cell represents a DSS. findSolution computes the
       // vertex of the cell that represents the minimal parameters of the DSS. 
       // Complexity of nextTermInFareySeriesEuclid
-      void findSolutionWithoutFractions(Integer fp, Integer fq, Integer gp, Integer gq, RayC r, Integer n, Integer *resAlphaP, Integer *resAlphaQ, Integer *resBetaP, bool found);  // resBetaQ = resAlphaQ  
+      void findSolutionWithoutFractions(Integer fp, Integer fq, Integer gp, Integer gq, RayC r, Integer n, Integer *resAlphaP, Integer *resAlphaQ, Integer *resBetaP, bool found/*, int *ndiff, long double *timeTot*/);  // resBetaQ = resAlphaQ  
       
       // Corresponds to the algorithm of paper "Walking in the Farey Fan to compute the characteristics of  discrete straight line subsegment" (Isabelle Sivignon, DGCI 2013, Springer LNCS 7749)
       void shortFindSolution(Integer fp, Integer fq, Integer gp, Integer gq, RayC r, Integer n, Integer *resAlphaP, Integer *resAlphaQ, Integer *resBetaP, bool found);  // resBetaQ = resAlphaQ  

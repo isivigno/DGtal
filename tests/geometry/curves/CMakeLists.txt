@@ -1,10 +1,14 @@
 add_subdirectory(estimation)
 
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O5 -qstrict")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -qstrict")
+
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg") 
 
 SET(DGTAL_TESTS_SRC
-  # testArithDSS	
+   testArithDSS	
   # testArithDSS3d
   # testFreemanChain
   # testDecomposition  

@@ -78,7 +78,8 @@ bool testDSLSubsegment( unsigned int nbtries, Integer modb, Integer modx)
   // DSLSubseg DD(2,3,15,A,B);
 
   // std::cout << "aa=" << DD.aa << " bb=" << DD.bb << " Nu=" << DD.Nu << std::endl;
-  
+  int ndiff = 0;
+  long double tdiff = 0;
   Integer b;
   
   // std::cout << "# a b mu a1 b1 mu1 Ax Ay Bx By" << std::endl;
@@ -160,16 +161,16 @@ bool testDSLSubsegment( unsigned int nbtries, Integer modb, Integer modx)
 		      //trace.info() << "Points " << A << " " << B << std::endl;
 		      nb++;
 		      
-		      bool locRay;
+		      //bool locRay;
 		      
 		      // DSLSubsegment with Farey Fan
 		      timeBeginSubseg = clock();
-		      DSLSubseg DSLsub(a,b,mu,A,B,&locRay);
+		      DSLSubseg DSLsub(a,b,mu,A,B/*,&ndiff,&tdiff*/);
 		      timeEndSubseg = clock();
 		      timeTotalSubseg += ((double)timeEndSubseg-(double)timeBeginSubseg)/(((double)CLOCKS_PER_SEC)/1000);
 		      
 		      
-		      nbLocRay +=locRay;
+		      //nbLocRay +=locRay;
 		      //std::cout << "res = " << "(" << D.aa << "," << D.bb << "," << D.Nu << ")" << std::endl;
 		      
 		      PointDSL AA = D.lowestY( x1 );
@@ -200,7 +201,7 @@ bool testDSLSubsegment( unsigned int nbtries, Integer modb, Integer modx)
 		      bool aBool;
 		      
 		      timeBeginSubseg4 = clock();
-		      DSLSubseg D2(a,a+b,-mu,A2,B2,&aBool); // DSL algorithm works with the definition 0 <= ab -by + mu < b whereas reversedSmartDSS uses mu <= ab-by < mu + b => -mu is introduced in order to compare the results
+		      DSLSubseg D2(a,a+b,-mu,A2,B2/*,&aBool*/); // DSL algorithm works with the definition 0 <= ab -by + mu < b whereas reversedSmartDSS uses mu <= ab-by < mu + b => -mu is introduced in order to compare the results
 		      timeEndSubseg4 = clock();
 		      timeTotalSubseg4 += ((double)timeEndSubseg4-(double)timeBeginSubseg4)/(((double)CLOCKS_PER_SEC)/1000);
 		      
@@ -209,7 +210,10 @@ bool testDSLSubsegment( unsigned int nbtries, Integer modb, Integer modx)
 		      // std::cout << "Reversed  : a =" << S.a() << " b =" << S.b() << " Mu =" << S.mu() << std::endl;
 		      
 		      // Compare results of DSLsubseg4 and reversedSmartDSS
-		      assert(D2.aa==S.a() && (D2.bb-D2.aa)==S.b() && D2.Nu==-S.mu());
+		      if(D2.aa!=S.a() || (D2.bb-D2.aa)!=S.b() || D2.Nu!=-S.mu())
+		      	std::cout << "error wrt dsl4/reversed" << std::endl;
+		      
+		      // assert(D2.aa==S.a() && (D2.bb-D2.aa)==S.b() && D2.Nu==-S.mu());
 		      
 		      
 		      
@@ -220,7 +224,10 @@ bool testDSLSubsegment( unsigned int nbtries, Integer modb, Integer modx)
 		      timeEndCH = clock();
 		      timeTotalCH += ((double)timeEndCH-(double)timeBeginCH)/(((double)CLOCKS_PER_SEC)/1000);
 		      // Compare results of local convex hull and DSLSubsegment
-		      assert(DSLsub.aa == DCH.aa && DSLsub.bb == DCH.bb && DSLsub.Nu == DCH.Nu);
+
+		      if(DSLsub.aa != DCH.aa || DSLsub.bb != DCH.bb || DSLsub.Nu != DCH.Nu)
+		      	std::cout << "error dsl/dch" << std::endl;
+		      // assert(DSLsub.aa == DCH.aa && DSLsub.bb == DCH.bb && DSLsub.Nu == DCH.Nu);
 		      
 		      
 #ifdef CHECK_RES
@@ -233,22 +240,22 @@ bool testDSLSubsegment( unsigned int nbtries, Integer modb, Integer modx)
 			{}
 		      timeEndDSS = clock();
 		      
-                  //std::cout << "a =" << myDSS.getA() << " b =" << myDSS.getB() << " mu =" << myDSS.getMu() << std::endl << std::endl;
+		      //std::cout << "a =" << myDSS.getA() << " b =" << myDSS.getB() << " mu =" << myDSS.getMu() << std::endl << std::endl;
 		  
-		  		  
+		      
 		      if(DSLsub.aa != myDSS.getA() || DSLsub.bb != myDSS.getB() || DSLsub.Nu != - myDSS.getMu())
-		    {
-		      std::cout << "ERROR " << std::endl;
-		      std::cout << a << " " << b << " " << mu << " " << x1 << " " << x2 << std::endl;    
-		      std::cout << "aa=" << D.aa << " bb=" << D.bb << " Nu=" << D.Nu << std::endl;
-		      std::cout << "a =" << myDSS.getA() << " b =" << myDSS.getB() << " mu =" << myDSS.getMu() << std::endl << std::endl;
-		      assert(D.aa == myDSS.getA() && D.bb == myDSS.getB() && D.Nu == - myDSS.getMu());
-		    }
-		  
-		  timeTotalDSS += ((double)timeEndDSS-(double)timeBeginDSS)/((double)CLOCKS_PER_SEC)*1000;
+			{
+			  std::cout << "ERROR " << std::endl;
+			  // std::cout << a << " " << b << " " << mu << " " << x1 << " " << x2 << std::endl;    
+			  // std::cout << "aa=" << D.aa << " bb=" << D.bb << " Nu=" << D.Nu << std::endl;
+			  // std::cout << "a =" << myDSS.getA() << " b =" << myDSS.getB() << " mu =" << myDSS.getMu() << std::endl << std::endl;
+			  assert(D.aa == myDSS.getA() && D.bb == myDSS.getB() && D.Nu == - myDSS.getMu());
+			}
+		      
+		      timeTotalDSS += ((double)timeEndDSS-(double)timeBeginDSS)/((double)CLOCKS_PER_SEC)*1000;
 #endif CHECK_RES
-		  
-		  
+		      
+		      
 		    }
 		  
 		}
@@ -258,7 +265,8 @@ bool testDSLSubsegment( unsigned int nbtries, Integer modb, Integer modx)
     }
   
   
-  std::cout << nb  << " " << nbLocRay ;
+  //std::cout << " " << nb << " " << ndiff << " " << (long double) tdiff/(ndiff);
+  //std::cout << nb  << " " << nbLocRay ;
   if(nb!=0)
     {
       std::cout << " " << (long double) timeTotalSubseg/(nb);
@@ -287,24 +295,26 @@ int main( int argc, char** argv )
   typedef LightSternBrocot<Integer,DGtal::int32_t> LSB;
   typedef LSB::Fraction Fraction;
 
-  unsigned int nbtries = ( argc > 1 ) ? atoi( argv[ 1 ] ) :2000;
+  unsigned int nbtries = ( argc > 1 ) ? atoi( argv[ 1 ] ) :4000;
   
   
-  Integer modb = 1000000000;
-  
-  Integer c = 100;
+    
+  //Integer c = 1000;
 
   //for(Integer i = 10; i<=modb ;i*=10)
   //for(Integer i = 10; i<modb ;i+=i/3) 
-  Integer i = modb;
+  Integer i = 1000000000;
   // for(Integer modx = 10; modx <=  2*i;modx+=modx/3)
-  for(Integer modx = 10; modx <=  2*i;modx+=(modx/3>100?modx/3:c))
-    //Integer  modx = 1000;
+  //for(Integer modx = 10; modx <=  2*i;modx+=(modx/3>100?modx/3:c))
+  
+  std::cout << "# N n DSLSubseg ReversedSmart DSLSubseg4 localCH\n"; 
+  for(Integer modx = 10; modx <= 2.5*i;modx*=1.3)
+    //Integer  modx = 10000;
     {
-	std::cout << i << " " << modx << " ";
-	testDSLSubsegment<Integer,Fraction>( nbtries,  i, modx);
-	std::cout << std::endl;
-      }
+      std::cout << i << " " << modx << " ";
+      testDSLSubsegment<Integer,Fraction>( nbtries,  i, modx);
+      std::cout << std::endl;
+    }
   
   return 1;
 }

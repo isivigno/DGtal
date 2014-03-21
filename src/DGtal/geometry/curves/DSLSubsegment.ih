@@ -607,8 +607,9 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::convexHullApproxTwoPoints(Vector l,
 	      //std::cout << "alpha1 = " << alpha  << std::endl;
 	      if(alpha >= 1 || first)
 		{
-		  Aold = A;
+		  //Aold = A; // Aold = A + (alpha-1)*vv ?
 		  vv  = v;
+		  Aold = A + (alpha-1)*vv;
 		  vv *= alpha;
 		  A += vv;
 		  //test if A is on the slope
@@ -636,8 +637,9 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::convexHullApproxTwoPoints(Vector l,
 		//std::cout << " alpha2 = " << alpha  << std::endl;
 		if(alpha >= 1)
 		  {
-		    Bold = B;
+		    //Bold = B;
 		    vv = v;
+		    Bold = B + (alpha-1)*vv;
 		    vv *= alpha;
 		    B += vv;
 		    // test if B is on the slope
@@ -1064,6 +1066,41 @@ typename DGtal::DSLSubsegment<TInteger,TNumber>::Point DGtal::DSLSubsegment<TInt
   
   return Point(qq,pp);
 }
+
+
+// Compute the term following fp/fq in the Farey sequence of order n
+// knowing a fraction gp/gq that is the successor of fp/fq in the Farey
+// sequence of order m.
+// If m < n, then the result is in between fp/fq and gp/gq
+// Otherwise, the result is greater than gp/gq
+
+template <typename TInteger, typename TNumber>
+inline
+typename DGtal::DSLSubsegment<TInteger,TNumber>::Point DGtal::DSLSubsegment<TInteger,TNumber>::nextTermInFareySeries(Integer fp, Integer fq, Integer gp, Integer gq, Integer m, Integer n)
+{
+  Integer p;
+  Integer q;
+  Integer k;
+  
+  if(m<n)
+    {
+      k = floor((long double) (n-gq)/fq);
+      p = gp + k*fp;
+      q = gq + k*fq;
+    }
+  else
+    {
+      k = ceil((long double) (gq-n)/fq);
+      p = gp - k*fp;
+      q = gq - k*fq;
+      if(gq<fq)
+	std::cout << "ici" << fq << " " << gq << " " << p << " " << q << std::endl;
+      
+    }
+  
+  return Point(q,p);
+}
+
 
 
 
@@ -1690,24 +1727,26 @@ inline
 void DGtal::DSLSubsegment<TInteger,TNumber>::shortFindSolution(Integer fp, Integer fq, Integer gp, Integer gq, RayC r, Integer n, Integer *resAlphaP, Integer *resAlphaQ, Integer *resBetaP, bool found)  // resBetaQ = resAlphaQ  
 {
   Point inf, sup , tmpsup, tmpinf;
-  
+  IntegerComputer<Integer> ic;
+
   //Compute the lower edge of the facet
-  if(fq <= max(r.x,n-r.x))
+  if(fq <= ic.max(r.x,n-r.x))
     {
       inf[0] = fq;
       inf[1] = fp;
     }
   else
-    //convexHullHarPeled(Vector(fq,fp),0,max(r.x,n-r.x),&inf,&tmpsup);
-    convexHullApprox(Vector(fq,fp),0,max(r.x,n-r.x),&inf,&tmpsup);
+    //convexHullHarPeled(Vector(fq,fp),ic.max(r.x,n-r.x),&inf,&tmpsup);
+    convexHullApprox(Vector(fq,fp),0,ic.max(r.x,n-r.x),&inf,&tmpsup);
 
-  if(gq <= max(r.x,n-r.x))
+  if(gq <= ic.max(r.x,n-r.x))
     {
       sup[0] = gq;
       sup[1] = gp;
     }
   else
-    convexHullApprox(Vector(gq,gp),0,max(r.x,n-r.x),&tmpinf,&sup);
+    //convexHullHarPeled(Vector(gq,gp),ic.max(r.x,n-r.x),&tmpinf,&sup);
+    convexHullApprox(Vector(gq,gp),0,ic.max(r.x,n-r.x),&tmpinf,&sup);
   
   
   if(r.x-inf[0] < 0) // R is the ray of smallest slope in inf
@@ -1725,11 +1764,16 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::shortFindSolution(Integer fp, Integ
       }
     else  //the facet is upper triangular, 
       {
-	IntegerComputer<Integer> ic;
-	Integer g = ic.gcd(inf[1] + sup[1],inf[0]+sup[0]);
-	*resAlphaP = (inf[1]+sup[1])/g;
-	*resAlphaQ = (inf[0]+sup[0])/g;
+	*resAlphaP = inf[1]+sup[1];
+	*resAlphaQ = inf[0]+sup[0];
 	*resBetaP = -(*resAlphaP)*r.x+(*resAlphaQ)*r.y;
+	
+	// IntegerComputer<Integer> ic;
+	// Integer g = ic.gcd(inf[1] + sup[1],inf[0]+sup[0]);
+	// if(g!=1) std::cout << "diff ";
+	// *resAlphaP = (inf[1]+sup[1])/g;
+	// *resAlphaQ = (inf[0]+sup[0])/g;
+	// *resBetaP = -(*resAlphaP)*r.x+(*resAlphaQ)*r.y;
       }
   
 }
@@ -1739,15 +1783,18 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::shortFindSolution(Integer fp, Integ
 
 template <typename TInteger, typename TNumber>
 inline
-void DGtal::DSLSubsegment<TInteger,TNumber>::findSolutionWithoutFractions(Integer fp, Integer fq, Integer gp, Integer gq, RayC r, Integer n, Integer *resAlphaP, Integer *resAlphaQ, Integer *resBetaP, bool found)  // resBetaQ = resAlphaQ  
-    {
-     Point inf, sup;
+void DGtal::DSLSubsegment<TInteger,TNumber>::findSolutionWithoutFractions(Integer fp, Integer fq, Integer gp, Integer gq, RayC r, Integer n, Integer *resAlphaP, Integer *resAlphaQ, Integer *resBetaP, bool found/*, int *ndiff, long double *timeTot*/)  // resBetaQ = resAlphaQ  
+{
   
+  
+  Point inf, sup;
+     IntegerComputer<Integer> ic;
+
      if(found == false)
-       // r is not the highest ray on A
+       // r is not the highest ray on A -> A is multiple
        {
 	 
-	 if(gq <= max(r.x,n-r.x))
+	 if(gq <= ic.max(r.x,n-r.x))
 	   { // B is a multiple point, r is the lowest ray on B
 	     // (otherwise, there would be an intersection in [AB]
 	     // between the lowest ray on B and the ray above r on A. 
@@ -1759,15 +1806,20 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::findSolutionWithoutFractions(Intege
 	   }
 	 else
 	   { // compute the ray juste above r
-	     //std::cout << "Neither A (nor B) is the solution, A is the higher left vertex. Find the next Farey term on the ray sup." << std::endl;
+	     //std::cout << "Neither A (nor B) is the solution, A is the
+	     //highest left vertex. Find the next Farey term on the ray sup." << std::endl;
 	     RayC rr = raySup(fp,fq,r);
 	     // compute the fraction following f in the Farey Series
 	     // given by the slope of rr 
-	     if(max(rr.x,n-rr.x)>max(r.x,n-r.x))
+	     
+	     if(ic.max(rr.x,n-rr.x)>ic.max(r.x,n-r.x))
 	       {
+	    
 		 //std::cout << "here " << r.x << " " <<  r.y <<  std::endl;
 		 //Point next = nextTermInFareySequence(fp,fq,max(rr.x,n-rr.x));
-		 Point next = nextTermInFareySeriesEuclid(fp,fq,max(rr.x,n-rr.x));
+		 //Point next = nextTermInFareySeriesEuclid(fp,fq,ic.max(rr.x,n-rr.x));
+		 Point next = nextTermInFareySeries(fp,fq,gp,gq,n,ic.max(rr.x,n-rr.x));
+
 		 *resAlphaP = next[1];
 		 *resAlphaQ = next[0];
 		 //*resBetaP = (Integer)
@@ -1778,17 +1830,27 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::findSolutionWithoutFractions(Intege
 	       {
 		 
 		 //Point next = nextTermInFareySequence(fp,fq,max(r.x,n-r.x));
-		 Point next = nextTermInFareySeriesEuclid(fp,fq,max(r.x,n-r.x));
+		 
+		 //Point next = nextTermInFareySeriesEuclid(fp,fq,ic.max(r.x,n-r.x));
+		 Point next = nextTermInFareySeries(fp,fq,gp,gq,n,ic.max(r.x,n-r.x));
+		
+		      // convexHullHarPeled(Vector(fq,fp),ic.max(r.x,n-r.x),&inf,&sup);
+		      // if(next != sup)
+		      // 	std::cout << fp << " " << fq << " " << ic.max(r.x,n-r.x) << " " << next << " " << sup << std::endl;
+		  
+		 
+		  
 		 *resAlphaP = next[1];
 		 *resAlphaQ = next[0];
 		 *resBetaP = (Integer) -(*resAlphaP)*r.x+(*resAlphaQ)*r.y ;
 	       }
+			  
 	   }
        }
      else
        {
 	 //std::cout << "the ray is the upper ray" << std::endl;
-	 if(fq <= max(r.x,n-r.x))
+	 if(fq <= ic.max(r.x,n-r.x))
 	   { // A is a multiple point
 	     // A is the solution
 	     //std::cout << "A is a multiple point, A is the solution" << std::endl;
@@ -1797,7 +1859,7 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::findSolutionWithoutFractions(Intege
 	     *resBetaP = -fp*r.x +fq*r.y;
 	   }
 	 else
-	   if(gq <= max(r.x,n-r.x) && (r.x + gq) >n)
+	   if(gq <= ic.max(r.x,n-r.x) && (r.x + gq) >n)
 	     { // B is a multiple point and r is the lowest ray
 	       // B is the solution
 	       //std::cout << "B is a multiple point and r is the lowest ray: B is the solution" << std::endl; 
@@ -1811,7 +1873,7 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::findSolutionWithoutFractions(Intege
 	       // is a multiple point
 	       Integer h = -fp*r.x + r.y*fq +1;
 	       RayC rr = smartRayOfSmallestSlope(fp,fq,gp,gq,h);
-	       if(fq<=max(rr.x,n-rr.x))
+	          if(fq<=ic.max(rr.x,n-rr.x))
 		 {  //the vertex above A is a
 		   // multiple point -> A is the solution 
 		   //std::cout << "A is not multiple, but the vertex above A is: A is the solution" << std::endl;
@@ -1819,11 +1881,16 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::findSolutionWithoutFractions(Intege
 		   *resAlphaQ = fq;
 		   *resBetaP = -fp*r.x +fq*r.y;
 		 }
-	       else
-		 {
+		  else
+		    {
+		      
 		   //std::cout << "Neither A nor B is the solution " << std::endl;
 		   //convexHullApprox(Vector(fq,fp),0,max(r.x,n-r.x),&inf,&sup);
-		   convexHullHarPeled(Vector(fq,fp),max(r.x,n-r.x),&inf,&sup);
+		      convexHullHarPeled(Vector(fq,fp),ic.max(r.x,n-r.x),&inf,&sup);
+		      
+		      //Point ssup = nextTermInFareySeries(fp,fq,gp,gq,n,ic.max(r.x,n-r.x));
+		      //if(ssup !=sup)
+		      //std::cout << "diff" << fp << " " << fq << " " << gp << " " << gq << " " << sup << " " << ssup << std::endl; 
 		   // Let C be the point on r with abscissa equal to inf. 
 		   RayC rr = raySup(inf[1],inf[0],r); // ray above r passing through C
 		   if(rr.x == r.x) // r is the highest ray passing through C
@@ -1835,8 +1902,9 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::findSolutionWithoutFractions(Intege
 		   else
 		     { 
 		       //std::cout << "r is not the highest ray" << std::endl;
-		       if(max(rr.x,n-rr.x)>max(r.x,n-r.x))
+		       if(ic.max(rr.x,n-rr.x)>ic.max(r.x,n-r.x))
 			 {
+			   
 			   // the solution is given by the fraction following inf
 			   // in the Farey Series of order
 			   // max(x-inf.q(),n-(x.inf.q())), on the ray rr
@@ -1846,12 +1914,27 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::findSolutionWithoutFractions(Intege
 			   // order given by the ray rr, then the
 			   // mediant is the solution. Otherwise, sup is
 			   // the solution.  
-			   IntegerComputer<Integer> ic;
-			   Integer g = ic.gcd(inf[1] + sup[1],inf[0]+sup[0]);
-			   if((inf[0]+sup[0])/g <= max(rr.x,n-rr.x))
+			   
+			   
+			   // Point next = nextTermInFareySeries(inf[1],inf[0],sup[1],sup[0],ic.max(r.x,n-r.x),ic.max(rr.x,n-rr.x));
+			   
+			   // if(next[0] <= ic.max(rr.x,n-rr.x))
+			   //   {
+			   //     *resAlphaP = next[1];
+			   //     *resAlphaQ = next[0];
+			   //   }
+			   // else
+			   //   {
+			   //     *resAlphaP = sup[1];
+			   //     *resAlphaQ = sup[0];
+			   //   }
+			   // *resBetaP = -(*resAlphaP)*rr.x+(*resAlphaQ)*rr.y - 1;
+			   
+			   Point next = inf+sup;
+			   if(next[0] <= ic.max(rr.x,n-rr.x))
 			     {
-			       *resAlphaP = (inf[1]+sup[1])/g;
-			       *resAlphaQ = (inf[0]+sup[0])/g;
+			       *resAlphaP = next[1];
+			       *resAlphaQ = next[0];
 			     }
 			   else
 			     {
@@ -1859,6 +1942,21 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::findSolutionWithoutFractions(Intege
 			       *resAlphaQ = sup[0];
 			     }
 			   *resBetaP = -(*resAlphaP)*rr.x+(*resAlphaQ)*rr.y - 1;
+			   
+			   
+			   // Integer g = ic.gcd(inf[1] + sup[1],inf[0]+sup[0]);
+			   
+			   // if((inf[0]+sup[0])/g <= ic.max(rr.x,n-rr.x))
+		      // 	     {
+		      // 	       *resAlphaP = (inf[1]+sup[1])/g;
+		      // 	       *resAlphaQ = (inf[0]+sup[0])/g;
+		      // 	     }
+		      // 	   else
+		      // 	     {
+		      // 	       *resAlphaP = sup[1];
+		      // 	       *resAlphaQ = sup[0];
+		      // 	     }
+		      // 		   *resBetaP = -(*resAlphaP)*rr.x+(*resAlphaQ)*rr.y - 1;
 			 }
 		       else
 			 {
@@ -1868,21 +1966,22 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::findSolutionWithoutFractions(Intege
 			 }
 		     }
 		   
+		   		  
 		   
 		 }
 	       
 	     }
 	 
        }
-    }
+     }
 
 
 template <typename TInteger, typename TNumber>
 inline
-DGtal::DSLSubsegment<TInteger,TNumber>::DSLSubsegment(Number a, Number b, Number mu, Point A, Point B, bool *locRay)
+DGtal::DSLSubsegment<TInteger,TNumber>::DSLSubsegment(Number a, Number b, Number mu, Point A, Point B/*, int *ndiff, long double *timeTot*/)
 {
   Integer n = B[0] - A[0];
-  
+  clock_t timeBegin, timeEnd;
   //trace.info() << "DSLSubsegment" << std::endl;
  
   if(n >= 2*b)
@@ -1890,6 +1989,7 @@ DGtal::DSLSubsegment<TInteger,TNumber>::DSLSubsegment(Number a, Number b, Number
       aa = a;
       bb = b;
       Nu = mu;
+      //std::cout << "easy\t";
       //std::cout << "DSS parameters are DSL parameters." << std::endl;
       ////std::cout << " " << a << " " << b << " " << mu;
     }
@@ -1908,7 +2008,12 @@ DGtal::DSLSubsegment<TInteger,TNumber>::DSLSubsegment(Number a, Number b, Number
       if(b>n)
 	{
 	  //convexHullApprox(Vector(b,a),0,n,&inf,&sup);
+	  //(*ndiff)++;
+	  //timeBegin = clock();
+	  
 	  convexHullHarPeled(Vector(b,a),n,&inf,&sup);
+	  //timeEnd =clock();
+	  //(*timeTot) += ((double)timeEnd-(double)timeBegin)/(((double)CLOCKS_PER_SEC)/1000);
 	  fp = inf[1];
 	  fq = inf[0];
 	  gp = sup[1];
@@ -1917,12 +2022,27 @@ DGtal::DSLSubsegment<TInteger,TNumber>::DSLSubsegment(Number a, Number b, Number
 	  } 
       else
       	{
-      	  Point next = nextTermInFareySeriesEuclid(a,b,n);
-      	  fp = a;
+	  Point supL, infL;
+	  
+	  convexHullHarPeled(Vector(b,a),b-1,&infL,&supL);
+	 
+	  Point supR = Point(b,a)+Point(b,a)-infL;
+	  Integer rL = supL[0]*a - supL[1]*b;
+	  Integer rR = supR[0]*a - supR[1]*b;
+	  Point next;
+	  if(rL<rR || supR[0] > n)
+	    next = supL;
+	  else
+	    next = supR;
+	  
+	  //Point next = nextTermInFareySeriesEuclid(a,b,n);
+      	  // std::cout << n << " " << a << " " << b << " " << "next " << next << std::endl << std::endl; 
+	  fp = a;
       	  fq = b;
       	  gp = next[1];
       	  gq = next[0];
-      	}	
+	  
+	}	
       
       
 #ifdef DEBUG
@@ -1963,18 +2083,18 @@ DGtal::DSLSubsegment<TInteger,TNumber>::DSLSubsegment(Number a, Number b, Number
       if(found)
 	{
 	  r = smartRayOfSmallestSlope(fp,fq,gp,gq,h);
-	  *locRay = false;
+	  
 	}
       else
 	{
 	  r = localizeRay(fp,fq,gp,gq,h,a,b,mu,n);      
-	  *locRay = true;
+	  
 	}
       //trace.info() << "Ray =" << r.x << " " << r.y << std::endl;
       
       Integer resAlphaP=0, resAlphaQ=0, resBetaP=0;
-      findSolutionWithoutFractions(fp,fq, gp, gq, r, n, &resAlphaP, &resAlphaQ, &resBetaP, found);
-      //shortFindSolution(fp,fq, gp, gq, r, n, &resAlphaP, &resAlphaQ, &resBetaP, found);
+      //findSolutionWithoutFractions(fp,fq, gp, gq, r, n, &resAlphaP, &resAlphaQ, &resBetaP, found/*, ndiff, timeTot*/);
+      shortFindSolution(fp,fq, gp, gq, r, n, &resAlphaP, &resAlphaQ, &resBetaP, found);
       
       
       aa = resAlphaP;
@@ -2138,7 +2258,7 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::filterUpperCH(Vector l, Number mu, 
 	if(v1[0]*v2[1]-v1[1]*v2[0] ==1) // if the vectors are unimodular
 	  {
 	    if(v1[0]==0 || v1[1]==0)
-	      g = max((Integer) 1,max(v1[0],v1[1]));
+	      g = ic.max((Integer) 1,ic.max(v1[0],v1[1]));
 	    else
 	      g = ic.gcd(v1[0],v1[1]);
 	    std::cout << v1 << " " << g << std::endl;
@@ -2148,14 +2268,14 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::filterUpperCH(Vector l, Number mu, 
 	{
 	  Vector v3 = sup[2] - sup[1];
 	  if(v3[0]==0 || v3[1]==0)
-	    g = max((Integer) 1,max(v3[0],v3[1]));
+	    g = ic.max((Integer) 1,ic.max(v3[0],v3[1]));
 	  else
 	    g = ic.gcd(v3[0],v3[1]);
 	  sup[2] = sup[1] + (v3/g);
 	  
 	  
 	  if(v2[0]==0 || v2[1]==0)
-	    g = max((Integer) 1,max(v2[0],v2[1]));
+	    g = ic.max((Integer) 1,ic.max(v2[0],v2[1]));
 	  else
 	    g = ic.gcd(v2[0],v2[1]);
 	  std::cout << "v2 = " <<  v2 << " " << g << std::endl;
@@ -2173,7 +2293,7 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::filterUpperCH(Vector l, Number mu, 
       if(v1[0]*v2[1]-v1[1]*v2[0] ==1) // if the vectors are unimodular
 	{
 	  if(v1[0]==0 || v1[1]==0)
-	    g = max((Integer) 1,max(v1[0],v1[1]));
+	    g = ic.max((Integer) 1,ic.max(v1[0],v1[1]));
 	  else
 	    g = ic.gcd(v1[0],v1[1]);
 	  std::cout << v1 << " " << g << std::endl;
@@ -2183,13 +2303,13 @@ void DGtal::DSLSubsegment<TInteger,TNumber>::filterUpperCH(Vector l, Number mu, 
 	{
 	  Vector v3 = sup[3] - sup[2];
 	  if(v3[0]==0 || v3[1]==0)
-	    g = max((Integer) 1,max(v3[0],v3[1]));
+	    g = ic.max((Integer) 1,ic.max(v3[0],v3[1]));
 	  else 
 	    g = ic.gcd(v3[0],v3[1]);
 	  sup[3] = sup[2] + (v3/g);
 	  
 	  if(v2[0]==0 || v2[1]==0)
-	    g = max((Integer) 1,max(v2[0],v2[1]));
+	    g = ic.max((Integer) 1,ic.max(v2[0],v2[1]));
 	  else
 	    g = ic.gcd(v2[0],v2[1]);
 	  sup[2] = sup[1]+(g-1)*(v2/g);
@@ -2320,6 +2440,18 @@ DGtal::DSLSubsegment<TInteger,TNumber>::DSLSubsegment(Number a, Number b, Number
   Integer n = B[0] - A[0];
   
   
+  if(n >= 2*b)
+    {
+      aa = a;
+      bb = b;
+      Nu = mu;
+      //std::cout << "DSS parameters are DSL parameters." << std::endl;
+      ////std::cout << " " << a << " " << b << " " << mu;
+    }
+  else
+    {
+
+
   Integer rA = a*A[0]-b*A[1] + mu;
   Integer rB = a*B[0]-b*B[1] + mu;
   
@@ -2381,13 +2513,18 @@ DGtal::DSLSubsegment<TInteger,TNumber>::DSLSubsegment(Number a, Number b, Number
 	  {
 	    btmp = inf[i+1][0] - inf[i][0];
 	    atmp = inf[i+1][1] - inf[i][1];
-	    Integer g;
-	    if(atmp==0 || btmp==0)
-	      g = max((Integer) 1,max(atmp,btmp));
-	    else
-	      g = ic.gcd(btmp,atmp);
-	    btmp = btmp/g;
-	    atmp = atmp/g;
+	    // Integer g;
+	    // if(atmp==0 || btmp==0)
+	    //   g = ic.max((Integer) 1,ic.max(atmp,btmp));
+	    // else
+	      
+	    // 	g = ic.gcd(btmp,atmp);
+	  
+	    // if(g !=1)
+	    // 	  std::cout << "diff" << std::endl;
+	    
+	    // btmp = btmp/g;
+	    // atmp = atmp/g;
 	    if(btmp > bb)
 	      {
 		bb =btmp;
@@ -2400,13 +2537,17 @@ DGtal::DSLSubsegment<TInteger,TNumber>::DSLSubsegment(Number a, Number b, Number
 	  {
 	    btmp = sup[i+1][0] - sup[i][0];
 	    atmp = sup[i+1][1] - sup[i][1];
-	    Integer g;
-	    if(atmp==0 || btmp==0)
-	      g = max((Integer) 1,max(atmp,btmp));
-	    else
-	      g = ic.gcd(btmp,atmp);
-	    btmp = btmp/g;
-	    atmp = atmp/g;
+	    // Integer g;
+	    // if(atmp==0 || btmp==0)
+	    //   g = ic.max((Integer) 1,ic.max(atmp,btmp));
+	    // else
+	    //   g = ic.gcd(btmp,atmp);
+	  
+	    //   if(g !=1)
+	    // 	  std::cout << "diff" << std::endl;
+	  
+	    // btmp = btmp/g;
+	    // atmp = atmp/g;
 	    if(btmp > bb)
 	      {
 		bb =btmp;
@@ -2423,8 +2564,8 @@ DGtal::DSLSubsegment<TInteger,TNumber>::DSLSubsegment(Number a, Number b, Number
 	//	std::cout << "a = " << aa << " b = " << bb << " mu = " << Nu << std::endl << std::endl;
 	
 	
-	
-	
+    }
+  
 }
 
 
