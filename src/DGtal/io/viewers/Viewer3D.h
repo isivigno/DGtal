@@ -56,6 +56,8 @@
 #include <QGLWidget>
 #include <QKeyEvent>
 
+#include <QGLViewer/manipulatedFrame.h> dans Viewer3D.h
+
 #include "DGtal/base/Common.h"
 #include "DGtal/kernel/SpaceND.h"
 #include "DGtal/topology/KhalimskySpaceND.h"
