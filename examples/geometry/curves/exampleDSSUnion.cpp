@@ -451,29 +451,32 @@ NaiveDSS8<Integer> fastUnionOfDSSs(NaiveDSS8<Integer> S1, NaiveDSS8<Integer> S2)
       // critical support points 
       bb = Ul[0]-Uf[0];
       aa = Ul[1]-Uf[1];
-      muu = -a*Uf[0]+b*Uf[1];
+      muu = -aa*Uf[0]+bb*Uf[1];
       // compute the remainders of the possible upper critical support points
       // with respect to these characteristics
-      Integer r3 = a*Lf[0]-b*Lf[1]+mu;
-      Integer r4 = a*Ll[0]-b*Ll[1]+mu;
+      Integer r3 = aa*Lf[0]-bb*Lf[1]+muu;
+      Integer r4 = aa*Ll[0]-bb*Ll[1]+muu;
       
       // if Lok and Uok are both true, then we have the four critical
       // support points
       bool Lok = (r1 >= 0 && r1<b && r2>=0 && r2<b);
       bool Uok = (r3 >= 0 && r3<bb && r4>=0 && r4<bb);
       
+      //std::cout << Lf << Ll << Uf << Ul << std::endl;
+
       // Otherwise, Uf, Ul, Lf and Ll are not all critical support
       // points. We use Property 6 to determine the exact critical
       // support points
       
       if(!(Lok && Uok))
 	{
-	  Integer d = determinant(Ul-Uf, Ll-Lf);
+	  // Integer d = determinant(Ul-Uf, Ll-Lf);
 	  if(Uok) // both upper leaning points are critical
 	    {
 	      asol = aa;
 	      bsol = bb;
-	      if(d>0)
+	      if(r3>r4)
+		//if(d>0)
 		Ll = Lf;
 	      else
 		Lf = Ll;
@@ -483,7 +486,8 @@ NaiveDSS8<Integer> fastUnionOfDSSs(NaiveDSS8<Integer> S1, NaiveDSS8<Integer> S2)
 	      {
 		asol = a;
 		bsol = b;
-		if(d>0)
+		if(r1<r2)
+		  //if(d>0)
 		  Ul = Uf;
 		else
 		  Uf = Ul;
@@ -911,6 +915,8 @@ int main( int argc, char** argv )
   int x,b;
   //for(b = 20; b<5000;b=b*2)
     
+  //testUnionOfConnectedDSSs(12,2,5);
+  
   b = 300;
   for(x = 10;x<2*b;x=x*1.2)
     testUnionOfConnectedDSSs(b,x,200);
