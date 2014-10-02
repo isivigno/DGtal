@@ -12,7 +12,9 @@ SET(DGTAL_EXAMPLES_SRC
   exampleDSLSubsegment
   exampleArithmeticalDSL
   exampleUnionOfConnectedDSSs
+  exampleDSSUnion
 )
+
 
 
 FOREACH(FILE ${DGTAL_EXAMPLES_SRC})
