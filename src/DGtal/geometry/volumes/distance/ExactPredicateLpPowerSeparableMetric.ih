@@ -43,7 +43,7 @@ DGtal::ExactPredicateLpPowerSeparableMetric<T,p,P>::ExactPredicateLpPowerSeparab
 {
 }
 //------------------------------------------------------------------------------
-template <typename T, DGtal::uint32_t p,  typename P>
+Template <typename T, DGtal::uint32_t p,  typename P>
 inline
 DGtal::ExactPredicateLpPowerSeparableMetric<T,p,P>::~ExactPredicateLpPowerSeparableMetric()
 {
@@ -73,7 +73,7 @@ DGtal::ExactPredicateLpPowerSeparableMetric<T,p,P>::powerDistance (const Point &
   return exactDistanceRepresentation(aP,aQ) - aW;
 }
 //------------------------------------------------------------------------------
-template <typename T, DGtal::uint32_t p,  typename P>
+Template <typename T, DGtal::uint32_t p,  typename P>
 inline
 DGtal::Closest
 DGtal::ExactPredicateLpPowerSeparableMetric<T,p,P>::closestPower (const Point &origin, 

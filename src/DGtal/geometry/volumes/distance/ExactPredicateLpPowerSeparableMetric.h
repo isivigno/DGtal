@@ -164,7 +164,7 @@ namespace DGtal
      * @param wF the first point weight
      * @param second the second point
      * @param wS the second point weight
-     $
+     *
      * @return a Closest enum: FIRST, SECOND or BOTH.
      */
     DGtal::Closest closestPower(const Point &origin,

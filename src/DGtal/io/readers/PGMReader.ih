@@ -109,6 +109,7 @@ DGtal::PGMReader<TImageContainer, TFunctor>::importPGM(const std::string & aFile
   typename TImageContainer::Domain domain(firstPoint,lastPoint);
   TImageContainer image(domain);
 
+
   getline( infile, str );
   std::istringstream str2_in( str );
   unsigned int max_value;
@@ -164,6 +165,7 @@ DGtal::PGMReader<TImageContainer, TFunctor>::importPGM(const std::string & aFile
       throw dgtalio;
     }
   infile >> std::skipws;
+
   return  image;
 }
 

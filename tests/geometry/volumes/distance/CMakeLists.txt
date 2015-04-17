@@ -13,7 +13,9 @@ SET(DGTAL_TESTS_SRC
   testChamferDT
   testChamferVoro
   testDigitalMetricAdapter
-  )
+  debugPGMReader
+  testCWDistanceTransform
+ )	
 
 
 FOREACH(FILE ${DGTAL_TESTS_SRC})
