@@ -1,0 +1,282 @@
+/**
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ **/
+
+/**
+ * @file PredicateCWSeparableMetric.ih
+ * @author Isabelle Sivignon (\c isabelle.sivignon@gipsa-lab.grenoble-inp.fr )
+ * gipsa-lab Grenoble Images Parole Signal Automatique (CNRS, UMR 5216), CNRS, France
+ *
+ * @date 2015/04/17
+ *
+ * Implementation of inline methods defined in PredicateCWSeparableMetric.h
+ *
+ * This file is part of the DGtal library.
+ */
+
+
+//////////////////////////////////////////////////////////////////////////////
+#include <cstdlib>
+//////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// IMPLEMENTATION of inline methods.
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// ----------------------- Standard services ------------------------------
+template <typename T, DGtal::uint32_t p,  typename P>
+inline
+DGtal::PredicateLpPowerSeparableMetric<T,p,P>::PredicateLpPowerSeparableMetric()
+{
+}
+
+//------------------------------------------------------------------------------
+template <typename T, typename P>
+inline
+DGtal::PredicateCWSeparableMetric<T,P>::~PredicateCWSeparableMetric()
+{
+}
+//------------------------------------------------------------------------------
+template <typename T, typename P>
+inline
+typename DGtal::PredicateCWSeparableMetric<T,P>::Promoted
+DGtal::PredicateCWSeparableMetric<T,P>::DistanceRepresentation (const Point &aP,
+										 const Point &aQ) const
+{
+  // L2 distance
+  Promoted res= NumberTraits<Promoted>::ZERO;
+  for(DGtal::Dimension d=0; d< Point::dimension ; ++d)
+    {
+      res += functions::power(static_cast<Promoted>(abs(aP[d]-aQ[d])), 2);
+    }
+  return sqrt(res);
+}
+//------------------------------------------------------------------------------
+template <typename T, typename P>
+inline
+typename DGtal::PredicateCWSeparableMetric<T,P>::Weight
+DGtal::PredicateCWSeparableMetric<T,P>::CWDistance (const Point &aP,
+							 const Point &aQ,
+							 const Weight &aW1,
+							 const Weight &aW2
+							 ) const
+{
+  ASSERT(aW2 > aW1);
+  return (DistanceRepresentation(aP,aQ) - aW1)/(aW2-aW1);
+}
+//------------------------------------------------------------------------------
+
+Template <typename T, DGtal::uint32_t p,  typename P>
+inline
+DGtal::Closest
+DGtal::PredicateCWSeparableMetric<T,p,P>::closestCW (const Point &origin, 
+							       const Point &first,  
+							       const Weight &w1f, const Weight &w2f,
+							       const Point &second,
+							       const Weight &w1s, const Weight &w2s) const
+{
+  Promoted a,b;
+      
+  a = CWDistance(origin, first, w1f, w2f);
+  b = CWDistance(origin, second, w1s, w2s);
+  
+  if (a<b)
+    return ClosestFIRST;
+  else
+    if (a>b)
+      return ClosestSECOND;
+    else
+      return ClosestBOTH;
+}
+
+
+
+  ASSERT(aW2 > aW1);
+  return (exactDistanceRepresentation(aP,aQ) - aW1)/(aW2-aW1)
+ 
+//------------------------------------------------------------------------------
+  template <typename T,  typename P>
+inline
+typename DGtal::PredicateCWSeparableMetric<T,P>::Abscissa 
+  DGtal::PredicateCWSeparableMetric<T,P>::binarySearchHidden(const Abscissa &udim, 
+							     const Abscissa &vdim,
+							     const Promoted &nu,
+							     const Weight &w1u,
+							     const Weight &w2u,
+							     const Promoted &nv,
+							     const Weight &w1v,
+							     const Weight &w2v,
+							     const Abscissa &lower,
+							     const Abscissa &upper) const
+  {   
+    ASSERT(  (nu +  functions::power( static_cast<Promoted>(abs( udim - lower)), 2)) <
+           (nv +  functions::power( static_cast<Promoted>(abs( vdim - lower)), 2)));
+  
+  //Recurrence stop 
+  if ( (upper - lower) <= NumberTraits<Abscissa>::ONE)
+    {
+      //testing upper
+      Promoted nuUpdated = nu +  functions::power( static_cast<Promoted>(abs( udim - upper )), 2);
+      Promoted nvUpdated = nv +  functions::power( static_cast<Promoted>(abs( vdim - upper )), 2);
+      nuUpdated = (sqrt(nuUpdated) - w1u)/(w2u-w1u);
+      nvUpdated = (sqrt(nvUpdated) - w1v)/(w2v-w1v);
+      if (nuUpdated < nvUpdated)
+        return upper;
+      else
+        return lower;
+    }
+  
+  Abscissa mid = (lower + upper)/2;
+  Promoted nuUpdated = nu +  functions::power( static_cast<Promoted>(abs( udim - mid )), 2);
+  Promoted nvUpdated = nv +  functions::power( static_cast<Promoted>(abs( vdim - mid )), 2);
+  
+  nuUpdated = (sqrt(nuUpdated) - w1u)/(w2u-w1u);
+  nvUpdated = (sqrt(nvUpdated) - w1v)/(w2v-w1v);
+  //Recursive call
+  if ( nuUpdated < nvUpdated)
+    return binarySearchHidden(udim,vdim,nu,nv,mid,upper);
+  else
+    return binarySearchHidden(udim,vdim,nu,nv,lower,mid);
+}
+
+
+//------------------------------------------------------------------------------
+template <typename T,  typename P>
+inline
+bool 
+DGtal::PredicateCWSeparableMetric<T,P>::hiddenByPower(const Point &u, 
+								  const Weight &w1u,
+								  const Weight &w2u,
+								  const Point &v,
+								  const Weight &w1v,
+								  const Weight &w2v,
+								  const Point &w, 
+								  const Weight &w1w,
+								  const Weight &w2w,
+								  const Point &startingPoint,
+								  const Point &endPoint,
+								  const typename Point::UnsignedComponent dim) const
+{
+  //Interval bound for the binary search
+  Abscissa lower = startingPoint[dim];
+  Abscissa upper = endPoint[dim];
+  
+  //Partial norm computation
+  // (sum_{i!=dim}  |u_i-v_i|^p
+  Promoted nu = 0;
+  Promoted nv = 0;
+  Promoted nw = 0;
+  // Promoted nu = -wu;
+  // Promoted nv = -wv;
+  // Promoted nw = -ww;
+  for(DGtal::Dimension i  = 0 ; i < Point::dimension ; i++)
+    if (i != dim)
+      {
+        nu += functions::power ( static_cast<Promoted>(abs(u[i] - startingPoint[i])), 2);
+        nv += functions::power ( static_cast<Promoted>(abs(v[i] - startingPoint[i])), 2);
+        nw += functions::power ( static_cast<Promoted>(abs(w[i] - startingPoint[i])), 2);
+      }
+
+  //Abscissa of voronoi edges
+  Abscissa uv,vw;
+  Promoted dv,dw,du,ddv,ddw;
+   
+  //checking distances to lower bound
+  
+  for(DGtal::Dimension i  = 0 ; i <= Point::dimension ; i++)
+    if (i != dim)
+      {
+        du += functions::power ( static_cast<Promoted>(abs(u[i] - startingPoint[i])), 2);
+        dv += functions::power ( static_cast<Promoted>(abs(v[i] - startingPoint[i])), 2);
+        dw += functions::power ( static_cast<Promoted>(abs(w[i] - startingPoint[i])), 2);
+      }
+  // Compute "true" distance defore any comparison
+  du = (sqrt(du)-w1u)/(w2u-w1u);
+  dv = (sqrt(dv)-w1v)/(w2v-w1v);
+  dw = (sqrt(dw)-w1w)/(w2w-w1w);
+  
+
+  //Precondition of binarySearchHidden is true
+  if (du < dv )
+    {
+      uv = binarySearchHidden(u[dim],v[dim],nu,w1u,w2u,nv,w1v,w2v,lower,upper);
+      if (dv < dw)
+        {
+          vw = binarySearchHidden(v[dim],w[dim],nv,w1v,w2v,nw,w1w,w2w,lower,upper); //precondition
+          return (uv > vw);
+        }
+
+      if (dw > dv)
+        return true; 
+      else
+        {
+          //check if uv + 1 is stricly in W
+       
+          //first, optimisation
+          if (uv == upper) return true;
+          
+          //distances at uv+1
+          ddv = nv + functions::power( static_cast<Promoted>(abs( v[dim] - uv -1)), 2);
+          ddw = nw + functions::power( static_cast<Promoted>(abs( w[dim] - uv -1)), 2);
+          ddv = (sqrt(ddv)-w1v)/(w2v-w1v);
+	  ddw = (sqrt(ddw)-w1w)/(w2w-w1w);
+	  if (ddw < ddv)
+            return true;
+          else
+            return false;
+        }
+    }
+  else  // du >= dv
+    {
+      if (dv <= dw)
+        return false;
+      else
+        return true;
+    }
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Interface - public :
+
+/**
+ * Writes/Displays the object on an output stream.
+ * @param out the output stream where the object is written.
+ */
+template <typename T>
+inline
+void
+DGtal::PredicateCWSeparableMetric<T>::selfDisplay ( std::ostream & out ) const
+{
+  out << "[PredicateCWSeparableMetric]";
+}
+
+/**
+ * Checks the validity/consistency of the object.
+ * @return 'true' if the object is valid, 'false' otherwise.
+ */
+template <typename T>
+inline
+bool
+DGtal::PredicateCWSeparableMetric<T>::isValid() const
+{
+    return true;
+}
+
+
+
+
