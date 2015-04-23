@@ -95,7 +95,7 @@ namespace DGtal
              typename TImageContainer = 
              ImageContainerBySTLVector<HyperRectDomain<typename TWeightImage::Domain::Space>,
                                        typename TWeightImage::Domain::Space::Vector> >
-  class PowerMap
+    class PowerMap
   {
 
   public:
@@ -251,7 +251,7 @@ namespace DGtal
      */    
     void computeOtherSteps(const Dimension dim) const;
     /** 
-     * Given  a voronoi map valid at dimension @a dim-1, this method
+     * Given  a power map valid at dimension @a dim-1, this method
      * updates the map to make it consistent at dimension @a dim along
      * the 1D span starting at @a row along the dimension @a
      * dim.
@@ -262,7 +262,7 @@ namespace DGtal
     void computeOtherStep1D (const Point &row, 
 			     const Size dim) const;
     
-    // ------------------- protected methods ------------------------
+    // ------------------- Protected methods ------------------------
   protected:
 
     /** 
@@ -298,7 +298,7 @@ namespace DGtal
     const WeightImage * myWeightImagePtr;
     
  
-  }; // end of class PowerMap
+  }; // End of class PowerMap
 
  /**
    * Overloads 'operator<<' for displaying objects of class 'ExactPredicateLpSeparableMetric'.

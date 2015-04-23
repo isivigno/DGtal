@@ -42,6 +42,11 @@
 // Inclusions
 #include <iostream>
 #include "DGtal/base/Common.h"
+#include <cmath>
+#include "DGtal/math/BasicMathFunctions.h"
+#include "DGtal/kernel/CInteger.h"
+#include "DGtal/kernel/CSpace.h"
+#include "DGtal/kernel/CInteger.h"
 //////////////////////////////////////////////////////////////////////////////
 
 namespace DGtal
@@ -53,10 +58,10 @@ namespace DGtal
    * Description of template class 'PredicateCWSeparableMetric' <p>
    * \brief Aim:
    */
-  template <typename TSpace,
-            typename TPromoted=DGtal::int64_t>
-  class PredicateCWSeparableMetric
-  {
+  template <typename TSpace, typename TWeight,
+    typename TPromoted=DGtal::int64_t>
+    class PredicateCWSeparableMetric
+    {
     // ----------------------- Standard services ------------------------------
   public:
   
@@ -72,11 +77,16 @@ namespace DGtal
   ///Type for vectors
   typedef typename Space::Vector Vector;
   
-  ///Type for internal distance values
+  ///Type for internal (integer) distance values
   typedef TPromoted Promoted;
   
-  ///Type for internal distance values
-  typedef TPromoted Weight;
+  // Type of the weights
+  //typedef TPromoted Weight;
+  typedef TWeight Weight;
+  
+  // Type for "real" distance values
+  typedef long double Distance;
+
   BOOST_CONCEPT_ASSERT(( concepts::CInteger<Promoted> ));
   
   ///Type for Value (alias)
@@ -104,10 +114,7 @@ namespace DGtal
    */
   PredicateCWSeparableMetric & operator= ( const PredicateCWSeparableMetric & /*other*/ ) { return *this;}
   
-  /**
-   * Destructor.
-   */
-  ~PredicateCWSeparableMetric();
+
   
     // ----------------------- Interface --------------------------------------
   public:
@@ -116,42 +123,38 @@ namespace DGtal
   
   
   /**
-   *  Return the power distance of a point @a aPoint and a weighted
+   *  Return the CW distance of a point @a aPoint and a weighted
    *  point (@a aQ,@a aWq)
    *
    * @param aPoint a point
    * @param aQ a second point
-   * @param aW1q first weight of the second point
-   * @param aW2q second weight of the second point (aW1q <= aW2q)
+   * @param aWq weights of the second point (a vector of two numbers such that aWq[0] <= aWq[1])
    *
-   * @return the power distance between aPoint and (Q,WQ)
+   * @return the CW distance between aPoint and (Q,WQ)
    */
-  Weight CWDistance(const Point &aPoint,
+  Distance CWDistance(const Point &aPoint,
 		    const Point &aQ,
-		    const Weight &aW1q, const Weight &aW2q) const;
+		    const Weight &aWq) const;
   
   
-  
-    /**
-     * Given an origin and two points, this method decides which one
-     * is closest to the origin. This method should be faster than
-     * comparing distance values.
-     *
-     * @param origin the origin
-     * @param first  the first point
-     * @param w1F the first point first weight
-     * @param w2F the first point second weight
-     * @param second the second point
-     * @param w1S the second point first weight
-     * @param w2S the second point second weight
-     *
-     * @return a Closest enum: FIRST, SECOND or BOTH.
+  /**
+   * Given an origin and two points, this method decides which one
+   * is closest to the origin. This method should be faster than
+   * comparing distance values.
+   *
+   * @param origin the origin
+   * @param first  the first point
+   * @param wF the first point weights
+   * @param second the second point
+   * @param wS the second point weights
+   *
+   * @return a Closest enum: FIRST, SECOND or BOTH.
      */
-  DGtal::Closest closestPower(const Point &origin,
+  DGtal::Closest closestCW(const Point &origin,
 			      const Point &first,
-			      const Weight &w1F, const Weight &w2F,
+			      const Weight &wF,
 			      const Point &second,
-			      const Weight &w1S, const Weight &w2S) const;
+			      const Weight &wS) const;
   
   
   // ----------------------- CPowerSeparableMetric --------------------------------------
@@ -169,36 +172,30 @@ namespace DGtal
      * @pre u,v and w must be such that u[dim] < v[dim] < w[dim]
      *
      * @param u a site
-     * @param w1u a weight
-     * @param w2u a weight
+     * @param wu weights
      * @param v a site
-     * @param w1v a weight
-     * @param w2v a weight
+     * @param wv weights
      * @param w a site
-     * @param w1w a weight
-     * @param w2w a weight
+     * @param ww a weights
      * @param startingPoint starting point of the segment
      * @param endPoint end point of the segment
      * @param dim direction of the straight line
      *
      * @return true if (u,w) hides v.
      */
-    bool hiddenByPower(const Point &u,
-		       const Weight &w1u,
-		       const Weight &w2u,
-		       const Point &v,
-		       const Weight &w1v,
-		       const Weight &w2v,   
-		       const Point &w,
-		       const Weight &w1w,
-		       const Weight &w2w,
-		       const Point &startingPoint,
-		       const Point &endPoint,
-		       const typename Point::UnsignedComponent dim) const;
+    bool hiddenByCW(const Point &u,
+		    const Weight &wu,
+		    const Point &v,
+		    const Weight &wv,
+		    const Point &w,
+		    const Weight &ww,
+		    const Point &startingPoint,
+		    const Point &endPoint,
+		    const typename Point::UnsignedComponent dim) const;
   
- 
+  
 
-
+  
 
   /**
    * Writes/Displays the object on an output stream.
@@ -214,34 +211,73 @@ namespace DGtal
   
   // ------------------------- Protected Datas ------------------------------
   private:
+  
+  /**
+   * Compute the Lp distance without the computation of the power
+   * 1/p. I.e. only @f$ \sum |p_i- q_i|^p@f$ is given.
+   *
+   * @param aP a first point
+   * @param aQ a second point
+   *
+   * @return the power p of the l_p distance between aP and aQ.
+   */
+  Promoted DistanceRepresentation(const Point &aP, const Point &aQ) const;
+  
+  /**
+   * Perform a binary search on the interval [lower,upper] to
+   * detect the mid-point between u and v according to the weighted l_p
+   * distance.
+   *
+   * @param udim coordinate of u along dimension dim
+   * @param vdim coordinate of v along dimension dim
+   * @param nu  partial distance of u (sum of |xj-x_i|^p) discarding
+   * the term along the dimension dim
+   * @param nv partial distance of v (sum of |xj-x_i|^p) discarding
+   * the term along the dimension dim
+   * @param lower interval lower bound
+   * @param upper interval upper bound
+   *
+   * @return the Voronoi boundary point coordinates along dimension dim.
+   */
+  Abscissa binarySearchHidden(const Abscissa &udim,
+			      const Abscissa &vdim,
+			      const Promoted &nu,
+			      const Weight &wu,
+			      const Promoted &nv,
+			      const Weight &wv,
+			      const Abscissa &lower,
+			      const Abscissa &upper) const;
+  
+  
+
   // ------------------------- Private Datas --------------------------------
   private:
   
   // ------------------------- Hidden services ------------------------------
-  protected:
+  /* protected: */
   
-  /**
-   * Constructor.
-   * Forbidden by default (protected to avoid g++ warnings).
-   */
-  PredicateCWSeparableMetric();
+  /* /\** */
+  /*  * Constructor. */
+  /*  * Forbidden by default (protected to avoid g++ warnings). */
+  /*  *\/ */
+  /* PredicateCWSeparableMetric(); */
   
-  private:
+  /* private: */
   
-  /**
-   * Copy constructor.
-   * @param other the object to clone.
-   * Forbidden by default.
-   */
-  PredicateCWSeparableMetric ( const PredicateCWSeparableMetric & other );
+  /* /\** */
+  /*  * Copy constructor. */
+  /*  * @param other the object to clone. */
+  /*  * Forbidden by default. */
+  /*  *\/ */
+  /* PredicateCWSeparableMetric ( const PredicateCWSeparableMetric & other ); */
   
-  /**
-   * Assignment.
-   * @param other the object to copy.
-   * @return a reference on 'this'.
-   * Forbidden by default.
-   */
-  PredicateCWSeparableMetric & operator= ( const PredicateCWSeparableMetric & other );
+  /* /\** */
+  /*  * Assignment. */
+  /*  * @param other the object to copy. */
+  /*  * @return a reference on 'this'. */
+  /*  * Forbidden by default. */
+  /*  *\/ */
+  /* PredicateCWSeparableMetric & operator= ( const PredicateCWSeparableMetric & other ); */
   
     // ------------------------- Internals ------------------------------------
   private:
@@ -255,9 +291,9 @@ namespace DGtal
    * @param object the object of class 'PredicateCWSeparableMetric' to write.
    * @return the output stream after the writing.
    */
-  template <typename T>
-  std::ostream&
-  operator<< ( std::ostream & out, const PredicateCWSeparableMetric<T> & object );
+  /* template <typename T> */
+  /* std::ostream& */
+  /* operator<< ( std::ostream & out, const PredicateCWSeparableMetric<T> & object ); */
 
 } // namespace DGtal
 

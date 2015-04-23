@@ -14,7 +14,7 @@ SET(DGTAL_TESTS_SRC
   testChamferVoro
   testDigitalMetricAdapter
   debugPGMReader
-  testCWDistanceTransform
+  testCWMap
  )	
 
 

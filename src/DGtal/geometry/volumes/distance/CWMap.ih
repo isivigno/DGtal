@@ -1,0 +1,339 @@
+/**
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ **/
+
+/**
+ * @file CWMap.ih
+ * @author Isabelle Sivignon (\c isabelle.sivignon@gipsa-lab.grenoble-inp.fr )
+ * gipsa-lab Grenoble Images Parole Signal Automatique (CNRS, UMR 5216), CNRS, France
+ *
+ * @date 2015/04/17
+ *
+ * Implementation of inline methods defined in CWMap.h
+ *
+ * This file is part of the DGtal library.
+ */
+
+
+//////////////////////////////////////////////////////////////////////////////
+#include <cstdlib>
+//////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// IMPLEMENTATION of inline methods.
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// ----------------------- Standard services ------------------------------
+
+/**
+ * Destructor.
+ */
+template <typename W, typename Sep, typename Im>
+inline
+DGtal::CWMap<W,Sep,Im>::~CWMap()
+{
+}
+
+
+
+template < typename W, typename Sep, typename Im>
+inline
+typename DGtal::CWMap<W, Sep,Im>::Self &  
+DGtal::CWMap<W, Sep,Im>::operator=(const Self &aOtherCWMap ) 
+{
+  if (this != &aOtherCWMap)
+    { 
+      myMetricPtr = aOtherCWMap.myMetricPtr;
+      myImagePtr = aOtherCWMap.myImagePtr;
+      myWeightImagePtr = aOtherCWMap.myWeightImagePtr;
+      myDomainPtr = aOtherCWMap.myDomainPtr;
+      myInfinity = aOtherCWMap.myInfinity;
+      myLowerBoundCopy = aOtherCWMap.myLowerBoundCopy;
+      myUpperBoundCopy = aOtherCWMap.myUpperBoundCopy;
+    }
+  return *this;
+}
+
+
+template < typename W, typename Sep, typename Im>
+inline
+void
+DGtal::CWMap<W, Sep,Im>::compute( )
+{
+  //We copy the image extent
+  myLowerBoundCopy = myDomainPtr->lowerBound();
+  myUpperBoundCopy = myDomainPtr->upperBound();
+ 
+  //Point outside the domain 
+  myInfinity = myDomainPtr->upperBound() + Point::diagonal(1);
+  
+  //Init the map: the CW map at point p is:
+  //  - p if p is an input weighted point (with weight > 0);
+  //  - myInfinity otherwise.
+  for(typename Domain::ConstIterator it = myDomainPtr->begin(),
+	itend = myDomainPtr->end();
+      it != itend;
+      ++it)
+    if (myWeightImagePtr->domain().isInside( *it ) &&
+        (myWeightImagePtr->operator()( *it )[0] > 0 && myWeightImagePtr->operator()( *it )[1] > 0))
+      myImagePtr->setValue ( *it, *it );
+    else
+      myImagePtr->setValue ( *it, myInfinity );
+
+  //We process the dimensions one by one
+  for ( Dimension dim = 0; dim < W::Domain::Space::dimension ; dim++ )
+    computeOtherSteps ( dim );
+}
+
+template < typename W, typename Sep, typename Im>
+inline
+void
+DGtal::CWMap<W, Sep,Im>::computeOtherSteps ( const Dimension dim ) const
+{
+#ifdef VERBOSE
+  std::string title = "CWmap dimension " +  boost::lexical_cast<std::string>( dim ) ;
+  trace.beginBlock ( title );
+#endif
+
+  typedef typename Domain::ConstSubRange::ConstIterator ConstDomIt;
+  
+  //We setup the subdomain iterator
+  //the iterator will scan dimension using the order:
+  // {n-1, n-2, ... 1} (we skip the '0' dimension).
+  std::vector<Size> subdomain;
+  subdomain.reserve(W::Domain::Space::dimension - 1);
+  for (unsigned int k = 0; k < W::Domain::Space::dimension ; k++)
+    if ( ((int)W::Domain::Space::dimension - 1 - k) != dim)
+      subdomain.push_back( (int)W::Domain::Space::dimension - 1 - k );
+  
+  Domain localDomain(myLowerBoundCopy, myUpperBoundCopy);
+  
+  //We solve the 1D problems sequentially
+  for (ConstDomIt it = localDomain.subRange( subdomain ).begin(),
+	 itend = localDomain.subRange( subdomain ).end();
+       it != itend; ++it)
+    computeOtherStep1D ( *it, dim);
+  
+#ifdef VERBOSE
+  trace.endBlock();
+#endif
+}
+
+
+// //////////////////////////////////////////////////////////////////////:
+// ////////////////////////// Other Phases
+template <typename W, typename Sep, typename Im>
+void
+DGtal::CWMap<W,Sep,Im>::computeOtherStep1D( const Point &startingPoint,
+                                                const Size dim) const
+{
+  Point point = startingPoint;
+  Point endpoint = startingPoint;
+  Point psite;
+  int nbSites = -1;
+  std::vector<Point> Sites;
+  
+  //Reserve 
+  Sites.reserve( myUpperBoundCopy[dim] - myLowerBoundCopy[dim] +1);
+
+  //endpoint of the 1D row
+  endpoint[dim] = myUpperBoundCopy[dim];
+  
+
+  //Pruning the list of sites (dim=0 implies no hidden sites)
+  if (dim==0)
+    {
+      std::cout << "dim 0" << std::endl;
+      for(Abscissa i = myLowerBoundCopy[dim] ;  i <= myUpperBoundCopy[dim] ;  i++) // i unused -> the loop is used only to count the number of incrementations of the point[dim] coordinate
+	{
+	  psite = myImagePtr->operator()( point );
+	  if ( psite != myInfinity )
+	    {
+	      nbSites++;
+	      Sites.push_back( psite );
+	    }
+	  point[dim] ++; // next point of the row
+	}
+    }
+  else
+    {
+      std::cout << "dim " << dim << std::endl;
+      //Pruning the list of sites
+      for(Abscissa i = myLowerBoundCopy[dim] ;  i <= myUpperBoundCopy[dim] ;  i++)
+	{
+	  psite = myImagePtr->operator()(point);
+	  
+	  if ( psite != myInfinity )
+	    {        
+	      while ((nbSites >= 1) && 
+		     ( myMetricPtr->hiddenByCW(Sites[nbSites-1], myWeightImagePtr->operator()(Sites[nbSites-1]),
+					       Sites[nbSites] ,  myWeightImagePtr->operator()(Sites[nbSites]),
+					       psite,  myWeightImagePtr->operator()(psite),
+					       startingPoint, endpoint, dim) ))
+		{
+		  nbSites --; 
+                  Sites.pop_back();
+		}
+	      nbSites++;
+	      Sites.push_back( psite );
+	      std::cout << psite << std::endl;
+	    }
+	  point[dim] ++;
+	}
+    }
+
+  //No sites found
+  if (nbSites == -1)
+    return;
+
+  //int k = 0; 
+
+  //Rewriting
+  std::cout << "rewriting" << std::endl;
+  point[dim] = myLowerBoundCopy[dim];
+ 
+  for(Abscissa i = myLowerBoundCopy[dim] ;  i <= myUpperBoundCopy[dim] ;  i++)
+    {
+      int k = 0; // check all sites for all the points since the monoticity property does not hold 
+      while ( (k < nbSites) && 
+	      ( myMetricPtr->closestCW(point, 
+					  Sites[k], myWeightImagePtr->operator()(Sites[k]),
+					  Sites[k+1],myWeightImagePtr->operator()(Sites[k+1]))
+		!= DGtal::ClosestFIRST ))
+        k++;
+      std::cout << point << std::endl;
+      myImagePtr->setValue(point, Sites[k]);
+      point[dim]++;
+    } 
+}
+
+
+/**
+ * Constructor.
+ */
+template <typename W,typename TSep,typename Im>
+inline
+DGtal::CWMap<W,TSep,Im>::CWMap( ConstAlias<Domain> aDomain,
+				ConstAlias<WeightImage> aWeightImage,
+				ConstAlias<CWSeparableMetric> aMetric):
+  myDomainPtr(&aDomain), 
+  myMetricPtr(&aMetric),
+  myWeightImagePtr(&aWeightImage)
+  
+{
+  myImagePtr = CountedPtr<OutputImage>(new OutputImage(aDomain));
+  compute();
+}
+
+
+/**
+ * Constructor.
+ */
+template <typename W,typename TSep,typename Im>
+inline
+DGtal::CWMap<W,TSep,Im>::CWMap( ConstAlias<Domain> aDomain)
+{
+}
+
+
+
+
+template <typename W,typename Sep,typename Im>
+inline
+void  DGtal::CWMap<W,Sep,Im>::CWMapBruteForce( ConstAlias<Domain> aDomain,
+					 ConstAlias<WeightImage> aWeightImage,
+					 ConstAlias<CWSeparableMetric> aMetric)  
+{
+  myDomainPtr = &aDomain;
+  myMetricPtr = &aMetric;
+  myWeightImagePtr = &aWeightImage;
+  
+  myImagePtr = CountedPtr<OutputImage>(new OutputImage(aDomain));
+  
+  std::cout << myDomainPtr->lowerBound() << " " << myDomainPtr->upperBound();;
+
+  
+  typedef typename Sep::Distance distance;
+  typedef typename W::Domain::Point Point;
+  
+  // for all the points
+  for(typename Domain::ConstIterator it = myDomainPtr->begin(); it != myDomainPtr->end() ; it ++)
+    {
+      distance min = (myWeightImagePtr->extent()).norm();
+      Point mySite = *it;
+      // for all the sites
+      for(typename W::Domain::ConstIterator itsite = myWeightImagePtr->domain().begin(); itsite != myWeightImagePtr->domain().end();itsite ++)
+	if(myWeightImagePtr->operator()(*itsite) != Vector(0,0)) // if it is a site
+	  {
+	    distance d = myMetricPtr->CWDistance(*it,*itsite,myWeightImagePtr->operator()(*itsite));
+	    if(d < min)
+	      {
+		min = d;
+		mySite = *itsite;
+	      }
+	  }
+      // std::cout << *it << " " << mySite << " " << min << std::endl;
+      if(min <= 1 && min >=0)
+	myImagePtr->setValue(*it,mySite);
+      else
+	myImagePtr->setValue(*it,*it);
+    }
+
+  
+}
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Interface - public :
+
+/**
+ * Writes/Displays the object on an output stream.
+ * @param out the output stream where the object is written.
+ */
+template <typename W, typename Sep, typename Im>
+inline
+void
+DGtal::CWMap<W,Sep,Im>::selfDisplay ( std::ostream & out ) const
+{
+  out << "[CWMap]";
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Implementation of inline functions                                        //
+
+// template <typename W, typename Sep, typename Im>
+// inline
+// std::ostream&
+// DGtal::operator<< ( std::ostream & out, 
+// 		    const CWMap<W,Sep,Im> & object )
+// {
+//   object.selfDisplay( out );
+//   return out;
+// }
+
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
