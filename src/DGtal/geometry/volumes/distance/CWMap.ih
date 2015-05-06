@@ -253,6 +253,54 @@ DGtal::CWMap<W,TSep,Im>::CWMap( ConstAlias<Domain> aDomain)
 
 template <typename W,typename Sep,typename Im>
 inline
+void  DGtal::CWMap<W,Sep,Im>::restrictedCWMapBruteForce( ConstAlias<Domain> aDomain,
+					 ConstAlias<WeightImage> aWeightImage,
+					 ConstAlias<CWSeparableMetric> aMetric)  
+{
+  myDomainPtr = &aDomain;
+  myMetricPtr = &aMetric;
+  myWeightImagePtr = &aWeightImage;
+  
+  myImagePtr = CountedPtr<OutputImage>(new OutputImage(aDomain));
+  
+  std::cout << myDomainPtr->lowerBound() << " " << myDomainPtr->upperBound();;
+
+  
+  typedef typename Sep::Distance distance;
+  typedef typename W::Domain::Point Point;
+  
+  // for all the points
+  for(typename Domain::ConstIterator it = myDomainPtr->begin(); it != myDomainPtr->end() ; it ++)
+    {
+      distance min = (myWeightImagePtr->extent()).norm();
+      Point mySite = *it;
+      
+      // for all the balls
+      for(typename W::Domain::ConstIterator itsite = myWeightImagePtr->domain().begin(); min !=0 && itsite != myWeightImagePtr->domain().end();itsite ++)
+	if(myWeightImagePtr->operator()(*itsite) != Vector(0,0)) // if it is a site
+	  {
+	    distance d = myMetricPtr->restrictedCWDistance(*it,*itsite,myWeightImagePtr->operator()(*itsite));
+	    if(d < min)
+	      {
+		min = d;
+		mySite = *itsite;
+	      }
+	  }
+      // std::cout << *it << " " << mySite << " " << min << std::endl;
+      if(min!=0 && min < 1)
+	myImagePtr->setValue(*it,mySite);
+      else
+	myImagePtr->setValue(*it,*it);
+    }
+
+  
+}
+
+
+
+
+template <typename W,typename Sep,typename Im>
+inline
 void  DGtal::CWMap<W,Sep,Im>::CWMapBruteForce( ConstAlias<Domain> aDomain,
 					 ConstAlias<WeightImage> aWeightImage,
 					 ConstAlias<CWSeparableMetric> aMetric)  

@@ -213,7 +213,8 @@ namespace DGtal
    */
   void selfDisplay ( std::ostream & out ) const;
   
-
+  void restrictedCWMapBruteForce(ConstAlias<Domain> aDomain, ConstAlias<WeightImage> aWeightImage, ConstAlias<CWSeparableMetric> aMetric);
+  
   void CWMapBruteForce(ConstAlias<Domain> aDomain, ConstAlias<WeightImage> aWeightImage, ConstAlias<CWSeparableMetric> aMetric);
   
   

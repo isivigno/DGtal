@@ -64,6 +64,37 @@ DGtal::PredicateCWSeparableMetric<T,W,P>::DistanceRepresentation (const Point &a
     }
   return res;
 }
+
+
+
+//------------------------------------------------------------------------------
+template <typename T, typename W, typename P>
+inline
+typename DGtal::PredicateCWSeparableMetric<T,W,P>::Distance
+DGtal::PredicateCWSeparableMetric<T,W,P>::restrictedCWDistance (const Point &aP,
+						      const Point &aQ,
+						      const Weight &aW
+						      ) const
+{
+  if(DistanceRepresentation(aP,aQ) <= aW[0]*aW[0])
+    return 0;
+  else
+    if(DistanceRepresentation(aP,aQ) > aW[1]*aW[1])
+      return 1;
+    else
+  //ASSERT(aW[1] > aW[0]);
+      return (sqrt(DistanceRepresentation(aP,aQ)) - aW[0])/(Distance) (aW[1]-aW[0]);
+  // if(d > 1)
+  //   return 10000;
+  // else
+  //   if(d < 0)
+  //     return 0;
+  //   else
+  //return d;
+      
+}
+
+
 //------------------------------------------------------------------------------
 template <typename T, typename W, typename P>
 inline

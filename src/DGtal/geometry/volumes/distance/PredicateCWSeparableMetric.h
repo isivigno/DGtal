@@ -123,6 +123,22 @@ namespace DGtal
   
   
   /**
+   *  Return the restricted CW distance of a point @a aPoint and a weighted
+   *  point (@a aQ,@a aWq): returns 0 if @a aPoint is inside the ball of center @a aQ and radius @a aWq[0], 1 if @a aPoint is outside the ball of center @a aQ and radius @a aWq[1], the CW distance otherwise.
+   *
+   * @param aPoint a point
+   * @param aQ a second point
+   * @param aWq weights of the second point (a vector of two numbers such that aWq[0] <= aWq[1])
+   *
+   * @return the CW distance between aPoint and (Q,WQ)
+   */
+  Distance restrictedCWDistance(const Point &aPoint,
+		    const Point &aQ,
+		    const Weight &aWq) const;
+
+
+  
+  /**
    *  Return the CW distance of a point @a aPoint and a weighted
    *  point (@a aQ,@a aWq)
    *

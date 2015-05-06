@@ -102,7 +102,7 @@ int main( int argc, char** argv )
   
   CWMap<Image,CWMetric> map(&domain);
 
-  map.CWMapBruteForce(&domain,&image,&CWmetric);
+  map.restrictedCWMapBruteForce(&domain,&image,&CWmetric);
   
   CWMap<Image, CWMetric> CWmap(&domain, &image, &CWmetric);
 
@@ -132,7 +132,6 @@ int main( int argc, char** argv )
   	}
       
     }
-
 
   
   board << domain;
