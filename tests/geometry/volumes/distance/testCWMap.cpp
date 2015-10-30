@@ -37,6 +37,7 @@
 #include <DGtal/images/ImageContainerBySTLMap.h>
 #include "DGtal/shapes/Shapes.h"
 #include "DGtal/io/colormaps/GrayscaleColorMap.h"
+#include "DGtal/io/colormaps/HueShadeColorMap.h"
 
 #include <DGtal/geometry/volumes/distance/CWMap.h>
 #include <DGtal/geometry/volumes/distance/PredicateCWSeparableMetric.h>
@@ -102,24 +103,54 @@ int main( int argc, char** argv )
   
   CWMap<Image,CWMetric> map(&domain);
 
-  map.restrictedCWMapBruteForce(&domain,&image,&CWmetric);
+  //map.restrictedCWMapBruteForce(&domain,&image,&CWmetric);
   
-  CWMap<Image, CWMetric> CWmap(&domain, &image, &CWmetric);
+  map.CWMapBruteForce(&domain,&image,&CWmetric);
+
+
+  //CWMap<Image, CWMetric> CWmap(&domain, &image, &CWmetric); // use separable algorithm
 
   Board2D board;
   
   // Display brute force result
   
   board.clear();
+
+  typedef ImageContainerBySTLVector<Z2i::Domain, DGtal::int64_t> ImageDT;
+  ImageDT CWDT(domain);
+  
   
   for(CWMap<Image, CWMetric>::Domain::ConstIterator it = map.domain().begin(),
   	itend = map.domain().end(); it != itend; ++it)
     {
       CWMap<Image,CWMetric>::Value site = map( *it );   //closest site to (*it)
+      DGtal::int64_t d = Z2i::l2Metric(site,*it);
+      CWDT.setValue(*it,d);
       if (site != (*it))
   	Display2DFactory::draw( board,   site - (*it), (*it)); //Draw an arrow
     }
 
+  
+  board << domain;
+  board.saveEPS("CWMapBruteForce.eps");
+  
+  board.clear();
+  
+    //! [DTColormaps]
+  //Colormap used for the SVG output
+  typedef HueShadeColorMap<long int, 2> HueTwice;
+  
+  ImageDT::Value maxv2=0;
+  //We compute the maximum DT value on the CW map
+  for ( ImageDT::ConstRange::ConstIterator it = CWDT.constRange().begin(), itend = CWDT.constRange().end();it != itend; ++it)
+    if ( (*it) > maxv2)  maxv2 = (*it);
+  
+  trace.warning() << CWDT << " maxValue= "<<maxv2<< endl;
+  board.clear();
+  Display2DFactory::drawImage<HueTwice>(board, CWDT, 0.0, maxv2 + 1);
+  board.saveEPS( "CWdt.eps" );
+  
+  
   
   for(Image::Domain::ConstIterator it = image.domain().begin(); it != image.domain().end() ; it ++)
     {
@@ -133,37 +164,32 @@ int main( int argc, char** argv )
       
     }
 
-  
-  board << domain;
-  board.saveEPS("CWMapBruteForce.eps");
-  
-  board.clear();
-  
-  board.setLineStyle( Board2D::Shape::SolidStyle);
+  // board.clear();
+  // board.setLineStyle( Board2D::Shape::SolidStyle);
 
-  for(CWMap<Image, CWMetric>::Domain::ConstIterator it = CWmap.domain().begin(),
-  	itend = CWmap.domain().end(); it != itend; ++it)
-    {
-      CWMap<Image,CWMetric>::Value site = CWmap( *it );   //closest site to (*it)
-      if (site != (*it))
-  	Display2DFactory::draw( board,   site - (*it), (*it)); //Draw an arrow
-    }
-  
-  
-  // for(Image::Domain::ConstIterator it = image.domain().begin(); it != image.domain().end() ; it ++)
+  // for(CWMap<Image, CWMetric>::Domain::ConstIterator it = CWmap.domain().begin(),
+  // 	itend = CWmap.domain().end(); it != itend; ++it)
   //   {
-  //     if(image(*it) != Vector(0,0))
-  // 	{
-  // 	  Point center = *it;
-  // 	  //board.setFillColor(Color());
-  // 	  board.drawCircle(center[0],center[1],image(*it)[0]);
-  // 	  board.drawCircle(center[0],center[1],image(*it)[1]);
-  // 	}
-      
+  //     CWMap<Image,CWMetric>::Value site = CWmap( *it );   //closest site to (*it)
+  //     if (site != (*it))
+  // 	Display2DFactory::draw( board,   site - (*it), (*it)); //Draw an arrow
   //   }
-  board << domain;
   
-  board.saveEPS("CWMapSeparable.eps");
+  
+  // // for(Image::Domain::ConstIterator it = image.domain().begin(); it != image.domain().end() ; it ++)
+  // //   {
+  // //     if(image(*it) != Vector(0,0))
+  // // 	{
+  // // 	  Point center = *it;
+  // // 	  //board.setFillColor(Color());
+  // // 	  board.drawCircle(center[0],center[1],image(*it)[0]);
+  // // 	  board.drawCircle(center[0],center[1],image(*it)[1]);
+  // // 	}
+      
+  // //   }
+  // board << domain;
+  
+  // board.saveEPS("CWMapSeparable.eps");
   
 
   

@@ -334,7 +334,7 @@ void  DGtal::CWMap<W,Sep,Im>::CWMapBruteForce( ConstAlias<Domain> aDomain,
 	      }
 	  }
       // std::cout << *it << " " << mySite << " " << min << std::endl;
-      if(min <= 1 && min >=0)
+      if(min <= 1 /*&& min >=0*/)
 	myImagePtr->setValue(*it,mySite);
       else
 	myImagePtr->setValue(*it,*it);
