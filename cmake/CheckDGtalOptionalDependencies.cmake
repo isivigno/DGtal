@@ -232,22 +232,26 @@ endif()
 # -----------------------------------------------------------------------------
 # Look for Qt (needed by libqglviewer visualization).
 # -----------------------------------------------------------------------------
-set(QT5_FOUND_DGTAL 0)
+set(QT6_FOUND_DGTAL 0)
 if (WITH_QGLVIEWER)
-    find_package(Qt5 COMPONENTS Widgets OpenGL Xml REQUIRED)
-    if (Qt5Widgets_FOUND AND Qt5OpenGL_FOUND AND Qt5Xml_FOUND)
-      set(QT5_FOUND_DGTAL 1)
-      message(STATUS "Qt5 (Widgets, OpenGL and Xml modules) found (needed by QGLViewer compiled with Qt5).")
-
-      target_compile_definitions(DGtal PUBLIC -DWITH_QT5)
+    find_package(Qt6 COMPONENTS Core Widgets Xml OpenGL OpenGLWidgets REQUIRED)
+#    find_package(Qt5 COMPONENTS Widgets OpenGL Xml REQUIRED)
+    if (Qt6_FOUND)   
+#    if (Qt5Widgets_FOUND AND Qt5OpenGL_FOUND AND Qt5Xml_FOUND)
+      set(QT6_FOUND_DGTAL 1)
+      message(STATUS "Qt6 (Widgets, OpenGL, OpenGLWidgets and Xml modules) found (needed by QGLViewer compiled with Qt6).")
+     
+      target_compile_definitions(DGtal PUBLIC -DWITH_QT6)
       target_link_libraries(DGtal PUBLIC
-        ${Qt5Widgets_LIBRARIES}
-        ${Qt5OpenGL_LIBRARIES}
-        ${Qt5Xml_LIBRARIES})
+        ${Qt6Widgets_LIBRARIES}
+	${Qt6OpenGLWidgets_LIBRARIES}	
+        ${Qt6OpenGL_LIBRARIES}
+        ${Qt6Xml_LIBRARIES})
       target_include_directories(DGtal PUBLIC
-        ${Qt5Widgets_INCLUDES_DIRS}
-        ${Qt5OpenGL_INCLUDES_DIR}
-        ${Qt5Xml_INCLUDES_DIR})
+        ${Qt6Widgets_INCLUDES_DIRS}
+	${Qt6OpenGLWidgets_INCLUDES_DIRS}
+        ${Qt6OpenGL_INCLUDES_DIR}
+        ${Qt6Xml_INCLUDES_DIR})
     else()
       message(STATUS "One of Qt5's modules was not found (needed by QGLViewer).")
     endif()

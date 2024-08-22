@@ -62,7 +62,7 @@
 #include <QApplication>
 
 #include <QGLViewer/qglviewer.h>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QKeyEvent>
 
 #include "DGtal/kernel/SpaceND.h"

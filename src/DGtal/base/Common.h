@@ -52,7 +52,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #include <QGLViewer/qglviewer.h>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QKeyEvent>
 #pragma clang diagnostic pop
 #pragma GCC diagnostic pop
